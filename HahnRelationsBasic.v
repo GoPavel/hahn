@@ -789,8 +789,11 @@ Require Import RelationAlgebra.kat_tac.
 Require Import RelationAlgebra.rel.
 Require Import RelationAlgebra.lattice.
 Require Import RelationAlgebra.monoid.
-Require Import RelationAlgebra.prop.
+(* Require Import RelationAlgebra.prop. *)
 Require Import RelationAlgebra.kat.
+
+Set Printing Coercions.
+Set Implicit Arguments.
 
 Definition top {A: Type}: relation A := fun x y => True.
 Definition bot {A: Type}: relation A := fun x y => False.
@@ -833,20 +836,9 @@ Proof.
   simpl; firstorder; apply LEM.
 Qed.
 
-(*
-   Проблема в том, что ob (@rel_monoid_ops A)
-
- *)
-
-Inductive IdType: Type -> Type :=
-  mkIdType :> forall (A0: Type), IdType A0.
-
-Check fun (A: Type) => A: IdType A.
-
-Set Printing Coercions.
 Definition rel_monoid_ops {A: Type}: monoid.ops :=
   {| (* monoid.ob := IdType A; *)
-     monoid.ob := Type;
+     monoid.ob := unit;
      monoid.mor n m := @rel_lattice_ops A;
      monoid.dot n m p := @seq A;
      monoid.one n := refl_top;
@@ -888,22 +880,39 @@ Definition eqv_rel' : forall {A: Type} {cond: A -> Prop}, relation A
   := fun _ (cond: _) x y =>  x = y /\ cond x.
 
 Print Coercions.
+
+(* Defintion impl =  *)
+
+(* Canonical Structure Prop_lattice_ops': lattice.ops := {| *)
+(*   leq := impl; *)
+(*   weq := fun _ _ => True; *)
+(*   cup := fun _ _ => True; *)
+(*   cap := fun _ _ => ; *)
+(*   neg := not; *)
+(*   bot := False; *)
+(*   top := True *)
+(* |}. *)
+
+(** bounded distributive lattice laws 
+   (we could get a Boolean lattice by assuming excluded middle) *)
+
+Instance Prop_lattice_laws: lattice.laws (BL+STR+CNV+DIV) Prop_lattice_ops.
+Proof.
+  constructor; (try apply Build_PreOrder); simpl;
+    repeat intro; try discriminate; tauto.
+Qed.
+
+
 (* Set Printing Universes. *)
 (* Check fun (A: Type@{lattice.pw}) => ob (@rel_monoid_ops A). *)
-Definition dset' {A: Type}: ob (@rel_monoid_ops A) -> lattice.ops
-  := fun Y => pw_ops bool_lattice_ops Y.
+Definition dset' {A: Type}: lattice.ops := pw_ops Prop_lattice_ops A.
 
-Definition inj' {A: Type}  (cond: @dset' A (A)): relation A
+Definition inj' {A: Type} (cond: (@dset' A)): relation A
   := fun x y => x = y /\ cond x.
-
-(* Definition coer: forall {A: Type} (r: relation A), hrel A A *)
-(*   := fun _ r x y => r x y. *)
-(* Coercion coer: relation >-> hrel. *)
-
 
 Canonical Structure rel_kat_ops {A: Type}: kat.ops :=
   {| kat.kar := @rel_monoid_ops A;
-     kat.tst n := @dset' A A;
+     kat.tst n := @dset' A;
      kat.inj n := @inj' A
   |}.
 
@@ -919,22 +928,40 @@ Proof.
   constructor; simpl; intros.
   - apply lower_laws.
   - apply (pw_laws (H:=lower_lattice_laws)).
-  - constructor; try discriminate; intros.
-    + apply inj_leq.
-    + apply op_leq_weq_1.
-    + simpl. unfold_all.
-      setoid_rewrite Bool.orb_true_iff; tauto.
-    + simpl. unfold_all. split; intros; destruct H; discriminate.
+  - constructor; try discriminate; intros; simpl; unfold_all; intros; try tauto.
+    (* + apply inj_leq. *)
+    (* + apply op_leq_weq_1. *)
+    (* + simpl. unfold_all. *)
+    (*   setoid_rewrite Bool.orb_true_iff; tauto. *)
+  (* + simpl. unfold_all. split; intros; destruct H; discriminate. *)
+    + destruct H0 as [H0 H1]. split; [> assumption | apply H; apply H1].
+    + split; intros; inversion 0; split; try by apply H || assumption.
+    + split; intros; inversion 0; inversion 0.
   - unfold_all. split; intros x y H.
     + destruct H as [H _]; rewrite H; constructor.
     + destruct H. constructor; constructor.
-  - unfold_all. setoid_rewrite Bool.andb_true_iff.
+  - unfold_all. 
     split; intros.
     + exists x. now trivial.
     + destruct H as [z [[H1 H2] [H3 H4]]]. rewrite H1, H3 in *; easy.
 Qed.
 
-Variable A : Type.
+Print Canonical Projections.
 
-Goal forall `{r: relation A}, (r ⋅ r) ≡ (r ⋅ r).
-Proof. intros. apply catch_weq. kat.
+(* Definition coer: forall {A: Type}, (relation A) -> hrel A A *)
+(*   := fun _ r x y => r x y. *)
+(* Coercion coer: relation >-> hrel. *)
+(* Definition coer': forall {A: Type}, hrel A A -> relation A *)
+(*   := fun _ r x y => r x y. *)
+(* Coercion coer': hrel >-> relation. *)
+
+Variable A : Type.
+Variable r : relation A.
+
+(* Check (fun (r: relation A) => let r r). *)
+
+Goal forall `{r: relation nat}, r ≡ r.
+Proof. intros.
+       apply catch_weq.
+       apply (catch_weq (n:=tt)(m:=tt)).
+       apply (@catch_weq _ rel_monoid_ops rel_monoid_laws _ _). kat. Qed.
