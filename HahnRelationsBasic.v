@@ -963,7 +963,7 @@ Qed.
 Section Lifting.
 
 Variable A : Type.
-Variables r1 r2: relation A.
+Variables r r1 r2: relation A.
 
 Definition same_rel_iff_weq: r1 ≡ r2 <-> same_relation r1 r2.
 Proof. simpl. unfold same_relation. firstorder. Qed.
@@ -974,11 +974,26 @@ Proof. simpl. firstorder. Qed.
 Definition inter_rel_iff_cap: inter_rel r1 r2 = cap r1 r2.
 Proof. reflexivity. Qed.
 
+Definition union_rel_iff_cup: union r1 r2 = cup r1 r2.
+Proof. reflexivity. Qed.
+
+Definition lift_clos_refl: forall {x y: A}, r^? x y <-> (refl_top ⊔ r) x y.
+Proof.
+  intros. unfold clos_refl. simpl. split; intro; destruct H; vauto.
+  destruct H. now left.
+Qed. (* TODO: redefine refl_top *)
+
+Definition clos_refl_trans_iff_str: clos_refl_trans r = @str _ tt r.
+Proof. reflexivity. Qed.
+
 End Lifting.
 
 Ltac lift_to_kat := repeat rewrite -> same_rel_iff_weq;
                     repeat rewrite -> inclusion_iff_leq;
-                    repeat rewrite -> inter_rel_iff_cap.
+                    repeat rewrite -> inter_rel_iff_cap;
+                    repeat rewrite -> union_rel_iff_cup;
+                    repeat rewrite -> clos_refl_trans_iff_str.
+                    (* repeat rewrite -> lift_clos_refl. *)
 Ltac kat' := lift_to_kat; kat.
 
 Section Testing.
@@ -993,15 +1008,15 @@ Proof. intros. kat'. Qed.
        (* apply (catch_weq (n:=tt)(m:=tt)). *)
        (* apply (@catch_weq _ rel_monoid_ops rel_monoid_laws _ _). kat. Qed. *)
 
-Lemma inclusion_r_rt' : r ⊆ r' -> r^? ⊆ r' ＊.
+Lemma inclusion_r_rt' : r ⊆ r' -> (union (@one _ tt) r) ⊆ r'＊.
 Proof.
-  lift_to_kat. Abort.
+  lift_to_kat. intro. rewrite cup_spec. split. rewrite ?leq_iff_cup. Abort.
 (*   unfold clos_refl. red; ins; desf; eauto using rt_step, rt_refl. *)
 (* Qed. *)
 
-Lemma inclusion_inter_mon' s s' : r ⊆ r' -> s ⊆ s' -> inter_rel r s ⊆ inter_rel r' s'.
-Proof. lift_to_kat. Abort. kat. 
+Lemma inclusion_inter_mon' s s' : r ⊆ r' -> s ⊆ s' -> cap r s ⊆ cap r' s'.
+Proof. lift_to_kat. intros. Abort.  
   (* clear; firstorder. *)
-Qed.
+(* Qed. *)
 
 End Testing.
