@@ -795,20 +795,23 @@ Require Import RelationAlgebra.kat.
 Set Printing Coercions.
 Set Implicit Arguments.
 
-Definition top {A: Type}: relation A := fun x y => True.
-Definition bot {A: Type}: relation A := fun x y => False.
+Axiom LEM : forall (p: Prop), p \/ not p.
+
+(** * TODO and NOTE *)
+(* TODO: Warning: projection-no-head-constant*)
+
 Inductive refl_top {A: Type}: relation A :=
   mk_refl_top: forall (a: A), refl_top a a.
 
 Definition rel_lattice_ops {A: Type}: lattice.ops :=
-  {| lattice.car := relation A;
-     lattice.leq := inclusion;
-     lattice.weq := same_relation;
-     lattice.cup := @union A;
-     lattice.cap := @inter_rel A;
-     lattice.neg := complement;
-     lattice.bot := bot;
-     lattice.top := top
+  {| car := relation A;
+     leq := leq;
+     weq := weq;
+     cup := cup;
+     cap := cap;
+     neg := neg;
+     bot := bot;
+     top := top
   |}.
 Canonical Structure rel_lattice_ops.
 (* Print Canonical Projections. *)
@@ -825,33 +828,27 @@ Instance tran_inclusion {A: Type}: Transitive (@inclusion A) :=
 Instance preorder_inclusion {A: Type}: PreOrder (@inclusion A)
   := Build_PreOrder inclusion refl_inclusion tran_inclusion.
 
-Axiom LEM : forall (p: Prop), p \/ not p.
-
 Instance rel_lattice_laws {A: Type}: lattice.laws (BL + CKA) (@rel_lattice_ops A).
 Proof.
   apply lattice.Build_laws; intros; simpl;
     (left; solve_lower)
     || clear; firstorder
-  (* x ∪ complement x <--> top *)
   simpl; firstorder; apply LEM.
 Qed.
 
 Definition rel_monoid_ops {A: Type}: monoid.ops :=
-  {| (* monoid.ob := IdType A; *)
-     monoid.ob := unit;
-     monoid.mor n m := @rel_lattice_ops A;
-     monoid.dot n m p := @seq A;
-     monoid.one n := refl_top;
-     monoid.itr n := @clos_trans A;
-     monoid.str n := @clos_refl_trans A;
-     monoid.cnv n m := @transp A; (* TODO: not used *)
-     monoid.ldv n m p := assert_false (fun _ a => a);
-     monoid.rdv n m p := assert_false (fun _ a => a);
+  {| ob := unit;
+     mor n m := @rel_lattice_ops A;
+     dot n m p := @seq A;
+     one n := refl_top;
+     itr n := @clos_trans A;
+     str n := @clos_refl_trans A;
+     cnv n m := @transp A; (* TODO: not used *)
+     ldv n m p := assert_false (fun _ a => a);
+     rdv n m p := assert_false (fun _ a => a);
   |}.
 
-(* Check fun (A: Type) => n : ob (@rel_monoid_ops A) != A. *)
 Canonical Structure rel_monoid_ops.
-(* TODO: Warning: projection-no-head-constant*)
 
 Instance rel_monoid_laws {A: Type}: monoid.laws (BL+CKA) (@rel_monoid_ops A).
 Proof.
@@ -861,19 +858,16 @@ Proof.
     (firstorder || idtac).
     (* try (unfold transp, inter_rel, seq, inclusion; firstorder) *)
   - exact rel_lattice_laws.
-  - unfold seq, same_relation, inclusion; firstorder.
-    + now inversion H.
-    + now exists x0.
-  - unfold inclusion; intros.
-    inversion H0; apply rt_refl.
-  - unfold inclusion; intros; destruct H0 as [z [H0 H1]].
-    apply rt_trans with (y:=z); [> apply rt_step; assumption | assumption].
-  - unfold inclusion, seq; intros; destruct H1 as [z' [H1 H2]].
-    induction H1.
-    + apply H0; simpl. exists y0; split; assumption.
+  - destruct H; assumption.
+  - now exists a.
+  - inversion H0; apply rt_refl.
+  - apply rt_trans with (y:=x0); [> apply rt_step; assumption | assumption].
+  - simpl in H0. induction H1.
+    + apply H0. exists y. split; assumption.
     + assumption.
     + apply IHclos_refl_trans1, IHclos_refl_trans2; assumption.
-  - split; do 2 intro; apply t_step_rt.
+  - apply t_step_rt; assumption.
+  - apply t_step_rt. exists x0. split; assumption.
 Qed.
 
 Definition eqv_rel' : forall {A: Type} {cond: A -> Prop}, relation A
@@ -936,17 +930,14 @@ Proof.
   (* + simpl. unfold_all. split; intros; destruct H; discriminate. *)
     + destruct H0 as [H0 H1]. split; [> assumption | apply H; apply H1].
     + split; intros; inversion 0; split; try by apply H || assumption.
-    + split; intros; inversion 0; inversion 0.
-  - unfold_all. split; intros x y H.
+  - unfold_all. split; intros H.
     + destruct H as [H _]; rewrite H; constructor.
     + destruct H. constructor; constructor.
   - unfold_all. 
     split; intros.
-    + exists x. now trivial.
+    + exists a. now trivial.
     + destruct H as [z [[H1 H2] [H3 H4]]]. rewrite H1, H3 in *; easy.
 Qed.
-
-Print Canonical Projections.
 
 (* Definition coer: forall {A: Type}, (relation A) -> hrel A A *)
 (*   := fun _ r x y => r x y. *)
@@ -955,13 +946,62 @@ Print Canonical Projections.
 (*   := fun _ r x y => r x y. *)
 (* Coercion coer': hrel >-> relation. *)
 
-Variable A : Type.
-Variable r : relation A.
-
 (* Check (fun (r: relation A) => let r r). *)
 
-Goal forall `{r: relation nat}, r ≡ r.
-Proof. intros.
-       apply catch_weq.
-       apply (catch_weq (n:=tt)(m:=tt)).
-       apply (@catch_weq _ rel_monoid_ops rel_monoid_laws _ _). kat. Qed.
+(* Definition rel_lattice_ops' {A: Type}: lattice.ops := *)
+(*   {| car := relation A; *)
+(*      leq := @inclusion A; *)
+(*      weq := @same_relation A; *)
+(*      cup := @union A; *)
+(*      cap := @inter_rel A; *)
+(*      neg := complement; *)
+(*      bot := bot; *)
+(*      top := top *)
+(*   |}. *)
+(* Canonical Structure rel_lattice_ops'. *)
+
+Section Lifting.
+
+Variable A : Type.
+Variables r1 r2: relation A.
+
+Definition same_rel_iff_weq: r1 ≡ r2 <-> same_relation r1 r2.
+Proof. simpl. unfold same_relation. firstorder. Qed.
+
+Definition inclusion_iff_leq: r1 ⊆ r2 <-> r1 ≦ r2.
+Proof. simpl. firstorder. Qed.
+
+Definition inter_rel_iff_cap: inter_rel r1 r2 = cap r1 r2.
+Proof. reflexivity. Qed.
+
+End Lifting.
+
+Ltac lift_to_kat := repeat rewrite -> same_rel_iff_weq;
+                    repeat rewrite -> inclusion_iff_leq;
+                    repeat rewrite -> inter_rel_iff_cap.
+Ltac kat' := lift_to_kat; kat.
+
+Section Testing.
+
+Variable A : Type.
+Variables r r': relation A.
+
+Goal forall `{r: relation A}, r ⊆ r.
+Proof. intros. kat'. Qed.
+       (* red. red. *)
+       (* apply catch_kat_weq. *)
+       (* apply (catch_weq (n:=tt)(m:=tt)). *)
+       (* apply (@catch_weq _ rel_monoid_ops rel_monoid_laws _ _). kat. Qed. *)
+
+Lemma inclusion_r_rt' : r ⊆ r' -> r^? ⊆ r' ＊.
+Proof.
+  lift_to_kat. Abort.
+(*   unfold clos_refl. red; ins; desf; eauto using rt_step, rt_refl. *)
+(* Qed. *)
+
+Lemma inclusion_inter_mon' s s' : r ⊆ r' -> s ⊆ s' -> inter_rel r s ⊆ inter_rel r' s'.
+Proof. lift_to_kat. Abort. kat. 
+  (* clear; firstorder. *)
+Qed.
+
+End Testing.
