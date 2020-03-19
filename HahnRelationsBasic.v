@@ -786,10 +786,9 @@ Qed.
 
 Add LoadPath "../relation-algebra-1.7.1".
 Require Import RelationAlgebra.kat_tac.
-Require Import RelationAlgebra.rel.
 Require Import RelationAlgebra.lattice.
 Require Import RelationAlgebra.monoid.
-(* Require Import RelationAlgebra.prop. *)
+Require Import RelationAlgebra.prop.
 Require Import RelationAlgebra.kat.
 
 Set Printing Coercions.
@@ -797,14 +796,24 @@ Set Implicit Arguments.
 
 Axiom LEM : forall (p: Prop), p \/ not p.
 
-(** * TODO and NOTE *)
-(* TODO: Warning: projection-no-head-constant*)
+Instance Prop_lattice_laws: lattice.laws (BL+STR+CNV+DIV) Prop_lattice_ops.
+Proof.
+  constructor; (try apply Build_PreOrder); simpl;
+    repeat intro; try discriminate; try tauto.
+Qed.
 
 Inductive refl_top {A: Type}: relation A :=
   mk_refl_top: forall (a: A), refl_top a a.
 
-Definition rel_lattice_ops {A: Type}: lattice.ops :=
+Canonical Structure rel_lattice_ops {A: Type}: lattice.ops :=
   {| car := relation A;
+     (* leq := pwr (pwr impl); *)
+     (* weq := pwr (pwr iff); *)
+     (* cup := pw2 (pw2 or); *)
+     (* cap := pw2 (pw2 and); *)
+     (* neg := pw1 (pw1 not); *)
+     (* bot := pw0 (pw0 False); *)
+     (* top := pw0 (pw0 True) *)
      leq := leq;
      weq := weq;
      cup := cup;
@@ -813,28 +822,10 @@ Definition rel_lattice_ops {A: Type}: lattice.ops :=
      bot := bot;
      top := top
   |}.
-Canonical Structure rel_lattice_ops.
 (* Print Canonical Projections. *)
 
-Instance refl_inclusion {A: Type}: Reflexive (@inclusion A).
-Proof.
-  (* intro. unfold inclusion. intros. assumption. *)
-  intro. apply eq_in_l. exact (@same_relation_refl2 A x).
-Qed.
-
-Instance tran_inclusion {A: Type}: Transitive (@inclusion A) :=
-  (@inclusion_trans A).
-
-Instance preorder_inclusion {A: Type}: PreOrder (@inclusion A)
-  := Build_PreOrder inclusion refl_inclusion tran_inclusion.
-
-Instance rel_lattice_laws {A: Type}: lattice.laws (BL + CKA) (@rel_lattice_ops A).
-Proof.
-  apply lattice.Build_laws; intros; simpl;
-    (left; solve_lower)
-    || clear; firstorder
-  simpl; firstorder; apply LEM.
-Qed.
+Instance rel_lattice_laws {A: Type}:
+  lattice.laws (BL+STR+CNV+DIV) (@rel_lattice_ops A) := pw_laws  _.
 
 Definition rel_monoid_ops {A: Type}: monoid.ops :=
   {| ob := unit;
@@ -857,7 +848,7 @@ Proof.
     try discriminate_levels;
     (firstorder || idtac).
     (* try (unfold transp, inter_rel, seq, inclusion; firstorder) *)
-  - exact rel_lattice_laws.
+  - apply lower_lattice_laws.
   - destruct H; assumption.
   - now exists a.
   - inversion H0; apply rt_refl.
@@ -874,28 +865,6 @@ Definition eqv_rel' : forall {A: Type} {cond: A -> Prop}, relation A
   := fun _ (cond: _) x y =>  x = y /\ cond x.
 
 Print Coercions.
-
-(* Defintion impl =  *)
-
-(* Canonical Structure Prop_lattice_ops': lattice.ops := {| *)
-(*   leq := impl; *)
-(*   weq := fun _ _ => True; *)
-(*   cup := fun _ _ => True; *)
-(*   cap := fun _ _ => ; *)
-(*   neg := not; *)
-(*   bot := False; *)
-(*   top := True *)
-(* |}. *)
-
-(** bounded distributive lattice laws 
-   (we could get a Boolean lattice by assuming excluded middle) *)
-
-Instance Prop_lattice_laws: lattice.laws (BL+STR+CNV+DIV) Prop_lattice_ops.
-Proof.
-  constructor; (try apply Build_PreOrder); simpl;
-    repeat intro; try discriminate; tauto.
-Qed.
-
 
 (* Set Printing Universes. *)
 (* Check fun (A: Type@{lattice.pw}) => ob (@rel_monoid_ops A). *)
