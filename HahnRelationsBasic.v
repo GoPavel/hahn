@@ -892,11 +892,6 @@ Proof.
   - apply lower_laws.
   - apply (pw_laws (H:=lower_lattice_laws)).
   - constructor; try discriminate; intros; simpl; unfold_all; intros; try tauto.
-    (* + apply inj_leq. *)
-    (* + apply op_leq_weq_1. *)
-    (* + simpl. unfold_all. *)
-    (*   setoid_rewrite Bool.orb_true_iff; tauto. *)
-  (* + simpl. unfold_all. split; intros; destruct H; discriminate. *)
     + destruct H0 as [H0 H1]. split; [> assumption | apply H; apply H1].
     + split; intros; inversion 0; split; try by apply H || assumption.
   - unfold_all. split; intros H.
@@ -934,7 +929,7 @@ Section Lifting.
 Variable A : Type.
 Variables r r1 r2: relation A.
 
-Definition same_rel_iff_weq: r1 ≡ r2 <-> same_relation r1 r2.
+Definition same_rel_iff_weq: same_relation r1 r2 <-> r1 ≡ r2.
 Proof. simpl. unfold same_relation. firstorder. Qed.
 
 Definition inclusion_iff_leq: r1 ⊆ r2 <-> r1 ≦ r2.
@@ -946,13 +941,16 @@ Proof. reflexivity. Qed.
 Definition union_rel_iff_cup: union r1 r2 = cup r1 r2.
 Proof. reflexivity. Qed.
 
-Definition lift_clos_refl: forall {x y: A}, r^? x y <-> (refl_top ⊔ r) x y.
-Proof.
-  intros. unfold clos_refl. simpl. split; intro; destruct H; vauto.
-  destruct H. now left.
-Qed. (* TODO: redefine refl_top *)
+(* Definition lift_clos_refl: forall {x y: A}, r^? x y <-> (refl_top ⊔ r) x y. *)
+(* Proof. *)
+(*   intros. unfold clos_refl. simpl. split; intro; destruct H; vauto. *)
+(*   destruct H. now left. *)
+(* Qed. (* TODO: redefine refl_top *) *)
 
 Definition clos_refl_trans_iff_str: clos_refl_trans r = @str _ tt r.
+Proof. reflexivity. Qed.
+
+Definition dom_iff_test: forall (dom: A -> Prop), ⦗dom⦘ = inj (n:=tt) dom.
 Proof. reflexivity. Qed.
 
 End Lifting.
@@ -961,31 +959,68 @@ Ltac lift_to_kat := repeat rewrite -> same_rel_iff_weq;
                     repeat rewrite -> inclusion_iff_leq;
                     repeat rewrite -> inter_rel_iff_cap;
                     repeat rewrite -> union_rel_iff_cup;
-                    repeat rewrite -> clos_refl_trans_iff_str.
+                    repeat rewrite -> clos_refl_trans_iff_str;
                     (* repeat rewrite -> lift_clos_refl. *)
-Ltac kat' := lift_to_kat; kat.
+                    repeat rewrite -> dom_iff_test;
+                    idtac.
+(* Ltac kat :=  *)
+(*   intros; rewrite ?leq_iff_cup;  *)
+(*     (apply catch_kat_weq || fail "could not find a KAT structure");  *)
+(*     pre_dec true. *)
+
+Ltac kat' :=
+  lift_to_kat;
+  intros; rewrite ?leq_iff_cup;
+    (apply (catch_kat_weq tt tt) || fail "could not find a KAT structure");
+    pre_dec true.
 
 Section Testing.
 
 Variable A : Type.
 Variables r r': relation A.
 
-Goal forall `{r: relation A}, r ⊆ r.
-Proof. intros. kat'. Qed.
-       (* red. red. *)
-       (* apply catch_kat_weq. *)
-       (* apply (catch_weq (n:=tt)(m:=tt)). *)
-       (* apply (@catch_weq _ rel_monoid_ops rel_monoid_laws _ _). kat. Qed. *)
+Goal forall `{r: relation A}, r ≡ r.
+Proof. intro. kat'. Qed.
 
+Goal r ⊆ r＊.
+Proof. kat'. Qed.
+
+(* Ltac hkat := *)
+(*   intros; aggregate_hoare_hypotheses; rewrite ?leq_iff_cup;  *)
+(*   (apply catch_kat_weq || fail "could not find a KAT structure");  *)
+(*   let L := fresh "L" in intro L; *)
+(*   let u := fresh "u" in  *)
+(*   ((ra_get_kat_alphabet; intro u;  *)
+(*     eapply (elim_hoare_hypotheses_weq (u^* ) (u^* )); [eassumption|]) *)
+(*   || fail "typed hkat is not supported yet");  *)
+(*   subst u; revert L; pre_dec true. *)
+
+(** ** inclusion_eqv_rt
+   Lemma inclusion_eqv_rt : ⦗dom⦘ ⊆ r'＊.
+   Proof. by unfold eqv_rel, inclusion; ins; desf; vauto. Qed.
+ *)
+Goal forall (dom: A -> Prop), ⦗dom⦘ ⊆ r'＊.
+Proof. intro. kat'. Qed.
+
+Import RelationAlgebra.kat_reification.
+
+Ltac hkat' :=
+  lift_to_kat;
+  intros; aggregate_hoare_hypotheses; rewrite ?leq_iff_cup;
+  (apply (catch_kat_weq tt tt) || fail "could not find a KAT structure");
+  let L := fresh "L" in intro L;
+  let u := fresh "u" in
+  ((ra_get_kat_alphabet; intro u;
+    eapply (elim_hoare_hypotheses_weq (u^* ) (u^* )); [eassumption|])
+  || fail "typed hkat is not supported yet");
+  subst u; revert L; pre_dec true.
+
+(** ** inclusion_r_rt
 Lemma inclusion_r_rt' : r ⊆ r' -> (union (@one _ tt) r) ⊆ r'＊.
-Proof.
-  lift_to_kat. intro. rewrite cup_spec. split. rewrite ?leq_iff_cup. Abort.
-(*   unfold clos_refl. red; ins; desf; eauto using rt_step, rt_refl. *)
-(* Qed. *)
+Proof. Abort. (* That type of hypotheses is not supported *)
+ *)
 
-Lemma inclusion_inter_mon' s s' : r ⊆ r' -> s ⊆ s' -> cap r s ⊆ cap r' s'.
-Proof. lift_to_kat. intros. Abort.  
-  (* clear; firstorder. *)
-(* Qed. *)
+Goal r ⊆ bot -> r ⊆ r'.
+Proof. hkat'. Qed.
 
 End Testing.
