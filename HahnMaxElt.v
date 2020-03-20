@@ -8,6 +8,7 @@ Require Import NPeano Omega Setoid.
 
 Set Implicit Arguments.
 
+Local Notation "a ≡ b" := (same_relation a b)  (at level 60).
 
 Definition max_elt A (r: relation A) (a : A) :=
   forall b (REL: r a b), False.

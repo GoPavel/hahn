@@ -5,6 +5,8 @@
 Require Import Setoid Morphisms Wf_nat Omega.
 Require Import HahnBase HahnList HahnSets HahnRelationsBasic HahnEquational HahnRewrite.
 
+Local Notation "a ≡ b" := (same_relation a b)  (at level 60).
+
 Set Implicit Arguments.
 
 (** A relation is finitely supported iff every element has a finite number of 

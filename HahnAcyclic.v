@@ -9,6 +9,10 @@ Require Import HahnDom HahnMinPath HahnPath.
 
 Set Implicit Arguments.
 
+Local Notation "a ≡ b" := (same_relation a b)  (at level 60).
+Local Notation "a ^+" := (clos_trans a) (at level 1, only parsing).
+Local Notation "a ^*" := (clos_refl_trans a) (at level 1, only parsing).
+
 Lemma acyclic_restr A d (r: relation A) : acyclic r -> acyclic (restr_rel d r).
 Proof.
   eauto using acyclic_mon with hahn.

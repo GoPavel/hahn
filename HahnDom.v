@@ -7,6 +7,8 @@ Set Implicit Arguments.
 
 Section Domains.
 
+Local Notation "a ≡ b" := (same_relation a b)  (at level 60).
+
 Variable A B : Type.
 
 Section Definitions.

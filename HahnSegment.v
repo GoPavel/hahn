@@ -7,6 +7,10 @@ Require Import HahnEquational HahnSorted.
 
 Set Implicit Arguments.
 
+Local Notation "a ≡ b" := (same_relation a b)  (at level 60).
+Local Notation "a ^+" := (clos_trans a) (at level 1, only parsing).
+Local Notation "a ^*" := (clos_refl_trans a) (at level 1, only parsing).
+
 Lemma fsupp_immediate_pred A (R: relation A)
     (FS: fsupp R) (IRR: irreflexive R) (TRANS: transitive R)
     x (NMIN: ~ min_elt R x):

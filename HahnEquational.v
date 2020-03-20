@@ -7,6 +7,8 @@ Require Import HahnBase HahnList HahnRelationsBasic HahnSets.
 
 Set Implicit Arguments.
 
+Local Notation "a ≡ b" := (same_relation a b)  (at level 60).
+
 (******************************************************************************)
 (** Set up setoid rewriting *)
 (******************************************************************************)

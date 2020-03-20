@@ -9,6 +9,8 @@ Require Import HahnDom HahnMinPath.
 
 Set Implicit Arguments.
 
+Local Notation "a ≡ b" := (same_relation a b)  (at level 60).
+
 Lemma wf_finite : 
   forall A (r: relation A) (ACYC: acyclic r) l (DOMA : doma r (fun x => List.In x l)),
     well_founded r.
