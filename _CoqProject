@@ -1,7 +1,7 @@
 -R . hahn 
 Hahn.v 
 HahnBase.v HahnFun.v HahnSets.v HahnList.v 
-HahnRelationsBasic.v HahnEquational.v  HahnRewrite.v
+HahnRelationsBasic.v HahnKat.v HahnEquational.v  HahnRewrite.v
 HahnExtraNotation.v
 HahnDom.v HahnMaxElt.v HahnMinElt.v HahnFuneq.v
 HahnWf.v HahnTotalList.v HahnTotalExt.v
