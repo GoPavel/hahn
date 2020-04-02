@@ -271,3 +271,18 @@ Goal r ⊆ bot -> r ⊆ r'.
 Proof. hkat'. Qed.
 
 End Testing.
+
+Local Notation "x ^+" := (itr tt x)   (left associativity, at level 5, format "x ^+"): ra_terms.
+
+Lemma acyclic_iff_kat A (r: relation A): acyclic r <-> (r^+) ⊓ 1 ≡ 0.
+Proof.
+  unfold acyclic, irreflexive; simpl.
+  split; intros.
+  - split.
+    + intros [H1 H2]. inversion H2. rewrite H3 in *. apply H in H1; apply H1.
+    + intros [].
+  - apply (H x x). split; [assumption | constructor].
+Qed.
+
+Lemma acyclic_restr A d (r: relation A) : acyclic r -> acyclic (restr_rel d r).
+Proof. Abort.
