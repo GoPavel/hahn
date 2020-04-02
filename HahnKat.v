@@ -9,6 +9,8 @@ Require Import RelationAlgebra.kat.
 
 Require Import HahnRelationsBasic.
 
+Require Import Coq.Logic.FunctionalExtensionality.
+
 Set Printing Coercions.
 Set Implicit Arguments.
 
@@ -146,30 +148,55 @@ Section Lifting.
 
 Variable A : Type.
 Variables r r1 r2: relation A.
+Variable d: A -> Prop.
 
-Definition same_rel_iff_weq: same_relation r1 r2 <-> r1 ≡ r2.
+Lemma same_rel_iff_weq: same_relation r1 r2 <-> r1 ≡ r2.
 Proof. simpl. unfold same_relation. firstorder. Qed.
 
-Definition inclusion_iff_leq: r1 ⊆ r2 <-> r1 ≦ r2.
+Lemma inclusion_iff_leq: r1 ⊆ r2 <-> r1 ≦ r2.
 Proof. simpl. firstorder. Qed.
 
-Definition inter_rel_iff_cap: inter_rel r1 r2 = cap r1 r2.
+Lemma inter_rel_iff_cap: inter_rel r1 r2 = cap r1 r2.
 Proof. reflexivity. Qed.
 
-Definition union_rel_iff_cup: union r1 r2 = cup r1 r2.
+Lemma union_rel_iff_cup: union r1 r2 = cup r1 r2.
 Proof. reflexivity. Qed.
 
-(* Definition lift_clos_refl: forall {x y: A}, r^? x y <-> (refl_top ⊔ r) x y. *)
-(* Proof. *)
-(*   intros. unfold clos_refl. simpl. split; intro; destruct H; vauto. *)
-(*   destruct H. now left. *)
-(* Qed. (* TODO: redefine refl_top *) *)
-
-Definition clos_refl_trans_iff_str: clos_refl_trans r = @str _ tt r.
+Lemma clos_refl_trans_iff_str: clos_refl_trans r = @str _ tt r.
 Proof. reflexivity. Qed.
 
-Definition dom_iff_test: forall (dom: A -> Prop), ⦗dom⦘ = inj (n:=tt) dom.
+Local Notation " [ p ] " := (inj (n:=tt) p): ra_terms. 
+
+Lemma dom_iff_test: forall (dom: A -> Prop), ⦗dom⦘ = [dom].
 Proof. reflexivity. Qed.
+
+(* ASK *)
+Axiom prop_ext: forall (P Q: Prop), (P <-> Q) -> P = Q.
+
+Ltac rel_ext :=
+  apply functional_extensionality; intro x;
+  apply functional_extensionality; intro y;
+  apply prop_ext.
+
+Lemma restr_rel_iff_kat: restr_rel d r = ([d]⋅r⋅[d]).
+Proof.
+  rel_ext.
+  unfold restr_rel; simpl; unfold inj', seq; split.
+  - intros [H1 [H2 H3]].
+    exists y. split; try exists x; auto.
+  - intros. destruct H as [z [[z0 [[H1 H2] H3]] [H4 H5]]].
+    rewrite <- H1 in H3; rewrite -> H4 in *.
+    split; [apply H3 | split; [apply H2 | apply H5]].
+Qed.
+
+Lemma lift_clos_refl: r^? = (refl_top ⊔ r).
+Proof.
+  rel_ext.
+  intros. unfold clos_refl. simpl. split; intro; destruct H; try rewrite H in *; try auto.
+  - left; constructor.
+  - destruct H; left; reflexivity.
+Qed. (* TODO: redefine refl_top *)
+
 
 End Lifting.
 
@@ -178,9 +205,12 @@ Ltac lift_to_kat := repeat rewrite -> same_rel_iff_weq;
                     repeat rewrite -> inter_rel_iff_cap;
                     repeat rewrite -> union_rel_iff_cup;
                     repeat rewrite -> clos_refl_trans_iff_str;
-                    (* repeat rewrite -> lift_clos_refl. *)
+                    repeat rewrite -> lift_clos_refl;
                     repeat rewrite -> dom_iff_test;
                     idtac.
+
+Require Import RelationAlgebra.kat_reification.
+
 (* Ltac kat :=  *)
 (*   intros; rewrite ?leq_iff_cup;  *)
 (*     (apply catch_kat_weq || fail "could not find a KAT structure");  *)
@@ -191,6 +221,27 @@ Ltac kat' :=
   intros; rewrite ?leq_iff_cup;
     (apply (catch_kat_weq tt tt) || fail "could not find a KAT structure");
     pre_dec true.
+
+(* Ltac hkat := *)
+(*   intros; aggregate_hoare_hypotheses; rewrite ?leq_iff_cup;  *)
+(*   (apply catch_kat_weq || fail "could not find a KAT structure");  *)
+(*   let L := fresh "L" in intro L; *)
+(*   let u := fresh "u" in  *)
+(*   ((ra_get_kat_alphabet; intro u;  *)
+(*     eapply (elim_hoare_hypotheses_weq (u^* ) (u^* )); [eassumption|]) *)
+(*   || fail "typed hkat is not supported yet");  *)
+(*   subst u; revert L; pre_dec true. *)
+
+Ltac hkat' :=
+  lift_to_kat;
+  intros; aggregate_hoare_hypotheses; rewrite ?leq_iff_cup;
+  (apply (catch_kat_weq tt tt) || fail "could not find a KAT structure");
+  let L := fresh "L" in intro L;
+  let u := fresh "u" in
+  ((ra_get_kat_alphabet; intro u;
+    eapply (elim_hoare_hypotheses_weq (u^* ) (u^* )); [eassumption|])
+  || fail "typed hkat is not supported yet");
+  subst u; revert L; pre_dec true.
 
 Section Testing.
 
@@ -203,16 +254,6 @@ Proof. intro. kat'. Qed.
 Goal r ⊆ r＊.
 Proof. kat'. Qed.
 
-(* Ltac hkat := *)
-(*   intros; aggregate_hoare_hypotheses; rewrite ?leq_iff_cup;  *)
-(*   (apply catch_kat_weq || fail "could not find a KAT structure");  *)
-(*   let L := fresh "L" in intro L; *)
-(*   let u := fresh "u" in  *)
-(*   ((ra_get_kat_alphabet; intro u;  *)
-(*     eapply (elim_hoare_hypotheses_weq (u^* ) (u^* )); [eassumption|]) *)
-(*   || fail "typed hkat is not supported yet");  *)
-(*   subst u; revert L; pre_dec true. *)
-
 (** ** inclusion_eqv_rt
    Lemma inclusion_eqv_rt : ⦗dom⦘ ⊆ r'＊.
    Proof. by unfold eqv_rel, inclusion; ins; desf; vauto. Qed.
@@ -220,18 +261,6 @@ Proof. kat'. Qed.
 Goal forall (dom: A -> Prop), ⦗dom⦘ ⊆ r'＊.
 Proof. intro. kat'. Qed.
 
-Import RelationAlgebra.kat_reification.
-
-Ltac hkat' :=
-  lift_to_kat;
-  intros; aggregate_hoare_hypotheses; rewrite ?leq_iff_cup;
-  (apply (catch_kat_weq tt tt) || fail "could not find a KAT structure");
-  let L := fresh "L" in intro L;
-  let u := fresh "u" in
-  ((ra_get_kat_alphabet; intro u;
-    eapply (elim_hoare_hypotheses_weq (u^* ) (u^* )); [eassumption|])
-  || fail "typed hkat is not supported yet");
-  subst u; revert L; pre_dec true.
 
 (** ** inclusion_r_rt
 Lemma inclusion_r_rt' : r ⊆ r' -> (union (@one _ tt) r) ⊆ r'＊.
