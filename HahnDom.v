@@ -5,6 +5,9 @@ Set Implicit Arguments.
 
 (** * Calculating the (co)domain of a relation *)
 
+Require Import HahnKat.
+Require Import RelationAlgebra.lattice.
+
 Section Domains.
 
 Local Notation "a <--> b" := (same_relation a b)  (at level 60).
@@ -23,6 +26,39 @@ Section Definitions.
   Definition dom_cond d := (fun e => dom_rel (r ⨾ ⦗ eq e ⦘) ⊆₁ d).
 End Definitions.
 
+Local Axiom LEM: forall (A: Type) (d : A -> Prop) (x: A), (d x) \/ (not (d x)). (* TODO *)
+
+Lemma doma_iff_kat r d: doma r d <-> ⦗(@neg dset') d⦘ ;; r ⊆ ∅₂.
+Proof.
+  split.
+    + unfold_all. intros DA x y [z [[H0 H1] H2]].
+      rewrite <- H0 in H2; apply DA in H2. apply H1; apply H2.
+    + unfold_all. unfold doma. intros.
+      specialize (H x y).
+      assert (not (d x) -> False).
+      { intro. apply H. exists x. split; [> split; [> reflexivity | assumption] | assumption]. }
+      destruct (LEM d x).
+      * assumption.
+      * apply H0 in H1. destruct H1.
+Qed.
+
+Lemma domb_iff_kat r d: domb r d <-> (r ;; ⦗(@neg dset') d⦘ ⊆ ∅₂).
+Proof.
+  split; unfold_all. intro H.
+  - intros x y [z [H0 [H1 H2]]].
+    rewrite H1 in *; apply H in H0. apply H2; apply H0.
+  - unfold domb. intros.
+    specialize (H x y).
+    assert (not (d y) -> False).
+    { intro. apply H. exists y. auto. }
+    destruct (LEM d y).
+    + assumption.
+    + apply H0 in H1. destruct H1.
+Qed.
+
+Ltac lift_dom := repeat rewrite -> doma_iff_kat in *;
+                 repeat rewrite -> domb_iff_kat in *.
+
 Section Lemmas.
 
   Variables r r' : relation A.
@@ -30,16 +66,16 @@ Section Lemmas.
   Variables d d' : A -> Prop.
 
   Lemma eqv_doma : doma ⦗d⦘ d.
-  Proof. unfold doma, eqv_rel; ins; desf. Qed.
+  Proof. lift_dom; kat'. Qed.
 
   Lemma eqv_domb : domb ⦗d⦘ d.
-  Proof. unfold domb, eqv_rel; ins; desf. Qed.
+  Proof. lift_dom; kat'. Qed.
 
   Lemma seq_eqv_doma : doma r d -> doma (⦗d'⦘ ⨾ r) d.
-  Proof. unfold doma, eqv_rel, seq; ins; desf; eauto. Qed.
+  Proof. lift_dom; hkat'. Qed.
 
   Lemma seq_eqv_domb : domb r d -> domb (r ⨾ ⦗d'⦘) d.
-  Proof. unfold domb, eqv_rel, seq; ins; desf; eauto. Qed.
+  Proof. lift_dom; hkat'. Qed.
 
   Lemma restr_eq_rel_doma : doma r d -> doma (restr_eq_rel f r) d.
   Proof. unfold doma, restr_eq_rel; ins; desf; eauto. Qed.
@@ -48,10 +84,10 @@ Section Lemmas.
   Proof. unfold domb, restr_eq_rel; ins; desf; eauto. Qed.
 
   Lemma seq_doma : doma r d -> doma (r ⨾ r') d.
-  Proof. unfold doma, seq; ins; desf; eauto. Qed.
+  Proof. lift_dom; hkat'. Qed.
 
   Lemma seq_domb : domb r' d -> domb (r ⨾ r') d.
-  Proof. unfold domb, seq; ins; desf; eauto. Qed.
+  Proof. lift_dom; hkat'. Qed.
 
   Lemma union_doma : doma r d -> doma r' d -> doma (r ∪ r') d.
   Proof. unfold doma, union; ins; desf; eauto. Qed.
@@ -60,10 +96,10 @@ Section Lemmas.
   Proof. unfold domb, union; ins; desf; eauto. Qed.
 
   Lemma ct_doma : doma r d -> doma r⁺ d.
-  Proof. induction 2; eauto. Qed.
+  Proof. lift_dom; hkat'. Qed.
 
   Lemma ct_domb : domb r d -> domb r⁺ d.
-  Proof. induction 2; eauto. Qed.
+  Proof. lift_dom; hkat'. Qed.
 
   Lemma seq_r_doma : doma r d -> doma r' d -> doma (r^? ⨾ r') d.
   Proof. unfold clos_refl, seq; red; ins; desf; eauto. Qed.
@@ -84,16 +120,16 @@ Section Lemmas.
   Proof. firstorder.  Qed.
 
   Lemma restr_doma : doma (restr_rel d r) d.
-  Proof. firstorder. Qed. 
+  Proof. lift_dom; kat'. Qed.
 
   Lemma restr_domb : domb (restr_rel d r) d.
-  Proof. firstorder. Qed. 
+  Proof. lift_dom; kat'. Qed.
 
   Lemma restr_doma_mon : doma r d -> doma (restr_rel d' r) d.
-  Proof. firstorder. Qed. 
+  Proof. lift_dom; hkat'. Qed.
 
   Lemma restr_domb_mon : domb r d -> domb (restr_rel d' r) d.
-  Proof. firstorder. Qed. 
+  Proof. lift_dom; hkat'. Qed.
 
   Lemma dom_empty : dom_rel (A:=A) ∅₂ ≡₁ ∅.
   Proof. unfolder; split; ins; desf. Qed. 
@@ -164,31 +200,31 @@ Section Lemmas.
   Proof. unfold eqv_rel, seq; split; red; ins; desf; eauto 6. Qed.
 
   Lemma doma_rewrite : doma r d -> r ⊆ ⦗d⦘ ⨾ r. 
-  Proof. firstorder. Qed.
+  Proof. lift_dom. hkat'. Qed.
 
   Lemma domb_rewrite : domb r d -> r ⊆ r ⨾ ⦗d⦘. 
-  Proof. firstorder. Qed.
+  Proof. lift_dom. hkat'. Qed.
 
   Lemma doma_helper : r ⊆ ⦗d⦘ ⨾ r <-> doma r d.
   Proof.
-    split; unfold doma, inclusion, seq, eqv_rel; ins; desf.
-      by apply H in REL; desf.
-      by eexists; splits; eauto.
+    split; lift_dom; [> hkat'' | hkat'].
   Qed.
 
   Lemma domb_helper : r ⊆ r ⨾ ⦗d⦘ <-> domb r d.
   Proof. 
-    split; unfold domb, inclusion, seq, eqv_rel; ins; desf. 
-      by apply H in REL; desf.
-      by eexists; splits; eauto.
+    split; lift_dom; [> hkat'' | hkat'].
   Qed.
   
   Lemma domab_helper : 
     r ⊆ ⦗d⦘ ⨾ r ⨾ ⦗d'⦘ <-> doma r d /\ domb r d'.
   Proof.
-    split; ins; splits; unfold doma, domb, inclusion, eqv_rel, seq in *;
-    ins; desf; try specialize (H _ _ REL); try specialize (H1 _ _ H0);
-    desf; splits; eexists; splits; eauto.
+    split.
+    - lift_dom; intros. split.
+      + assert (⦗d⦘ ⨾ r ⨾ ⦗d'⦘ ⊆ ⦗d⦘ ⨾ r). kat'.
+        rewrite H0 in H; clear H0. hkat''.
+      + assert (⦗d⦘ ⨾ r ⨾ ⦗d'⦘ ⊆ r ⨾ ⦗d'⦘). kat'.
+        rewrite H0 in H; clear H0. hkat''.
+   - lift_dom. intros [H1 H2]. hkat'.
   Qed.
 
   Lemma domab_helper2 : 
@@ -199,24 +235,22 @@ Section Lemmas.
 
   Lemma dom_to_doma : r <--> ⦗d⦘ ⨾ r ⨾ ⦗d'⦘ -> doma r d.
   Proof.
-    intro H; unfold doma; ins.
-    hahn_rewrite H in REL; revert REL; basic_solver.
+    lift_dom; intro H; rewrite H; kat'.
   Qed.
 
   Lemma dom_to_domb : r <--> ⦗d⦘ ⨾ r ⨾ ⦗d'⦘ -> domb r d'.
   Proof.
-    intro H; unfold domb; ins.
-    hahn_rewrite H in REL; revert REL; basic_solver.
+    lift_dom; intro H; rewrite H; kat'.
   Qed.
 
   Lemma dom_l : r <--> ⦗d⦘ ⨾ r ⨾ ⦗d'⦘ -> r <--> ⦗d⦘ ⨾ r.
   Proof.
-    unfolder; firstorder.
+    intro H; rewrite H; kat'.
   Qed.
 
   Lemma dom_r : r <--> ⦗d⦘ ⨾ r ⨾ ⦗d'⦘ -> r <--> r ⨾ ⦗d'⦘.
   Proof.
-    unfolder; firstorder.
+    intro H; rewrite H; kat'.
   Qed.
 
   Lemma dom_helper_1 : r ⊆ ⦗d⦘ ⨾ r ⨾ ⦗d'⦘ <-> r <--> ⦗d⦘ ⨾ r ⨾ ⦗d'⦘.
@@ -242,7 +276,7 @@ Section Lemmas.
         ee (EE: ee = ⦗d'⦘ ⨾ r ⨾ ⦗d'⦘) :
     r ⊆ dd ∪ de ∪ ed ∪ ee.
   Proof.
-    rewrite E; subst; basic_solver 8.
+    rewrite E. subst. kat'.
   Qed.
 
   Lemma path_dom
@@ -261,71 +295,9 @@ Section Lemmas.
     { rewrite step_dom at 1; try eassumption.
       repeat apply inclusion_union_l; rewrite ?seqA.
       1,4: sin_rewrite !ct_end.
-      all: try (repeat (apply inclusion_union_r; constructor); basic_solver 14). }
+      all: try hkat'. }
     rewrite step_dom at 1; try eassumption.
-     relsf.
-    assert (E2': ⦗d'⦘ ⨾ ⦗d⦘ ⊆ (fun _ _ : A => False)).
-    { by rewrite seq_eqvC in E2. }
-
-    assert (X17: ed ⨾ ed ⊆ ∅₂).
-    { rewrite ?DD, ?ED, ?DE, ?EE; generalize E2; basic_solver. }
-    assert (X18: ed ⨾ ee ⊆ ∅₂).
-    { rewrite ?DD, ?ED, ?DE, ?EE; generalize E2; basic_solver. }
-    assert (X19: de ⨾ dd ⊆ ∅₂).
-    { rewrite ?DD, ?ED, ?DE, ?EE; generalize E2; basic_solver. }
-    assert (X20: de ⨾ de ⊆ ∅₂).
-    { by rewrite ?DD, ?ED, ?DE, ?EE; generalize E2; basic_solver. }
-    assert (X1: dd ＊ ⨾ ed ⊆ ed).
-    { by rewrite ?rtE; relsf; rewrite ct_end, ?seqA, ?DD, ?ED, ?DE, ?EE, ?seqA; 
-        try sin_rewrite E2; try sin_rewrite E2'; relsf. }
-    assert (X2: dd ＊ ⨾ dd ⊆ dd＊ ).
-    {  by rewrite rt_end at 2; relsf. }
-    assert (X3: dd ＊ ⨾ ee ⊆ ee).
-    {  by rewrite ?rtE; relsf; rewrite ct_end, ?seqA, ?DD, ?ED, ?DE, ?EE, ?seqA; 
-        try sin_rewrite E2; try sin_rewrite E2'; relsf. }
-    assert (X4: ee ＊ ⨾ de ⊆ de).
-    {  by rewrite ?rtE; relsf; rewrite ct_end, ?seqA, ?DD, ?ED, ?DE, ?EE, ?seqA; 
-        try sin_rewrite E2; try sin_rewrite E2'; relsf. }
-    assert (X5: ee ＊ ⨾ ee ⊆ ee＊ ).
-    {  by rewrite rt_end at 2; relsf. }
-    assert (X6: ee ＊ ⨾ dd ⊆ dd).
-    {  by rewrite ?rtE; relsf; rewrite ct_end, ?seqA, ?DD, ?ED, ?DE, ?EE, ?seqA; 
-         try sin_rewrite E2; try sin_rewrite E2'; relsf. }
-    assert (X7: dd ⁺ ⨾ dd ⊆ dd⁺).
-    { by rewrite ct_end at 2; rewrite inclusion_t_rt. }
-    assert (X8: dd ⁺ ⨾ ed ⊆ ∅₂).
-    { by rewrite ?rtE; relsf; rewrite ct_end, ?seqA, ?DD, ?ED, ?DE, ?EE, ?seqA; 
-        try sin_rewrite E2; try sin_rewrite E2'; relsf. }
-    assert (X9: dd ⁺ ⨾ ee ⊆ ∅₂).
-    { by rewrite ?rtE; relsf; rewrite ct_end, ?seqA, ?DD, ?ED, ?DE, ?EE, ?seqA; 
-        try sin_rewrite E2; try sin_rewrite E2'; relsf. }
-    assert (X10: (dd ＊ ⨾ de ⨾ ee ＊ ⨾ ed) ⁺ ⨾ ed ⊆ ∅₂).
-    { by rewrite ct_end, ?seqA, ?DD, ?ED, ?DE, ?EE, ?seqA; 
-        try sin_rewrite E2; try sin_rewrite E2'; relsf. }
-    assert (X11: (dd ＊ ⨾ de ⨾ ee ＊ ⨾ ed) ⁺ ⨾ ee ⊆ ∅₂).
-    { by rewrite ct_end, ?seqA, ?DD, ?ED, ?DE, ?EE, ?seqA;
-        try sin_rewrite E2; try sin_rewrite E2'; relsf. }
-    assert (X12: ee ⁺ ⨾ dd ⊆ ∅₂).
-    { by rewrite ?rtE; relsf; rewrite ct_end, ?seqA, ?DD, ?ED, ?DE, ?EE, ?seqA; 
-        try sin_rewrite E2; try sin_rewrite E2'; relsf. }
-    assert (X13: ee ⁺ ⨾ de ⊆ ∅₂).
-    { by rewrite ?rtE; relsf; rewrite ct_end, ?seqA, ?DD, ?ED, ?DE, ?EE, ?seqA; 
-        try sin_rewrite E2; try sin_rewrite E2'; relsf. }
-    assert (X14: ee ⁺ ⨾ ee ⊆ ee⁺).
-    { by rewrite ct_end at 2; rewrite inclusion_t_rt. }
-    assert (X15: (ee ＊ ⨾ ed ⨾ dd ＊ ⨾ de) ⁺ ⨾ dd ⊆ ∅₂).
-    { by rewrite ct_end, ?seqA, ?DD, ?ED, ?DE, ?EE, ?seqA; 
-        try sin_rewrite E2; try sin_rewrite E2'; relsf. }
-    assert (X16: (ee ＊ ⨾ ed ⨾ dd ＊ ⨾ de) ⁺ ⨾ de ⊆ ∅₂).
-    { by rewrite ct_end, ?seqA, ?DD, ?ED, ?DE, ?EE, ?seqA; 
-        try sin_rewrite E2; try sin_rewrite E2'; relsf. }
-
-    repeat apply inclusion_union_l; rewrite ?seqA.
-    all: rewrite ?X1, ?X2, ?X3, ?X4, ?X5, ?X6, ?X7, ?X8, ?X9, ?X10,
-         ?X11, ?X12, ?X13, ?X14, ?X15, ?X16, ?X17, ?X18, ?X19, ?X20.
-    all: rels.
-    all: try (repeat (apply inclusion_union_r; constructor); basic_solver 5).
-    all: try (repeat (apply inclusion_union_r; constructor); basic_solver 20).
+    { rewrite ?DD, ?ED, ?DE, ?EE. hkat'. }
   Qed.
 
   Lemma path_dom_same
@@ -338,36 +310,7 @@ Section Lemmas.
     ⦗d⦘ ⨾ r⁺ ⨾ ⦗d⦘ ⊆ dd⁺ ∪ (dd＊ ⨾ de ⨾ ee＊ ⨾ ed)⁺ ⨾ dd＊.
   Proof.
     rewrite path_dom; try edone.
-    relsf; repeat apply inclusion_union_l; rewrite ?seqA.
-    all: try by rewrite inclusion_seq_eqv_l, inclusion_seq_eqv_r; relsf.
-    { by rewrite ct_begin, EE, ?seqA; sin_rewrite E2; relsf. }
-    { rewrite ct_begin at 1; rewrite EE at 1; rewrite ED at 1;
-        rewrite rtE at 1; relsf.
-      rewrite ?seqA. 
-      repeat apply inclusion_union_l; rewrite ?seqA.
-      { by sin_rewrite E2; relsf. }
-      rewrite ct_begin, EE, ?seqA; sin_rewrite E2; relsf. }
-    { rewrite rtE at 1; relsf.
-      rewrite rtE at 1; relsf.
-      repeat apply inclusion_union_l; rewrite ?seqA.
-      { rewrite ED, ?seqA; sin_rewrite E2; relsf. }
-      { rewrite ct_begin, EE, ?seqA; sin_rewrite E2; relsf. }
-      rewrite ct_begin at 1; rewrite ?seqA.
-      rewrite rtE at 1; relsf.
-      rewrite ED, ?seqA; sin_rewrite E2; relsf.
-      rewrite ct_begin, EE, ?seqA; sin_rewrite E2; relsf. }
-    rewrite ?seqA.
-    arewrite (⦗d⦘ ⨾ (dd ＊ ⨾ de ⨾ ee ＊ ⨾ ed) ＊ ⨾ dd ＊ ⊆ fun _ _ => True).
-    rewrite rtE at 1; relsf.
-    rewrite DE, ?seqA.
-    arewrite (⦗d'⦘ ⨾ ⦗d⦘ ⊆ (fun _ _ : A => False)).
-    {  by rewrite seq_eqvC in E2. }
-    relsf.
-    rewrite ct_end at 1; rewrite ?seqA.
-    rewrite EE, ?seqA.
-    arewrite (⦗d'⦘ ⨾ ⦗d⦘ ⊆ (fun _ _ : A => False)).
-    {  by rewrite seq_eqvC in E2. }
-    relsf.
+    { rewrite ?DD, ?ED, ?DE, ?EE. hkat'. }
   Qed.
 
   Lemma irr_dom
@@ -445,10 +388,10 @@ Section Lemmas.
 End Lemmas.
 
 Lemma doma_eqv (d : A -> Prop) (r : relation A): doma (⦗d⦘ ⨾ r) d.
-Proof. apply doma_helper. basic_solver. Qed.
+Proof. lift_dom. kat'. Qed.
 
 Lemma domb_eqv (d : A -> Prop) (r : relation A): domb (r ⨾ ⦗d⦘) d.
-Proof. apply domb_helper. basic_solver. Qed.
+Proof.  lift_dom. kat'. Qed.
 
 Lemma acyc_dom (r: relation A) d e
       (E1: r ⊆ (⦗d⦘ ∪ ⦗e⦘) ⨾ r ⨾ (⦗d⦘ ∪ ⦗e⦘))
@@ -471,10 +414,11 @@ Proof.
     apply ct_domb; eapply domab_helper with (d := fun x => d x \/ e x).
     rewrite E1 at 1; basic_solver. }
   sin_rewrite path_dom_same; try edone.
-  { repeat rewrite irreflexive_union; splits; try done.
+  {
+    repeat rewrite irreflexive_union; splits; try done.
     rewrite irreflexive_seqC.
     arewrite( dd＊ ⨾ (dd ＊ ⨾ de ⨾ ee ＊ ⨾ ed) ⁺ ⊆ (dd ＊ ⨾ de ⨾ ee ＊ ⨾ ed) ⁺).
-    {  by rewrite ct_begin; rewrite !seqA; rels. }
+    {  kat'. }
     assert (acyclic (dd ＊ ⨾ de ⨾ ee ＊ ⨾ ed)); try done. (*?*)
     rewrite acyclic_seqC; rewrite !seqA. 
     rewrite acyclic_seqC; rewrite !seqA. 
@@ -485,13 +429,16 @@ Proof.
   repeat rewrite irreflexive_union; splits; try done.
   rewrite irreflexive_seqC.
   arewrite( ee＊ ⨾ (ee ＊ ⨾ ed ⨾ dd ＊ ⨾ de) ⁺  ⊆ (ee ＊ ⨾ ed ⨾ dd ＊ ⨾ de) ⁺).
-  { by rewrite ct_begin; rewrite !seqA; rels. }
+  { kat'. }
   assert (acyclic(ee ＊ ⨾ ed ⨾ dd ＊ ⨾ de)); try done. (*?*)
   rewrite acyclic_seqC; rewrite !seqA. 
   done.
 Qed.
 
 End Domains.
+
+Ltac lift_dom := repeat rewrite -> doma_iff_kat in *;
+                 repeat rewrite -> domb_iff_kat in *.
 
 Add Parametric Morphism A : (@doma A) with signature
   inclusion --> set_subset ==> Basics.impl as doma_mori.
