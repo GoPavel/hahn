@@ -7,9 +7,11 @@ Require Import HahnBase HahnList HahnRelationsBasic.
 Require Import HahnEquational HahnMaxElt HahnRewrite.
 Require Import HahnDom HahnMinPath.
 
+Require Import HahnKat.
+
 Set Implicit Arguments.
 
-Local Notation "a ≡ b" := (same_relation a b)  (at level 60).
+Local Notation "a <--> b" := (same_relation a b)  (at level 60).
 
 Lemma wf_finite : 
   forall A (r: relation A) (ACYC: acyclic r) l (DOMA : doma r (fun x => List.In x l)),
@@ -40,14 +42,14 @@ Qed.
 
 (******************************************************************************)
 
-Lemma rt_unionE A (r r' : relation A) : (r ∪ r')＊ ≡ r'＊ ⨾ (r ⨾ r'＊)＊.
+Lemma rt_unionE A (r r' : relation A) : (r ∪ r')＊ <--> r'＊ ⨾ (r ⨾ r'＊)＊.
 Proof.
   split; eauto 8 using inclusion_seq_rt, inclusion_rt_rt2 with hahn.
   apply inclusion_rt_ind_left; relsf; unionL; rels. 
   rewrite <- seqA; rels; rewrite rtE at 2; relsf. 
 Qed.
 
-Lemma ct_unionE A (r r' : relation A) : (r ∪ r')⁺ ≡ r'⁺ ∪ r'＊ ⨾ (r ⨾ r'＊)⁺.
+Lemma ct_unionE A (r r' : relation A) : (r ∪ r')⁺ <--> r'⁺ ∪ r'＊ ⨾ (r ⨾ r'＊)⁺.
 Proof.
   rewrite ct_begin, rt_unionE; relsf; rewrite <- seqA; rels.
   split; unionL; eauto using inclusion_seq_r, inclusion_seq_l with hahn.
@@ -61,7 +63,7 @@ Qed.
 (******************************************************************************)
 
 Lemma ct_union_singl A (r : relation A) a b :
-  (r ∪ singl_rel a b)⁺ ≡ r⁺ ∪ r＊ ⨾ singl_rel a b ⨾ r＊.
+  (r ∪ singl_rel a b)⁺ <--> r⁺ ∪ r＊ ⨾ singl_rel a b ⨾ r＊.
 Proof.
   split.
   { unfold inclusion, union, singl_rel, seq.
@@ -72,19 +74,19 @@ Proof.
 Qed.
 
 Lemma rt_union_singl A (r : relation A) a b :
-  (r ∪ singl_rel a b)＊ ≡ r＊ ∪ r＊ ⨾ singl_rel a b ⨾ r＊.
+  (r ∪ singl_rel a b)＊ <--> r＊ ∪ r＊ ⨾ singl_rel a b ⨾ r＊.
 Proof.
   by rewrite rtE, rtE at 1; rewrite ct_union_singl, !unionA.
 Qed.
 
 Lemma ct_union_singl_max A (r : relation A) a b (MAX: max_elt r b) :
-  (r ∪ singl_rel a b)⁺ ≡ r⁺ ∪ r＊ ⨾ singl_rel a b.
+  (r ∪ singl_rel a b)⁺ <--> r⁺ ∪ r＊ ⨾ singl_rel a b.
 Proof.
   rewrite ct_union_singl, seq_singl_max_rt; ins.
 Qed.
 
 Lemma rt_union_singl_max A (r : relation A) a b (MAX: max_elt r b) :
-  (r ∪ singl_rel a b)＊ ≡ r＊ ⨾ (singl_rel a b) ^?.
+  (r ∪ singl_rel a b)＊ <--> r＊ ⨾ (singl_rel a b) ^?.
 Proof.
   rewrite rt_union_singl, crE, seq_singl_max_rt; relsf.
 Qed.
@@ -100,7 +102,7 @@ Section PathUnionTotal.
 
   Lemma path_decomp_u_total r dom r' (T: is_total dom r') (DB: domb r' dom)
       (IRR: irreflexive (r＊ ⨾ r'⁺)) :
-    (r ∪ r')⁺ ≡ r⁺ ∪ r＊ ⨾ r'⁺ ⨾ r＊.
+    (r ∪ r')⁺ <--> r⁺ ∪ r＊ ⨾ r'⁺ ⨾ r＊.
   Proof.
     split; ins.
     { intros ? ? C; unfold seq, union in *.
@@ -133,7 +135,7 @@ Section PathAbsorb.
   Implicit Type r : relation A.
 
   Lemma path_absorb1 r r' (F: r' ⨾ r ⊆ r') :
-    (r ∪ r')⁺ ≡ r⁺ ∪ r'⁺ ∪ r⁺ ⨾ r'⁺.
+    (r ∪ r')⁺ <--> r⁺ ∪ r'⁺ ∪ r⁺ ⨾ r'⁺.
   Proof.
     split; cycle 1.
       repeat apply inclusion_union_l; eauto with hahn.
@@ -146,7 +148,7 @@ Section PathAbsorb.
   Qed.
 
   Lemma path_absorb2 r r' (F: r' ⨾ r ⊆ r) :
-    (r ∪ r')⁺ ≡ r⁺ ∪ r'⁺ ∪ r⁺ ⨾ r'⁺.
+    (r ∪ r')⁺ <--> r⁺ ∪ r'⁺ ∪ r⁺ ⨾ r'⁺.
   Proof.
     split; cycle 1.
       repeat apply inclusion_union_l; eauto with hahn.
@@ -159,19 +161,19 @@ Section PathAbsorb.
   Qed.
 
   Lemma path_absorb r r' (F: r' ⨾ r ⊆ r \/ r' ⨾ r ⊆ r') :
-    (r ∪ r')⁺ ≡ r⁺ ∪ r'⁺ ∪ r⁺ ⨾ r'⁺.
+    (r ∪ r')⁺ <--> r⁺ ∪ r'⁺ ∪ r⁺ ⨾ r'⁺.
   Proof.
     ins; desf; eauto using path_absorb1, path_absorb2.
   Qed.
 
   Lemma path_absorb_lt r r' (F: r' ⨾ r ⊆ r \/ r' ⨾ r ⊆ r') (T: transitive r) :
-    (r ∪ r')⁺ ≡ r'⁺ ∪ r ⨾ r'＊.
+    (r ∪ r')⁺ <--> r'⁺ ∪ r ⨾ r'＊.
   Proof.
     ins; rewrite path_absorb, rtE; relsf; hahn_rel.
   Qed.
 
   Lemma path_absorb_rt r r' (F: r'⨾ r ⊆ r \/ r'⨾ r ⊆ r') (T: transitive r') :
-    (r ∪ r')⁺ ≡ r⁺ ∪ r＊ ⨾ r'.
+    (r ∪ r')⁺ <--> r⁺ ∪ r＊ ⨾ r'.
   Proof.
     ins; rewrite path_absorb, rtE; relsf; hahn_rel.
   Qed.
@@ -274,7 +276,7 @@ Section PathDom.
 
   Lemma path_tur r r' adom bdom
         (T: transitive r) (DA: doma r' adom) (DB: domb r' bdom) :
-    (r ∪ r')⁺ ≡ r ∪ (r ⨾ ⦗adom⦘ ∪ r')⁺ ⨾ (⦗bdom⦘ ⨾ r)^?.
+    (r ∪ r')⁺ <--> r ∪ (r ⨾ ⦗adom⦘ ∪ r')⁺ ⨾ (⦗bdom⦘ ⨾ r)^?.
   Proof.
     split.
       rewrite seq_eqv_r, seq_eqv_l.
@@ -287,7 +289,7 @@ Section PathDom.
   Qed.
 
   Lemma path_ur r r' adom bdom (DA: doma r' adom) (DB: domb r' bdom) :
-    (r ∪ r')⁺ ≡ r⁺ ∪ (r⁺ ⨾ ⦗adom⦘ ∪ r')⁺ ⨾ (⦗bdom⦘ ⨾ r⁺)^?.
+    (r ∪ r')⁺ <--> r⁺ ∪ (r⁺ ⨾ ⦗adom⦘ ∪ r')⁺ ⨾ (⦗bdom⦘ ⨾ r⁺)^?.
   Proof.
     by ins; rewrite <- path_tur, ct_of_union_ct_l; eauto; vauto.
   Qed.
@@ -295,7 +297,7 @@ Section PathDom.
   Lemma path_tur2 r r' adom bdom
         (T: transitive r')
         (DA: doma r adom) (DB: domb r bdom) :
-    (r ∪ r')⁺ ≡ r' ∪ (r' ⨾ ⦗adom⦘)^? ⨾ (r ∪ ⦗bdom⦘ ⨾ r')⁺.
+    (r ∪ r')⁺ <--> r' ∪ (r' ⨾ ⦗adom⦘)^? ⨾ (r ∪ ⦗bdom⦘ ⨾ r')⁺.
   Proof.
     split.
       rewrite seq_eqv_r, seq_eqv_l.
@@ -308,7 +310,7 @@ Section PathDom.
   Qed.
 
   Lemma path_ur2 r r' adom bdom (A: doma r adom) (B: domb r bdom) :
-    (r ∪ r')⁺ ≡ r'⁺ ∪ (r'⁺ ⨾ ⦗adom⦘)^? ⨾ (r ∪ ⦗bdom⦘ ⨾ r'⁺)⁺.
+    (r ∪ r')⁺ <--> r'⁺ ∪ (r'⁺ ⨾ ⦗adom⦘)^? ⨾ (r ∪ ⦗bdom⦘ ⨾ r'⁺)⁺.
   Proof.
     ins; rewrite <- path_tur2, ct_of_union_ct_r; eauto; vauto.
   Qed.
@@ -332,7 +334,7 @@ Proof.
 Qed.
 
 Lemma clos_trans_rotl A (r r' : relation A) :
-  (r ⨾ r')⁺ ≡ r ⨾ (r' ⨾ r)＊ ⨾ r'.
+  (r ⨾ r')⁺ <--> r ⨾ (r' ⨾ r)＊ ⨾ r'.
 Proof.
   split; red; ins; unfold seq in *; desf.
     by induction H; desf; eauto 10 using clos_refl_trans.
@@ -395,7 +397,7 @@ Section PathUnionTransitive.
   Hint Resolve inclusion_seq_l inclusion_seq_r : hahn_full.
 
   Lemma path_ut r r' (T: transitive r') :
-    (r ∪ r')＊ ≡ r＊ ⨾ (r' ⨾ r⁺)＊ ⨾ r'^?.
+    (r ∪ r')＊ <--> r＊ ⨾ (r' ⨾ r⁺)＊ ⨾ r'^?.
   Proof.
     split.
     - apply inclusion_rt_ind; hahn_rel; eauto 4 with hahn hahn_full.
@@ -414,7 +416,7 @@ Section PathUnionTransitive.
   Qed.
 
   Lemma path_ut2 r r' (T: transitive r') :
-    (r ∪ r')⁺ ≡ r⁺ ∪ r＊⨾ (r'⨾ r⁺)＊ ⨾ r'⨾ r＊.
+    (r ∪ r')⁺ <--> r⁺ ∪ r＊⨾ (r'⨾ r⁺)＊ ⨾ r'⨾ r＊.
   Proof.
     split.
       rewrite ct_end, path_ut; ins; relsf.
@@ -440,7 +442,7 @@ Section PathUnion.
   Implicit Type r : relation A.
 
   Lemma path_ut_first r r' :
-    (r ∪ r')⁺ ≡ r⁺ ∪ r＊ ⨾ r' ⨾ (r ∪ r')＊.
+    (r ∪ r')⁺ <--> r⁺ ∪ r＊ ⨾ r' ⨾ (r ∪ r')＊.
   Proof.
     split.
     - apply inclusion_t_ind_right.
@@ -468,7 +470,7 @@ Section PathUnion.
   Qed.
 
   Lemma path_ut_last r r' :
-    (r ∪ r')⁺ ≡ r⁺ ∪ (r ∪ r')＊ ⨾ r' ⨾ r＊.
+    (r ∪ r')⁺ <--> r⁺ ∪ (r ∪ r')＊ ⨾ r' ⨾ r＊.
   Proof.
     split.
     - apply inclusion_t_ind_right.
@@ -569,7 +571,7 @@ Lemma path_utd :
   forall X (r r' : relation X) (T: transitive r') dom
          (F: is_total dom r') (DA: doma r' dom) (DB: domb r' dom)
          (I': irreflexive (r' ⨾ r＊)),
-    (r ∪ r')⁺ ≡ r⁺ ∪ r＊ ⨾ r' ⨾ r＊.
+    (r ∪ r')⁺ <--> r⁺ ∪ r＊ ⨾ r' ⨾ r＊.
 Proof.
   split.
     unfold inclusion, seq, union in *; ins; desf.
@@ -582,25 +584,25 @@ Qed.
 (** Paths with disconnected relations *)
 (******************************************************************************)
 
-Lemma ct_no_step A (r : relation A) (D: r ⨾ r ≡ ∅₂) : r⁺ ≡ r.
+Lemma ct_no_step A (r : relation A) (D: r ⨾ r <--> ∅₂) : r⁺ <--> r.
 Proof.
   by apply ct_of_trans, transitiveI; rewrite D.
 Qed.
 
-Lemma ct_ct_disj A (r : relation A) (D: r ⨾ r ≡ ∅₂) : r⁺ ⨾ r⁺ ≡ ∅₂.
+Lemma ct_ct_disj A (r : relation A) (D: r ⨾ r <--> ∅₂) : r⁺ ⨾ r⁺ <--> ∅₂.
 Proof.
   rewrite ct_no_step; ins.
 Qed.
 
-Lemma irreflexive_disj A (r : relation A) (D: r ⨾ r ≡ ∅₂) : irreflexive r.
+Lemma irreflexive_disj A (r : relation A) (D: r ⨾ r <--> ∅₂) : irreflexive r.
 Proof.
   red; ins; eapply D; vauto.
 Qed.
 
 Lemma path_unc X (r r' : relation X)
-      (A : r ⨾ r ≡ ∅₂)
-      (B : r' ⨾ r' ≡ ∅₂) :
-  (r ∪ r')＊ ≡
+      (A : r ⨾ r <--> ∅₂)
+      (B : r' ⨾ r' <--> ∅₂) :
+  (r ∪ r')＊ <-->
   (r ⨾ r')＊ ∪ (r' ⨾ r)＊ ∪ r ⨾ (r' ⨾ r)＊ ∪ r' ⨾ (r ⨾ r')＊.
 Proof.
   split.
@@ -616,9 +618,9 @@ Proof.
 Qed.
 
 Lemma pathp_unc X (r r' : relation X)
-      (A : r ⨾ r ≡ ∅₂)
-      (B : r' ⨾ r' ≡ ∅₂) :
-  (r ∪ r')⁺ ≡ (r ⨾ r')⁺ ∪ (r' ⨾ r)⁺ ∪ r ⨾ (r' ⨾ r)＊ ∪ r' ⨾ (r ⨾ r')＊.
+      (A : r ⨾ r <--> ∅₂)
+      (B : r' ⨾ r' <--> ∅₂) :
+  (r ∪ r')⁺ <--> (r ⨾ r')⁺ ∪ (r' ⨾ r)⁺ ∪ r ⨾ (r' ⨾ r)＊ ∪ r' ⨾ (r ⨾ r')＊.
 Proof.
   rewrite ct_begin, path_unc; ins.
   rewrite seq_union_l, !seq_union_r, <- !seqA, <- !ct_begin.

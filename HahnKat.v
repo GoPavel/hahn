@@ -148,7 +148,7 @@ Section Lifting.
 
 Variable A : Type.
 Variables r r1 r2: relation A.
-Variable d: A -> Prop.
+Variable d d1 d2: A -> Prop.
 
 Lemma same_rel_iff_weq: same_relation r1 r2 <-> r1 ≡ r2.
 Proof. simpl. unfold same_relation. firstorder. Qed.
@@ -163,6 +163,9 @@ Lemma union_rel_iff_cup: union r1 r2 = cup r1 r2.
 Proof. reflexivity. Qed.
 
 Lemma clos_refl_trans_iff_str: clos_refl_trans r = @str _ tt r.
+Proof. reflexivity. Qed.
+
+Lemma close_trans_iff_itr: clos_trans r = @itr _ tt r.
 Proof. reflexivity. Qed.
 
 Local Notation " [ p ] " := (inj (n:=tt) p): ra_terms. 
@@ -198,6 +201,40 @@ Proof.
 Qed. (* TODO: redefine refl_top *)
 
 
+Notation "x ^+" := (itr tt x)   (left associativity, at level 5, format "x ^+"): ra_terms.
+
+Lemma acyclic_iff_kat: acyclic r <-> 1 ⊓ (r^+) ≡ 0.
+Proof.
+  unfold acyclic, irreflexive; simpl.
+  split; intros.
+  - split.
+    + intros [H1 H2]. inversion H1. rewrite H3 in *. apply H in H2; apply H2.
+    + intros [].
+  - apply (H x x). split; [constructor | assumption].
+Qed.
+
+
+Goal irreflexive r <-> r ⊆ @neg rel_lattice_ops (one tt).
+Proof.
+  unfold irreflexive. simpl. unfold pw1, inclusion. simpl. unfold not.
+  split; intros.
+  - destruct H1; apply H with (x:=a); assumption.
+  - apply H with (x:=x) (y:=x). assumption. constructor.
+Qed.
+
+Lemma cross_rel_iff_kat: cross_rel d1 d2 = [d1]⋅top⋅[d2].
+Proof.
+  rel_ext.
+  unfold cross_rel.
+  do 2 rewrite <- dom_iff_test.
+  simpl. unfold seq, eqv_rel.
+  split.
+     - intros [H1 H2]. exists y. split. exists x. split; try auto. constructor. auto.
+     - intros [z [[z0 [[H01 H02] H03]] [H1 H2]]].
+       rewrite H01 in *. rewrite H1 in *.
+       split; assumption.
+Qed.
+
 End Lifting.
 
 Ltac lift_to_kat := repeat rewrite -> same_rel_iff_weq;
@@ -205,9 +242,38 @@ Ltac lift_to_kat := repeat rewrite -> same_rel_iff_weq;
                     repeat rewrite -> inter_rel_iff_cap;
                     repeat rewrite -> union_rel_iff_cup;
                     repeat rewrite -> clos_refl_trans_iff_str;
+                    repeat rewrite -> close_trans_iff_itr;
                     repeat rewrite -> lift_clos_refl;
                     repeat rewrite -> dom_iff_test;
+                    repeat rewrite -> restr_rel_iff_kat;
+                    repeat rewrite -> acyclic_iff_kat;
+                    repeat rewrite -> cross_rel_iff_kat;
                     idtac.
+
+Ltac lift_to_kat_all := repeat rewrite -> same_rel_iff_weq in *;
+                        repeat rewrite -> inclusion_iff_leq in *;
+                        repeat rewrite -> inter_rel_iff_cap in *;
+                        repeat rewrite -> union_rel_iff_cup in *;
+                        repeat rewrite -> clos_refl_trans_iff_str in *;
+                        repeat rewrite -> close_trans_iff_itr in *;
+                        repeat rewrite -> lift_clos_refl in *;
+                        repeat rewrite -> dom_iff_test in *;
+                        repeat rewrite -> restr_rel_iff_kat in *;
+                        repeat rewrite -> acyclic_iff_kat in *;
+                        repeat rewrite -> cross_rel_iff_kat in *;
+                        idtac.
+
+Ltac simpl_from_kat := repeat rewrite <- same_rel_iff_weq;
+                       repeat rewrite <- inclusion_iff_leq;
+                       repeat rewrite <- inter_rel_iff_cap;
+                       repeat rewrite <- union_rel_iff_cup;
+                       repeat rewrite <- clos_refl_trans_iff_str;
+                       repeat rewrite <- close_trans_iff_itr;
+                       repeat rewrite <- lift_clos_refl;
+                       repeat rewrite <- dom_iff_test;
+                       repeat rewrite <- restr_rel_iff_kat;
+                       repeat rewrite <- cross_rel_iff_kat;
+                       idtac.
 
 Require Import RelationAlgebra.kat_reification.
 
@@ -232,9 +298,51 @@ Ltac kat' :=
 (*   || fail "typed hkat is not supported yet");  *)
 (*   subst u; revert L; pre_dec true. *)
 
+Ltac aggregate_hoare_hypotheses' :=
+  repeat 
+    match goal with
+      | H: _ ≡ _ |- _ => 
+        apply (ab_to_hoare (n:=tt)) in H || 
+        (rewrite (cp_c _ _ H); clear H) || 
+        (rewrite (pc_c _ _ H); clear H) || 
+        apply weq_spec in H as [? ?]
+    end;
+  repeat
+    match goal with
+      | H: _ ≦ _ |- _ => 
+        apply (ab'_to_hoare (n:=tt)) in H || 
+        apply (bpqc_to_hoare (* (n:=tt) (m:=tt) *)) in H || 
+        apply (pbcq_to_hoare (* (n:=tt) (m:=tt) *) ) in H || 
+        apply (qcp_to_hoare  (* (n:=tt) (m:=tt) *) ) in H ||
+        apply (qpc_to_hoare  (* (n:=tt) (m:=tt) *) ) in H
+      | H: _ ≦ 0,  H': _ ≦ 0 |- _ => 
+        apply (join_leq _ _ _ H') in H; clear H'
+    end.
+
+Ltac aggregate_hoare_hypotheses'' :=
+  repeat 
+    match goal with
+      | H: _ ≡ _ |- _ => 
+        apply (ab_to_hoare (n:=tt)) in H || 
+        (rewrite (cp_c _ _ H); clear H) || 
+        (rewrite (pc_c _ _ H); clear H) || 
+        apply weq_spec in H as [? ?]
+    end;
+  repeat
+    match goal with
+      | H: _ ≦ _ |- _ => 
+        apply (ab'_to_hoare (n:=tt)) in H || 
+        apply (bpqc_to_hoare (n:=tt) (m:=tt)) in H || 
+        apply (pbcq_to_hoare (n:=tt) (m:=tt) ) in H || 
+        apply (qcp_to_hoare  (n:=tt) (m:=tt) ) in H ||
+        apply (qpc_to_hoare  (n:=tt) (m:=tt) ) in H
+      | H: _ ≦ 0,  H': _ ≦ 0 |- _ => 
+        apply (join_leq _ _ _ H') in H; clear H'
+    end.
+
 Ltac hkat' :=
-  lift_to_kat;
-  intros; aggregate_hoare_hypotheses; rewrite ?leq_iff_cup;
+  lift_to_kat_all;
+  intros; aggregate_hoare_hypotheses'; rewrite ?leq_iff_cup;
   (apply (catch_kat_weq tt tt) || fail "could not find a KAT structure");
   let L := fresh "L" in intro L;
   let u := fresh "u" in
@@ -243,13 +351,56 @@ Ltac hkat' :=
   || fail "typed hkat is not supported yet");
   subst u; revert L; pre_dec true.
 
+
+Ltac hkat'' :=
+  lift_to_kat_all;
+  intros; aggregate_hoare_hypotheses''; rewrite ?leq_iff_cup;
+  (apply (catch_kat_weq tt tt) || fail "could not find a KAT structure");
+  let L := fresh "L" in intro L;
+  let u := fresh "u" in
+  ((ra_get_kat_alphabet; intro u;
+    eapply (elim_hoare_hypotheses_weq (u^* ) (u^* )); [eassumption|])
+  || fail "typed hkat is not supported yet");
+  subst u; revert L; pre_dec true.
+
+
 Section Testing.
 
 Variable A : Type.
 Variables r r': relation A.
+Variables dom dom1 dom2 s': A -> Prop.
 
 Goal forall `{r: relation A}, r ≡ r.
 Proof. intro. kat'. Qed.
+
+(* Notation "x ^+" := (itr tt x)   (left associativity, at level 5, format "x ^+"): ra_terms. *)
+
+Locate "x ^+".
+Locate "x ∩ y".
+Locate "x ⁺".
+Locate "x ^+".
+
+Check @cap rel_lattice_ops (str tt r) r.
+Check cap (str tt r) r.
+Check (r ⊓ str tt r).
+
+Goal  (r ⊓ (str tt r) ⊔ r) ≡ bot.
+Proof.
+  rewrite <- same_rel_iff_weq.
+  repeat simpl_from_kat. lift_to_kat. simpl_from_kat.
+Abort.
+
+Goal r⁺ ∩ (one tt) <--> bot.
+Proof.
+  lift_to_kat.
+  (* rewrite -> acyclic_iff_kat. *)
+  simpl_from_kat.
+Abort.
+
+Goal @weq rel_lattice_ops ((one tt) ⊓ (str tt r)) bot.
+Proof.
+  rewrite <- same_rel_iff_weq.
+Abort.
 
 Goal r ⊆ r＊.
 Proof. kat'. Qed.
@@ -258,8 +409,8 @@ Proof. kat'. Qed.
    Lemma inclusion_eqv_rt : ⦗dom⦘ ⊆ r'＊.
    Proof. by unfold eqv_rel, inclusion; ins; desf; vauto. Qed.
  *)
-Goal forall (dom: A -> Prop), ⦗dom⦘ ⊆ r'＊.
-Proof. intro. kat'. Qed.
+Goal ⦗dom⦘ ⊆ r'＊.
+Proof. kat'. Qed.
 
 
 (** ** inclusion_r_rt
@@ -270,19 +421,22 @@ Proof. Abort. (* That type of hypotheses is not supported *)
 Goal r ⊆ bot -> r ⊆ r'.
 Proof. hkat'. Qed.
 
+Lemma acyclic_restr d : acyclic r -> acyclic (restr_rel d r).
+Proof. Abort.
+
+Goal dom1 ≦ dom2 -> ⦗dom1⦘ ≦ ⦗dom2⦘.
+Proof. hkat'. Qed.
+
+Check ⦗dom2⦘.
+Goal dom1 ≡ dom2 -> ⦗dom1⦘ <--> ⦗dom2⦘.
+Proof. hkat'. Qed.
+
+Goal dom2 ≦ dom1 -> ⦗dom1⦘ ⨾ ⦗dom2⦘ <--> ⦗dom2⦘.
+Proof. lift_to_kat_all. hkat'. Qed.
+
+Implicit Type s : A -> Prop.
+Lemma ct_of_cross s s' : (s × s')⁺ <--> s × s'.
+
+
 End Testing.
 
-Local Notation "x ^+" := (itr tt x)   (left associativity, at level 5, format "x ^+"): ra_terms.
-
-Lemma acyclic_iff_kat A (r: relation A): acyclic r <-> (r^+) ⊓ 1 ≡ 0.
-Proof.
-  unfold acyclic, irreflexive; simpl.
-  split; intros.
-  - split.
-    + intros [H1 H2]. inversion H2. rewrite H3 in *. apply H in H1; apply H1.
-    + intros [].
-  - apply (H x x). split; [assumption | constructor].
-Qed.
-
-Lemma acyclic_restr A d (r: relation A) : acyclic r -> acyclic (restr_rel d r).
-Proof. Abort.

@@ -7,11 +7,16 @@ Require Import HahnBase HahnList HahnRelationsBasic.
 Require Import HahnEquational HahnMaxElt HahnRewrite.
 Require Import HahnDom HahnMinPath HahnPath.
 
+Require Import HahnKat.
+Require Import RelationAlgebra.kat.
+
 Set Implicit Arguments.
 
-Local Notation "a ≡ b" := (same_relation a b)  (at level 60).
+Local Notation "a <--> b" := (same_relation a b)  (at level 60).
+(*
 Local Notation "a ^+" := (clos_trans a) (at level 1, only parsing).
 Local Notation "a ^*" := (clos_refl_trans a) (at level 1, only parsing).
+*)
 
 Lemma acyclic_restr A d (r: relation A) : acyclic r -> acyclic (restr_rel d r).
 Proof.
@@ -194,7 +199,7 @@ Section PathDom.
     rewrite ct_end, seqA, !seq_union_l, !seqA.
     rewrite <- rt_ct in H0; eapply irreflexive_inclusion, H0.
     eapply inclusion_seq_mon, inclusion_union_l; ins.
-      assert (EQ: r ≡ r ⨾ eqv_rel bdom).
+      assert (EQ: r <--> r ⨾ eqv_rel bdom).
         by split; rewrite seq_eqv_r; red; ins; desf; eauto.
       by rewrite EQ at 1; rewrite seqA;
          eauto using inclusion_step2_ct with hahn.
@@ -205,7 +210,7 @@ Section PathDom.
     rewrite <- ct_rt in H0; eapply irreflexive_inclusion, H0.
     apply inclusion_seq_mon; ins.
     apply inclusion_union_l; ins.
-      assert (EQ: r ≡ eqv_rel adom ⨾ r).
+      assert (EQ: r <--> eqv_rel adom ⨾ r).
         by split; rewrite seq_eqv_l; red; ins; desf; eauto.
       by rewrite EQ at 1; rewrite <- !seqA;
          eauto using inclusion_step2_ct with hahn.
@@ -284,14 +289,14 @@ Qed.
 (** Paths with disconnected relations *)
 (******************************************************************************)
 
-Lemma acyclic_disj A (r : relation A) (D: r ⨾ r ≡ ∅₂) : acyclic r.
+Lemma acyclic_disj A (r : relation A) (D: r ⨾ r <--> ∅₂) : acyclic r.
 Proof.
   by apply irreflexive_disj, ct_ct_disj.
 Qed.
 
 Lemma acyclic_unc X (r r' : relation X)
-      (A : r ⨾ r ≡ ∅₂)
-      (B : r' ⨾ r' ≡ ∅₂) :
+      (A : r ⨾ r <--> ∅₂)
+      (B : r' ⨾ r' <--> ∅₂) :
   acyclic (r ∪ r') <-> acyclic (r ⨾ r').
 Proof.
   unfold acyclic.
@@ -334,7 +339,7 @@ Proof.
     relsf; unionL; rels.
       by rewrite rt_begin at 1; relsf; sin_rewrite DISJ'; relsf.
       by rewrite ct_begin at 1; relsf; sin_rewrite DISJ; relsf.
-    by arewrite (r'' <<= r''^*) at 1; relsf. 
+    by arewrite (r'' <<= r''＊) at 1; relsf. 
   relsf.
   red; rewrite <- ct_of_union_ct_r.
   apply acyclic_ut; splits; ins.
@@ -342,7 +347,7 @@ Proof.
   arewrite (r <<= (r ⨾ r'＊)⁺) by (unfolder; eauto using rt_refl, t_step). 
   arewrite (r <<= (r ⨾ r'＊)⁺) at 1 by (unfolder; eauto using rt_refl, t_step). 
   apply acyclic_seqC.
-  rewrite ct_begin with (r := _ ;; r''^+); rewrite !seqA. 
+  rewrite ct_begin with (r := _ ;; r''⁺); rewrite !seqA. 
   sin_rewrite ct_ct; rewrite <- seqA, <- ct_begin; red; rels.
   by apply acyclic_seqC.
 Qed.
@@ -366,7 +371,7 @@ Proof.
   ins; unfold pref_union.
   assert (EQ: restr_rel (fun x => ~ dom x)
                     (fun x y => r x y \/ r' x y /\ ~ r y x)
-          ≡ restr_rel (fun x => ~ dom x) r).
+          <--> restr_rel (fun x => ~ dom x) r).
     unfold restr_rel; split; red; ins; desf; eauto.
     by specialize_full DL; eauto; ins; desf.
 
