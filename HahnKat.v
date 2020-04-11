@@ -235,6 +235,34 @@ Proof.
        split; assumption.
 Qed.
 
+Import hahn.HahnSets.
+
+Ltac pred_ext :=
+  apply functional_extensionality; intro x;
+  apply prop_ext.
+
+Lemma set_empty_iff_kat: @set_empty A = bot.
+Proof. reflexivity. Qed.
+
+Lemma set_full_iff_kat: @set_full A = top.
+Proof. reflexivity. Qed.
+
+Lemma set_compl_iff_kat: @set_compl A = neg.
+Proof. reflexivity. Qed.
+
+Lemma set_union_iff_kat: @set_union A = cup.
+Proof. reflexivity. Qed.
+
+Lemma set_inter_iff_kat: @set_inter A = cap.
+Proof. reflexivity. Qed.
+
+Lemma set_subset_iff_kat: @set_subset A = leq.
+Proof. reflexivity. Qed.
+
+Lemma set_equiv_iff_kat: @set_equiv A = weq.
+Proof. unfold set_equiv. unfold weq. simpl. unfold iff. unfold set_subset.
+       rel_ext. firstorder. Qed.
+
 End Lifting.
 
 Ltac lift_to_kat := repeat rewrite -> same_rel_iff_weq;
@@ -248,6 +276,13 @@ Ltac lift_to_kat := repeat rewrite -> same_rel_iff_weq;
                     repeat rewrite -> restr_rel_iff_kat;
                     repeat rewrite -> acyclic_iff_kat;
                     repeat rewrite -> cross_rel_iff_kat;
+                    repeat rewrite -> set_empty_iff_kat;
+                    repeat rewrite -> set_full_iff_kat;
+                    repeat rewrite -> set_compl_iff_kat;
+                    repeat rewrite -> set_union_iff_kat;
+                    repeat rewrite -> set_inter_iff_kat;
+                    repeat rewrite -> set_subset_iff_kat;
+                    repeat rewrite -> set_equiv_iff_kat;
                     idtac.
 
 Ltac lift_to_kat_all := repeat rewrite -> same_rel_iff_weq in *;
@@ -261,6 +296,13 @@ Ltac lift_to_kat_all := repeat rewrite -> same_rel_iff_weq in *;
                         repeat rewrite -> restr_rel_iff_kat in *;
                         repeat rewrite -> acyclic_iff_kat in *;
                         repeat rewrite -> cross_rel_iff_kat in *;
+                        repeat rewrite -> set_empty_iff_kat in *;
+                        repeat rewrite -> set_full_iff_kat in *;
+                        repeat rewrite -> set_compl_iff_kat in *;
+                        repeat rewrite -> set_union_iff_kat in *;
+                        repeat rewrite -> set_inter_iff_kat in *;
+                        repeat rewrite -> set_subset_iff_kat in *;
+                        repeat rewrite -> set_equiv_iff_kat in *;
                         idtac.
 
 Ltac simpl_from_kat := repeat rewrite <- same_rel_iff_weq;
@@ -273,6 +315,13 @@ Ltac simpl_from_kat := repeat rewrite <- same_rel_iff_weq;
                        repeat rewrite <- dom_iff_test;
                        repeat rewrite <- restr_rel_iff_kat;
                        repeat rewrite <- cross_rel_iff_kat;
+                       repeat rewrite <- set_empty_iff_kat;
+                       repeat rewrite <- set_full_iff_kat;
+                       repeat rewrite <- set_compl_iff_kat;
+                       repeat rewrite <- set_union_iff_kat;
+                       repeat rewrite <- set_inter_iff_kat;
+                       repeat rewrite <- set_subset_iff_kat;
+                       repeat rewrite <- set_equiv_iff_kat;
                        idtac.
 
 Require Import RelationAlgebra.kat_reification.
@@ -368,7 +417,7 @@ Section Testing.
 
 Variable A : Type.
 Variables r r': relation A.
-Variables dom dom1 dom2 s': A -> Prop.
+Variables dom dom1 dom2: A -> Prop.
 
 Goal forall `{r: relation A}, r ≡ r.
 Proof. intro. kat'. Qed.
@@ -379,6 +428,8 @@ Locate "x ^+".
 Locate "x ∩ y".
 Locate "x ⁺".
 Locate "x ^+".
+
+Local Notation " [ p ] " := (inj (n:=tt) p): ra_terms.
 
 Check @cap rel_lattice_ops (str tt r) r.
 Check cap (str tt r) r.
@@ -434,8 +485,17 @@ Proof. hkat'. Qed.
 Goal dom2 ≦ dom1 -> ⦗dom1⦘ ⨾ ⦗dom2⦘ <--> ⦗dom2⦘.
 Proof. lift_to_kat_all. hkat'. Qed.
 
+(* Local Notation " [ p ] " := (inj (n:=tt) p): ra_terms. *)
+(* Local Notation "x ⋅ y" := (@dot _ tt tt tt x y). *)
+(* Local Notation dot' := (@dot _ tt tt tt). *)
+Local Notation top := (@lattice.top rel_lattice_ops).
+
+Goal top ;; ⦗dom1⦘;; (top;;⦗dom1⦘)＊ ≡ top ;; ⦗dom1⦘.
+Proof. Fail kat'. Abort.
+
 Implicit Type s : A -> Prop.
 Lemma ct_of_cross s s' : (s × s')⁺ <--> s × s'.
+Proof. lift_to_kat_all. Fail kat'. Abort.
 
 
 End Testing.
