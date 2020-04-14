@@ -243,12 +243,51 @@ Proof.
   pose (@max_elt_test_dual r); hkat'.
 Qed.
 
+Lemma wmax_elt_iff_kat2: forall (a: A) r,
+    r a a ->
+    wmax_elt r a <-> ⦗eq a⦘ ;; r ≡ ⦗eq a⦘.
+Proof.
+  unfold_all; unfold wmax_elt; firstorder.
+  - rewrite <- H3; apply H0. congruence.
+  - esplits; eauto. congruence.
+Qed.
+
+(* ASK I don't sure about completeness of that method, but it seems like that.
+ *)
+Lemma cod_to_kat r b: (forall x y, r x y -> y = b) <-> (r ≡ r ;; ⦗eq b⦘).
+Proof.
+  split; unfold_all; firstorder.
+  - rewrite <- H1; assumption.
+  - apply H in H0; clear H; destruct H0 as [z [H2 [H3 H4]]].
+    rewrite <- H3; symmetry; assumption.
+Qed.
+Ltac elim_cod COD := apply cod_to_kat in COD; rewrite COD in *; clear COD.
+
+Lemma Hyp_eq b r:
+  ⦗eq b⦘ ;; r ;; ⦗eq b⦘ ⊆ ⦗eq b⦘.
+Proof.
+  unfold_all; firstorder.
+  transitivity b. symmetry; assumption.
+  transitivity x1; auto.
+Qed.
+
+(* NOTE:
+   1) We need [Hyp_eq], but don't know how to use it in generalize case
+   2) Or we need proof that wmax element contains in relation
+*)
 Lemma seq_wmax r r' b
-      (MAX: wmax_elt r' b) (COD: forall x y, r x y -> y = b) :
+      (MAX: wmax_elt r' b)
+      (COD: forall x y, r x y -> y = b):
     r⨾ r' ⊆ r.
 Proof.
-  unfold seq; red; ins; desf; eauto.
-  specialize (COD _ _ H); desf; apply MAX in H0; desf.
+  (* assert (r' b b) as H. admit. *)
+  (* lift_cod; rewrite (wmax_elt_iff_kat2 _ _ H) in MAX. *)
+  (* hkat''. *)
+  (* About. *)
+  elim_cod COD.
+  specialize (@Hyp_eq b r') as H.
+  rewrite <- H at 2.
+  hkat'.
 Qed.
 
 Lemma seq_wmax_t r r' b
@@ -262,7 +301,15 @@ Lemma seq_wmax_rt r r' b
       (MAX: wmax_elt r' b) (COD: forall x y, r x y -> y = b) :
   r⨾ r' ＊ ≡ r.
 Proof.
-  rewrite rtE; split; relsf; rewrite seq_wmax_t; relsf.
+  (* assert (r' b b) as H. admit. *)
+  (* rewrite -> (wmax_elt_iff_kat2 _ _ H) in MAX; lift_cod. *)
+  (* hkat''. About. *)
+  split.
+  - elim_cod COD.
+    specialize (@Hyp_eq b r'＊) as H. rewrite <- H at 2.
+    hkat'.
+  - hkat'.
+  (* rewrite rtE; split; relsf; rewrite seq_wmax_t; relsf. *)
 Qed.
 
 Lemma seq_wmax_r r r' b
@@ -275,7 +322,8 @@ Qed.
 Lemma seq_eq_wmax r b (MAX: wmax_elt r b) :
   ⦗eq b⦘⨾ r ⊆ ⦗eq b⦘.
 Proof.
-  eapply seq_wmax; unfold eqv_rel; ins; desf.
+  specialize (@Hyp_eq b r) as H.
+  rewrite <- H at 2. hkat'.
 Qed.
 
 Lemma seq_eq_wmax_t r b (MAX: wmax_elt r b) :
@@ -299,14 +347,21 @@ Qed.
 Lemma seq_singl_wmax r a b (MAX: wmax_elt r b) :
   singl_rel a b⨾ r ⊆ singl_rel a b.
 Proof.
-  unfold singl_rel, seq; red; ins; desf; eauto.
-  apply MAX in H0; desf.
+  rewrite wmax_elt_iff_kat in MAX.
+  rewrite -> singl_rel_iff_kat.
+  specialize (@Hyp_eq b r) as H.
+  lift_to_kat_all.
+  setoid_rewrite <- H at 2.
+  hkat'.
 Qed.
 
 Lemma seq_singl_wmax_t r a b (MAX: wmax_elt r b) :
   singl_rel a b⨾ r ⁺ ⊆ singl_rel a b.
 Proof.
-  eauto using seq_singl_wmax with hahn.
+  specialize (@Hyp_eq b r⁺) as H.
+  lift_to_kat_all.
+  setoid_rewrite <- H at 2. clear H.
+  hkat'.
 Qed.
 
 Lemma seq_singl_wmax_rt r a b (MAX: wmax_elt r b) :
