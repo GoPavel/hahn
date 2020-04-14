@@ -90,9 +90,11 @@ Section Lemmas.
   Proof. lift_dom; hkat'. Qed.
 
   Lemma union_doma : doma r d -> doma r' d -> doma (r ∪ r') d.
+  (* Proof. lift_dom. hkat'. Qed. FAIL TODO *)
   Proof. unfold doma, union; ins; desf; eauto. Qed.
 
   Lemma union_domb : domb r d -> domb r' d -> domb (r ∪ r') d.
+  (* Proof. lift_dom. hkat'. Qed. FAIL TODO *)
   Proof. unfold domb, union; ins; desf; eauto. Qed.
 
   Lemma ct_doma : doma r d -> doma r⁺ d.
@@ -102,9 +104,11 @@ Section Lemmas.
   Proof. lift_dom; hkat'. Qed.
 
   Lemma seq_r_doma : doma r d -> doma r' d -> doma (r^? ⨾ r') d.
+  (* Proof. lift_dom. hkat'. Qed. FAIL TODO *)
   Proof. unfold clos_refl, seq; red; ins; desf; eauto. Qed.
 
   Lemma seq_r_domb : domb r d -> domb r' d -> domb (r ⨾ r'^?) d.
+  (* Proof. lift_dom. hkat'. Qed. FAIL TODO *)
   Proof. unfold clos_refl, seq; red; ins; desf; eauto. Qed.
 
   Lemma minus_doma : doma r d -> doma (r \ r') d.
@@ -230,7 +234,11 @@ Section Lemmas.
   Lemma domab_helper2 : 
     r ⊆ d × d' <-> doma r d /\ domb r d'.
   Proof.
-    unfold doma, domb, cross_rel, inclusion; intuition; firstorder. 
+    split.
+    - lift_dom; rewrite cross_rel_iff_kat.
+      intros. rewrite H. split; kat'.
+    - (* lift_dom. intros [H1 H2]. hkat'. FAIL *)
+      unfold doma, domb, cross_rel, inclusion; intuition; firstorder.
   Qed.
 
   Lemma dom_to_doma : r <--> ⦗d⦘ ⨾ r ⨾ ⦗d'⦘ -> doma r d.
@@ -255,7 +263,10 @@ Section Lemmas.
 
   Lemma dom_helper_1 : r ⊆ ⦗d⦘ ⨾ r ⨾ ⦗d'⦘ <-> r <--> ⦗d⦘ ⨾ r ⨾ ⦗d'⦘.
   Proof.
-    unfolder; firstorder.
+    split.
+    - (* hkat''. FAIL (for all dom_helper_i) *)
+       unfolder; firstorder.
+    - intro H; rewrite H; kat'.
   Qed.
 
   Lemma dom_helper_2 : r ⊆ ⦗d⦘ ⨾ top ⨾ ⦗d'⦘ <-> r <--> ⦗d⦘ ⨾ r ⨾ ⦗d'⦘.

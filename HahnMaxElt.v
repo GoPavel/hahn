@@ -327,12 +327,105 @@ Proof.
   pose (@max_elt_test_dual r); hkat'.
 Qed.
 
+Lemma wmax_elt_iff_kat3: forall (a: A) r,
+    wmax_elt r a <-> ⦗fun b => a = b⦘ ;; r ⊆ ⦗fun b => a = b⦘.
+Proof.
+  split; unfold_all; unfold wmax_elt.
+  - intros H x y [z [[H1 H2] H3]].
+    rewrite <- H1 in *; clear H1 z.
+    rewrite -> H2 in *; clear H2 a.
+    split; [> apply H; apply H3 | reflexivity].
+  - intros.
+    specialize (H a b). firstorder.
+Qed.
+
+Lemma wmax_elt_iff_kat4: forall (a: A) r,
+    wmax_elt r a <-> ⦗fun b => b = a⦘ ;; r <--> ⦗fun b => b = a⦘ ;; r ;; ⦗fun b => b = a⦘.
+Proof.
+  split; unfold_all; unfold wmax_elt.
+  - firstorder. exists x0. firstorder. exists y. firstorder. symmetry. apply H.
+    rewrite <- H2. rewrite H0. assumption.
+    exists x. firstorder. rewrite H0; rewrite <- H3; assumption.
+  - intros [H1 H2] y H.
+    specialize (H1 a y).
+    assert (exists z : A, (a = z /\ a = a) /\ r z y). exists a. firstorder.
+    apply H1 in H0.
+    destruct H0 as [z [H11 [z0 [_ [H12 H13]]]]].
+    rewrite <- H12. symmetry. assumption.
+Qed.
+
+(* Require Import RelationAlgebra.kat. *)
+(* Require Import RelationAlgebra.prop. *)
+(* Require Import RelationAlgebra.kat_tac. *)
+(* Require Import RelationAlgebra.kat_reification. *)
+
+(* Ltac aggregate_hoare_hypotheses''' := *)
+(*   repeat  *)
+(*     match goal with *)
+(*       | H: _ ≡ _ |- _ =>  *)
+(*         apply (ab_to_hoare (n:=tt)) in H ||  *)
+(*         (rewrite (cp_c tt tt H); clear H) ||  *)
+(*         (rewrite (pc_c tt tt H); clear H) ||  *)
+(*         apply weq_spec in H as [? ?] *)
+(*     end; *)
+(*   repeat *)
+(*     match goal with *)
+(*       (* | H: _ ≦ _ |- _ =>  *) *)
+(*       (*   apply (ab'_to_hoare (n:=tt)) in H ||  *) *)
+(*       (*   apply (bpqc_to_hoare (n:=tt) (m:=tt)) in H ||  *) *)
+(*       (*   apply (pbcq_to_hoare (n:=tt) (m:=tt) ) in H ||  *) *)
+(*       (*   apply (qcp_to_hoare  (n:=tt) (m:=tt) ) in H || *) *)
+(*       (*   apply (qpc_to_hoare  (n:=tt) (m:=tt) ) in H *) *)
+(*       | H: _ ≦ bot,  H': _ ≦ bot |- _ =>  *)
+(*         apply (join_leq _ _ _ H') in H; clear H' *)
+(*     end. *)
+
+Lemma seq_assoc r r' r'': ((r ;; r') ;; r'') <--> (r ;; (r' ;; r'')).
+Proof. kat'. Qed.
+
+Lemma eq_elim r b: ⦗fun a : A => a = b⦘ ⨾ r ⨾ ⦗fun a : A => a = b⦘ ⊆ refl_top.
+Proof.
+    intros.
+    unfold eqv_rel. unfold_all. firstorder. rewrite H1. rewrite <- H3. rewrite H2; constructor.
+Qed.
+
+(* Result: failed
+
+I don't know why kat can't solve that.
+
+*)
 Lemma seq_wmax r r' b
-      (MAX: wmax_elt r' b) (COD: forall x y, r x y -> y = b) :
+      (MAX: wmax_elt r' b)
+      (COD: forall x y, r x y -> y = b)
+      (* (COD': r <--> r ;; ⦗fun a => (a = b)⦘) *)
+      (* (TEST: t = fun a => (a = b)) *)
+      (* (MAX'': ⦗fun a => a = b⦘ ;; r' ;; neg ⦗fun a => a = b⦘ ⊆ bot ) *)
+      (* (MAX': ⦗fun a => a = b⦘ ;; r' <-->  ⦗fun a => a = b⦘ ;; r' ;; ⦗fun a => a = b ⦘) *)
+  :
     r⨾ r' ⊆ r.
 Proof.
-  unfold seq; red; ins; desf; eauto.
-  specialize (COD _ _ H); desf; apply MAX in H0; desf.
+  (* rewrite <- TEST in *. *)
+  (* clear MAX'. *)
+  apply cod_to_kat in COD.
+  rewrite wmax_elt_iff_kat4 in MAX.
+  rewrite COD at 1. clear COD. 
+  rewrite seq_assoc.
+  rewrite MAX.
+  rewrite eq_elim.
+  kat'.
+  (* lift_to_kat_all. clear - MAX''. *)
+  (* aggregate_hoare_hypotheses'''. *)
+  (* (* apply (join_leq _ _ _ COD''') in MAX''. *) *)
+  (* rewrite ?leq_iff_cup. *)
+  (* (apply (catch_kat_weq tt tt) || fail "could not find a KAT structure"); *)
+  (* let L := fresh "L" in intro L; *)
+  (* let u := fresh "u" in *)
+  (* ra_get_kat_alphabet; intro u. *)
+  (* eapply (elim_hoare_hypotheses_weq (u^* ) (u^* )). *)
+  (* eassumption. *)
+  (* (* || fail "typed hkat is not supported yet"); *) *)
+  (* (* assert (forall r1 r2, r1 ⊔ r2 = r1 + r2). *) *)
+  (* subst u; revert L; pre_dec true. *)
 Qed.
 
 Lemma seq_wmax_t r r' b
@@ -346,6 +439,7 @@ Lemma seq_wmax_rt r r' b
       (MAX: wmax_elt r' b) (COD: forall x y, r x y -> y = b) :
   r⨾ r' ＊ <--> r.
 Proof.
+  (* lift_wmax_elt2. elim_cod COD. hkat'. TODO FAIL *)
   rewrite rtE; split; relsf; rewrite seq_wmax_t; relsf.
 Qed.
 
@@ -383,6 +477,7 @@ Qed.
 Lemma seq_singl_wmax r a b (MAX: wmax_elt r b) :
   singl_rel a b⨾ r ⊆ singl_rel a b.
 Proof.
+  (* lift_wmax_elt1. rewrite -> singl_rel_iff_kat. hkat'. TODO FAIL *)
   unfold singl_rel, seq; red; ins; desf; eauto.
   apply MAX in H0; desf.
 Qed.

@@ -337,6 +337,7 @@ Lemma seq_wmin r r' b
       (MAX: wmin_elt r b) (D: forall x y, r' x y -> x = b) :
     r⨾ r' ⊆ r'.
 Proof.
+  (* lift_wmin_elt2. elim_dom D. hkat'. FAIL *)
   unfold seq; red; ins; desf; eauto.
   specialize (D _ _ H0); desf; apply MAX in H; desf.
 Qed.
@@ -345,6 +346,7 @@ Lemma seq_wmin_t r r' b
       (MAX: wmin_elt r b) (D: forall x y, r' x y -> x = b) :
   r ⁺⨾ r' ⊆ r'.
 Proof.
+  (* lift_wmin_elt2; elim_dom D. hkat'. FAIL *)
   eauto using seq_wmin with hahn.
 Qed.
 
@@ -352,6 +354,7 @@ Lemma seq_wmin_rt r r' b
       (MAX: wmin_elt r b) (COD: forall x y, r' x y -> x = b) :
   r ＊⨾ r' <--> r'.
 Proof.
+  (* lift_wmin_elt2. elim_dom COD. hkat'. FAIL *)
   rewrite rtE; split; relsf; rewrite seq_wmin_t; relsf.
 Qed.
 
@@ -365,6 +368,12 @@ Qed.
 Lemma seq_wmin_eq r b (MAX: wmin_elt r b) :
   r ⨾ ⦗eq b⦘ ⊆ ⦗eq b⦘.
 Proof.
+  (* lift_wmin_elt1. *)
+  (* assert (@weq dset' (fun b0: A => b = b0) (eq b)). *)
+  (* { simpl. split; auto.  } *)
+  (* assert (⦗(@neg dset') (eq b)⦘ ⨾ r ⨾ ⦗eq b⦘ ⊆ bot). *)
+  (* { hkat'. } *)
+  (* hkat'. FAIL *)
   eapply seq_wmin; unfold eqv_rel; ins; desf.
 Qed.
 

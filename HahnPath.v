@@ -58,9 +58,17 @@ Qed.
 (** Extension of a relation with a singleton *)
 (******************************************************************************)
 
+(* Require Import RelationAlgebra.kat. *)
+
 Lemma ct_union_singl A (r : relation A) a b :
   (r ∪ singl_rel a b)⁺ <--> r⁺ ∪ r＊ ⨾ singl_rel a b ⨾ r＊.
 Proof.
+  (* assert (⦗(@neg dset')(fun x => x = a)⦘ ;; singl_rel a b ⊆ ∅₂). *)
+  (* { kat'. } *)
+  (* assert (singl_rel a b ;; ⦗(@neg dset')(fun x => x = b)⦘ ⊆ ∅₂). *)
+  (* { kat'. } *)
+  (* remember (singl_rel a b). *)
+  (* hkat'. TODO FAIL *)
   split.
   { unfold inclusion, union, singl_rel, seq.
     induction 1; desf; eauto 9 using clos_trans, clos_refl_trans, clos_trans_in_rt.
@@ -77,12 +85,14 @@ Qed.
 Lemma ct_union_singl_max A (r : relation A) a b (MAX: max_elt r b) :
   (r ∪ singl_rel a b)⁺ <--> r⁺ ∪ r＊ ⨾ singl_rel a b.
 Proof.
-  rewrite ct_union_singl, seq_singl_max_rt; ins.
+  rewrite ct_union_singl. lift_max_elt2. hkat'. (* TODO depend on FAIL *)
+  (* rewrite ct_union_singl, seq_singl_max_rt; ins. *)
 Qed.
 
 Lemma rt_union_singl_max A (r : relation A) a b (MAX: max_elt r b) :
   (r ∪ singl_rel a b)＊ <--> r＊ ⨾ (singl_rel a b) ^?.
 Proof.
+  (* lift_max_elt1. hkat'. FAIL test *)
   rewrite rt_union_singl, crE, seq_singl_max_rt; relsf.
 Qed.
 
