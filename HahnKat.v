@@ -100,7 +100,7 @@ Canonical Structure rel_kat_ops {A: Type}: kat.ops :=
   |}.
 
 Ltac unfold_all :=
-  unfold inj', union, is_true, inter_rel, seq, same_relation, inclusion; simpl.
+  unfold eqv_rel, inj', union, is_true, inter_rel, seq, same_relation, inclusion; simpl.
 
 Instance rel_kat_laws {A: Type}: kat.laws (@rel_kat_ops A).
 Proof.
@@ -214,12 +214,21 @@ Proof.
 Qed.
 
 
-Goal irreflexive r <-> r ⊆ @neg rel_lattice_ops (one tt).
+Lemma irreflexive_iff_kat1: irreflexive r <-> r ⊆ @neg rel_lattice_ops (one tt).
 Proof.
   unfold irreflexive. simpl. unfold pw1, inclusion. simpl. unfold not.
   split; intros.
   - destruct H1; apply H with (x:=a); assumption.
   - apply H with (x:=x) (y:=x). assumption. constructor.
+Qed.
+
+Lemma irreflexive_iff_kat2: irreflexive r <-> cap (one tt) r ⊆ bot.
+Proof.
+  unfold irreflexive. simpl. hnf. repeat (unfold pw2, pw0; simpl).
+  unfold inclusion.
+  firstorder.
+  - inversion H0. apply H with (x:=x); rewrite -> H3 at 2; apply H1.
+  - apply H with (x:=x)(y:=x). split; [> constructor | assumption ].
 Qed.
 
 Lemma cross_rel_iff_kat: cross_rel d1 d2 = [d1]⋅top⋅[d2].
@@ -263,6 +272,15 @@ Lemma set_equiv_iff_kat: @set_equiv A = weq.
 Proof. unfold set_equiv. unfold weq. simpl. unfold iff. unfold set_subset.
        rel_ext. firstorder. Qed.
 
+Lemma singl_rel_iff_kat: forall (a b: A), singl_rel a b = [fun x => x = a]⋅top⋅[fun x => x = b].
+Proof.
+  simpl. unfold seq, singl_rel. unfold inj'. simpl.
+  intros; rel_ext.
+  split.
+  - intros [H1 H2]. exists y. split; eauto.
+  - intros [z [[z0 [[H3 H4] _]] [H1 H2]]]. rewrite H3, H4, H1, H2 in *. split; reflexivity.
+Qed.
+
 End Lifting.
 
 Ltac lift_to_kat := repeat rewrite -> same_rel_iff_weq;
@@ -275,6 +293,7 @@ Ltac lift_to_kat := repeat rewrite -> same_rel_iff_weq;
                     repeat rewrite -> dom_iff_test;
                     repeat rewrite -> restr_rel_iff_kat;
                     repeat rewrite -> acyclic_iff_kat;
+                    repeat rewrite -> irreflexive_iff_kat2;
                     repeat rewrite -> cross_rel_iff_kat;
                     repeat rewrite -> set_empty_iff_kat;
                     repeat rewrite -> set_full_iff_kat;
@@ -283,6 +302,7 @@ Ltac lift_to_kat := repeat rewrite -> same_rel_iff_weq;
                     repeat rewrite -> set_inter_iff_kat;
                     repeat rewrite -> set_subset_iff_kat;
                     repeat rewrite -> set_equiv_iff_kat;
+                    repeat rewrite -> singl_rel_iff_kat;
                     idtac.
 
 Ltac lift_to_kat_all := repeat rewrite -> same_rel_iff_weq in *;
@@ -295,6 +315,7 @@ Ltac lift_to_kat_all := repeat rewrite -> same_rel_iff_weq in *;
                         repeat rewrite -> dom_iff_test in *;
                         repeat rewrite -> restr_rel_iff_kat in *;
                         repeat rewrite -> acyclic_iff_kat in *;
+                        repeat rewrite -> irreflexive_iff_kat2 in *;
                         repeat rewrite -> cross_rel_iff_kat in *;
                         repeat rewrite -> set_empty_iff_kat in *;
                         repeat rewrite -> set_full_iff_kat in *;
@@ -303,26 +324,8 @@ Ltac lift_to_kat_all := repeat rewrite -> same_rel_iff_weq in *;
                         repeat rewrite -> set_inter_iff_kat in *;
                         repeat rewrite -> set_subset_iff_kat in *;
                         repeat rewrite -> set_equiv_iff_kat in *;
+                        repeat rewrite -> singl_rel_iff_kat in *;
                         idtac.
-
-Ltac simpl_from_kat := repeat rewrite <- same_rel_iff_weq;
-                       repeat rewrite <- inclusion_iff_leq;
-                       repeat rewrite <- inter_rel_iff_cap;
-                       repeat rewrite <- union_rel_iff_cup;
-                       repeat rewrite <- clos_refl_trans_iff_str;
-                       repeat rewrite <- close_trans_iff_itr;
-                       repeat rewrite <- lift_clos_refl;
-                       repeat rewrite <- dom_iff_test;
-                       repeat rewrite <- restr_rel_iff_kat;
-                       repeat rewrite <- cross_rel_iff_kat;
-                       repeat rewrite <- set_empty_iff_kat;
-                       repeat rewrite <- set_full_iff_kat;
-                       repeat rewrite <- set_compl_iff_kat;
-                       repeat rewrite <- set_union_iff_kat;
-                       repeat rewrite <- set_inter_iff_kat;
-                       repeat rewrite <- set_subset_iff_kat;
-                       repeat rewrite <- set_equiv_iff_kat;
-                       idtac.
 
 Require Import RelationAlgebra.kat_reification.
 
@@ -366,6 +369,8 @@ Ltac aggregate_hoare_hypotheses' :=
         apply (qpc_to_hoare  (* (n:=tt) (m:=tt) *) ) in H
       | H: _ ≦ 0,  H': _ ≦ 0 |- _ => 
         apply (join_leq _ _ _ H') in H; clear H'
+      | H: _ ≦ bot,  H': _ ≦ bot |- _ => 
+        apply (join_leq _ _ _ H') in H; clear H'
     end.
 
 Ltac aggregate_hoare_hypotheses'' :=
@@ -386,6 +391,8 @@ Ltac aggregate_hoare_hypotheses'' :=
         apply (qcp_to_hoare  (n:=tt) (m:=tt) ) in H ||
         apply (qpc_to_hoare  (n:=tt) (m:=tt) ) in H
       | H: _ ≦ 0,  H': _ ≦ 0 |- _ => 
+        apply (join_leq _ _ _ H') in H; clear H'
+      | H: _ ≦ bot,  H': _ ≦ bot |- _ => 
         apply (join_leq _ _ _ H') in H; clear H'
     end.
 
@@ -438,14 +445,12 @@ Check (r ⊓ str tt r).
 Goal  (r ⊓ (str tt r) ⊔ r) ≡ bot.
 Proof.
   rewrite <- same_rel_iff_weq.
-  repeat simpl_from_kat. lift_to_kat. simpl_from_kat.
 Abort.
 
 Goal r⁺ ∩ (one tt) <--> bot.
 Proof.
   lift_to_kat.
   (* rewrite -> acyclic_iff_kat. *)
-  simpl_from_kat.
 Abort.
 
 Goal @weq rel_lattice_ops ((one tt) ⊓ (str tt r)) bot.
