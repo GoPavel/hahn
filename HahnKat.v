@@ -459,6 +459,21 @@ Check @cap rel_lattice_ops (str tt r) r.
 Check cap (str tt r) r.
 Check (r ⊓ str tt r).
 
+(* Canonical Structure dual_rel_kat_ops A := (dual (@rel_kat_ops A)). *)
+(* Instance dual_rel_kat_laws A : kat.laws (@dual_rel_kat_ops A) *)
+(*   := dual_laws rel_kat_laws. *)
+
+(* Lemma l1 `{L: kat.laws} {n m} (p: X n m): (cup p p ≡ p). *)
+(* Proof. kat. Qed. *)
+
+(* Lemma l2 `{L: kat.laws} {m n} (p: X m n): (cap p p ≡ p). *)
+(* Proof. dual @l1. remember(lattice.dualize _ (@l1)). *)
+(*         apply w. hnf in w. apply w. *)
+
+(* Lemma l2 (p: relation A): (p ⊓ p ≡ p). *)
+(* Proof. remember(dualize (@l1) (H:=@rel_kat_laws A)). *)
+(*         apply w. hnf in w. apply w. *)
+
 Goal  (r ⊓ (str tt r) ⊔ r) ≡ bot.
 Proof.
   rewrite <- same_rel_iff_weq.
