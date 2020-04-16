@@ -7,8 +7,6 @@ Require Import HahnBase HahnList HahnRelationsBasic.
 Set Implicit Arguments.
 
 Local Notation "a ≡ b" := (same_relation a b)  (at level 60).
-Local Notation "a ^+" := (clos_trans a) (at level 1, only parsing).
-Local Notation "a ^*" := (clos_refl_trans a) (at level 1, only parsing).
 
 (** We define three constructions:
 - [total_order_from_list] constructs a total order from a list of elements.
