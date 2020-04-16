@@ -100,7 +100,7 @@ Canonical Structure rel_kat_ops {A: Type}: kat.ops :=
   |}.
 
 Ltac unfold_all :=
-  unfold eqv_rel, inj', union, is_true, inter_rel, seq, same_relation, inclusion; simpl.
+  unfold eqv_rel, inj', union, is_true, inter_rel, seq, same_relation, inclusion, singl_rel; simpl.
 
 Instance rel_kat_laws {A: Type}: kat.laws (@rel_kat_ops A).
 Proof.
@@ -162,15 +162,24 @@ Proof. reflexivity. Qed.
 Lemma union_rel_iff_cup: union r1 r2 = cup r1 r2.
 Proof. reflexivity. Qed.
 
+Lemma empty_rel_iff_bot: (∅₂ : relation A) = bot.
+Proof. reflexivity. Qed.
+
 Lemma clos_refl_trans_iff_str: clos_refl_trans r = @str _ tt r.
 Proof. reflexivity. Qed.
 
 Lemma close_trans_iff_itr: clos_trans r = @itr _ tt r.
 Proof. reflexivity. Qed.
 
+Lemma seq_iff_dot: r1 ;; r2 = @dot _ tt tt tt r1 r2.
+Proof. reflexivity. Qed.
+
 Local Notation " [ p ] " := (inj (n:=tt) p): ra_terms. 
 
 Lemma dom_iff_test: forall (dom: A -> Prop), ⦗dom⦘ = [dom].
+Proof. reflexivity. Qed.
+
+Lemma minus_rel_iff_kat: r1 \ r2 = r1 ∩ neg r2.
 Proof. reflexivity. Qed.
 
 (* ASK *)
@@ -283,14 +292,19 @@ Qed.
 
 End Lifting.
 
+(* TODO: We shouldn't rewrite general operation, we should relay on unification *)
+
 Ltac lift_to_kat := repeat rewrite -> same_rel_iff_weq;
                     repeat rewrite -> inclusion_iff_leq;
                     repeat rewrite -> inter_rel_iff_cap;
                     repeat rewrite -> union_rel_iff_cup;
+                    repeat rewrite -> seq_iff_dot;
+                    repeat rewrite -> empty_rel_iff_bot;
                     repeat rewrite -> clos_refl_trans_iff_str;
                     repeat rewrite -> close_trans_iff_itr;
                     repeat rewrite -> lift_clos_refl;
                     repeat rewrite -> dom_iff_test;
+                    repeat rewrite -> minus_rel_iff_kat;
                     repeat rewrite -> restr_rel_iff_kat;
                     repeat rewrite -> acyclic_iff_kat;
                     repeat rewrite -> irreflexive_iff_kat2;
@@ -309,10 +323,13 @@ Ltac lift_to_kat_all := repeat rewrite -> same_rel_iff_weq in *;
                         repeat rewrite -> inclusion_iff_leq in *;
                         repeat rewrite -> inter_rel_iff_cap in *;
                         repeat rewrite -> union_rel_iff_cup in *;
+                        repeat rewrite -> seq_iff_dot in *;
+                        repeat rewrite -> empty_rel_iff_bot in *;
                         repeat rewrite -> clos_refl_trans_iff_str in *;
                         repeat rewrite -> close_trans_iff_itr in *;
                         repeat rewrite -> lift_clos_refl in *;
                         repeat rewrite -> dom_iff_test in *;
+                        repeat rewrite -> minus_rel_iff_kat in *;
                         repeat rewrite -> restr_rel_iff_kat in *;
                         repeat rewrite -> acyclic_iff_kat in *;
                         repeat rewrite -> irreflexive_iff_kat2 in *;
@@ -351,48 +368,48 @@ Ltac kat' :=
 (*   subst u; revert L; pre_dec true. *)
 
 Ltac aggregate_hoare_hypotheses' :=
-  repeat 
+  repeat
     match goal with
-      | H: _ ≡ _ |- _ => 
-        apply (ab_to_hoare (n:=tt)) in H || 
-        (rewrite (cp_c _ _ H); clear H) || 
-        (rewrite (pc_c _ _ H); clear H) || 
+      | H: _ ≡ _ |- _ =>
+        apply (ab_to_hoare (n:=tt)) in H ||
+        (rewrite (cp_c _ _ H); clear H) ||
+        (rewrite (pc_c _ _ H); clear H) ||
         apply weq_spec in H as [? ?]
     end;
   repeat
     match goal with
-      | H: _ ≦ _ |- _ => 
-        apply (ab'_to_hoare (n:=tt)) in H || 
-        apply (bpqc_to_hoare (* (n:=tt) (m:=tt) *)) in H || 
-        apply (pbcq_to_hoare (* (n:=tt) (m:=tt) *) ) in H || 
+      | H: _ ≦ _ |- _ =>
+        apply (ab'_to_hoare (n:=tt)) in H ||
+        apply (bpqc_to_hoare (* (n:=tt) (m:=tt) *)) in H ||
+        apply (pbcq_to_hoare (* (n:=tt) (m:=tt) *) ) in H ||
         apply (qcp_to_hoare  (* (n:=tt) (m:=tt) *) ) in H ||
         apply (qpc_to_hoare  (* (n:=tt) (m:=tt) *) ) in H
-      | H: _ ≦ 0,  H': _ ≦ 0 |- _ => 
+      | H: _ ≦ 0,  H': _ ≦ 0 |- _ =>
         apply (join_leq _ _ _ H') in H; clear H'
-      | H: _ ≦ bot,  H': _ ≦ bot |- _ => 
+      | H: _ ≦ bot,  H': _ ≦ bot |- _ =>
         apply (join_leq _ _ _ H') in H; clear H'
     end.
 
 Ltac aggregate_hoare_hypotheses'' :=
-  repeat 
+  repeat
     match goal with
-      | H: _ ≡ _ |- _ => 
-        apply (ab_to_hoare (n:=tt)) in H || 
-        (rewrite (cp_c _ _ H); clear H) || 
-        (rewrite (pc_c _ _ H); clear H) || 
+      | H: _ ≡ _ |- _ =>
+        apply (ab_to_hoare (n:=tt)) in H ||
+        (rewrite (cp_c _ _ H); clear H) ||
+        (rewrite (pc_c _ _ H); clear H) ||
         apply weq_spec in H as [? ?]
     end;
   repeat
     match goal with
-      | H: _ ≦ _ |- _ => 
-        apply (ab'_to_hoare (n:=tt)) in H || 
-        apply (bpqc_to_hoare (n:=tt) (m:=tt)) in H || 
-        apply (pbcq_to_hoare (n:=tt) (m:=tt) ) in H || 
+      | H: _ ≦ _ |- _ =>
+        apply (ab'_to_hoare (n:=tt)) in H ||
+        apply (bpqc_to_hoare (n:=tt) (m:=tt)) in H ||
+        apply (pbcq_to_hoare (n:=tt) (m:=tt) ) in H ||
         apply (qcp_to_hoare  (n:=tt) (m:=tt) ) in H ||
         apply (qpc_to_hoare  (n:=tt) (m:=tt) ) in H
-      | H: _ ≦ 0,  H': _ ≦ 0 |- _ => 
+      | H: _ ≦ 0,  H': _ ≦ 0 |- _ =>
         apply (join_leq _ _ _ H') in H; clear H'
-      | H: _ ≦ bot,  H': _ ≦ bot |- _ => 
+      | H: _ ≦ bot,  H': _ ≦ bot |- _ =>
         apply (join_leq _ _ _ H') in H; clear H'
     end.
 
