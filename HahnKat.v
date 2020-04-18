@@ -7,7 +7,7 @@ Require Import RelationAlgebra.monoid.
 Require Import RelationAlgebra.prop.
 Require Import RelationAlgebra.kat.
 
-Require Import HahnRelationsBasic.
+Require Import HahnRelationsBasicDef HahnBase.
 
 Require Import Coq.Logic.FunctionalExtensionality.
 
