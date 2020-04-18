@@ -14,7 +14,7 @@ Require Import Coq.Logic.FunctionalExtensionality.
 Set Printing Coercions.
 Set Implicit Arguments.
 
-Axiom LEM : forall (p: Prop), p \/ not p.
+Local Axiom LEM : forall {A: Type} (P: A -> Prop) (a: A), (P a) \/ (not (P a)).
 
 Instance Prop_lattice_laws: lattice.laws (BL+STR+CNV+DIV) Prop_lattice_ops.
 Proof.
@@ -61,6 +61,11 @@ Definition rel_monoid_ops {A: Type}: monoid.ops :=
 
 Canonical Structure rel_monoid_ops.
 
+Local Lemma clos_refl_transE {A: Type} {r: relation A} a b :  r＊ a b <-> a = b \/ r⁺ a b.
+Proof.
+  split; ins; desf; vauto; induction H; desf; vauto.
+Qed.
+
 Instance rel_monoid_laws {A: Type}: monoid.laws (BL+CKA) (@rel_monoid_ops A).
 Proof.
   apply monoid.Build_laws; intros; simpl;
@@ -77,8 +82,13 @@ Proof.
     + apply H0. exists y. split; assumption.
     + assumption.
     + apply IHclos_refl_trans1, IHclos_refl_trans2; assumption.
-  - apply t_step_rt; assumption.
-  - apply t_step_rt. exists x0. split; assumption.
+  - apply clos_trans_tn1 in H0. induction H0.
+    + unfold seq. exists y. split; [> assumption | apply rt_refl ].
+    + unfold seq in *. desf; eauto using clos_refl_trans.
+  - rewrite clos_refl_transE in H1.
+    destruct H1.
+    + rewrite H1 in H0. constructor; assumption.
+    + eauto using clos_trans.
 Qed.
 
 Definition eqv_rel' : forall {A: Type} {cond: A -> Prop}, relation A
@@ -179,7 +189,7 @@ Local Notation " [ p ] " := (inj (n:=tt) p): ra_terms.
 Lemma dom_iff_test: forall (dom: A -> Prop), ⦗dom⦘ = [dom].
 Proof. reflexivity. Qed.
 
-Lemma minus_rel_iff_kat: r1 \ r2 = r1 ∩ neg r2.
+Lemma minus_rel_iff_kat: r1 \ r2 = r1 ⊓ neg r2.
 Proof. reflexivity. Qed.
 
 (* ASK *)
@@ -210,7 +220,7 @@ Proof.
 Qed. (* TODO: redefine refl_top *)
 
 
-Notation "x ^+" := (itr tt x)   (left associativity, at level 5, format "x ^+"): ra_terms.
+Local Notation "x ^+" := (itr tt x)   (left associativity, at level 5, format "x ^+"): ra_terms.
 
 Lemma acyclic_iff_kat: acyclic r <-> 1 ⊓ (r^+) ≡ 0.
 Proof.
@@ -223,21 +233,21 @@ Proof.
 Qed.
 
 
-Lemma irreflexive_iff_kat1: irreflexive r <-> r ⊆ @neg rel_lattice_ops (one tt).
+Lemma irreflexive_iff_kat1: irreflexive r <-> r ≦ @neg rel_lattice_ops (one tt).
 Proof.
   unfold irreflexive. simpl. unfold pw1, inclusion. simpl. unfold not.
   split; intros.
   - destruct H1; apply H with (x:=a); assumption.
-  - apply H with (x:=x) (y:=x). assumption. constructor.
+  - apply H with (a:=x) (a0:=x). assumption. constructor.
 Qed.
 
-Lemma irreflexive_iff_kat2: irreflexive r <-> cap (one tt) r ⊆ bot.
+Lemma irreflexive_iff_kat2: irreflexive r <-> cap (one tt) r ≦ bot.
 Proof.
   unfold irreflexive. simpl. hnf. repeat (unfold pw2, pw0; simpl).
   unfold inclusion.
   firstorder.
-  - inversion H0. apply H with (x:=x); rewrite -> H3 at 2; apply H1.
-  - apply H with (x:=x)(y:=x). split; [> constructor | assumption ].
+  - inversion H0. apply H with (x:=a); rewrite -> H3 at 2; apply H1.
+  - apply H with (a:=x)(a0:=x). split; [> constructor | assumption ].
 Qed.
 
 Lemma cross_rel_iff_kat: cross_rel d1 d2 = [d1]⋅top⋅[d2].
@@ -281,13 +291,41 @@ Lemma set_equiv_iff_kat: @set_equiv A = weq.
 Proof. unfold set_equiv. unfold weq. simpl. unfold iff. unfold set_subset.
        rel_ext. firstorder. Qed.
 
-Lemma singl_rel_iff_kat: forall (a b: A), singl_rel a b = [fun x => x = a]⋅top⋅[fun x => x = b].
+Lemma singl_rel_iff_kat: forall {a b: A}, singl_rel a b = [fun x => x = a]⋅top⋅[fun x => x = b].
 Proof.
   simpl. unfold seq, singl_rel. unfold inj'. simpl.
   intros; rel_ext.
   split.
   - intros [H1 H2]. exists y. split; eauto.
   - intros [z [[z0 [[H3 H4] _]] [H1 H2]]]. rewrite H3, H4, H1, H2 in *. split; reflexivity.
+Qed.
+
+Lemma reflexive_iff_kat: reflexive r <-> refl_top ≦ r.
+Proof.
+  unfold_all; unfold reflexive.
+  firstorder.
+  inversion H0. apply H.
+  apply H. constructor.
+Qed.
+
+Lemma transitive_iff_kat: transitive r <-> (@dot _ tt tt tt) r r ≦ r.
+Proof.
+  unfold_all; unfold transitive.
+  firstorder.
+Qed.
+
+Lemma upward_closed_iff_kat: upward_closed r d <-> [@neg dset' d]⋅r⋅[d] ≦ bot.
+Proof.
+  simpl; split; unfold upward_closed; unfold_all.
+  - intros H0 x y [z [[z1 [[H1 H2] H3]] [H4 H5]]].
+    apply H2. apply H0 in H3. rewrite H1; assumption. assumption.
+  - intros.
+    specialize (H x y).
+    assert (not (d x) -> False).
+    {
+      intro. apply H. exists y. split; [> exists x; auto | auto].
+    }
+    destruct (LEM d x); [> assumption | apply H0 in H1; destruct H1].
 Qed.
 
 End Lifting.
@@ -317,6 +355,9 @@ Ltac lift_to_kat := repeat rewrite -> same_rel_iff_weq;
                     repeat rewrite -> set_subset_iff_kat;
                     repeat rewrite -> set_equiv_iff_kat;
                     repeat rewrite -> singl_rel_iff_kat;
+                    repeat rewrite -> reflexive_iff_kat;
+                    repeat rewrite -> transitive_iff_kat;
+                    repeat rewrite -> upward_closed_iff_kat;
                     idtac.
 
 Ltac lift_to_kat_all := repeat rewrite -> same_rel_iff_weq in *;
@@ -342,6 +383,9 @@ Ltac lift_to_kat_all := repeat rewrite -> same_rel_iff_weq in *;
                         repeat rewrite -> set_subset_iff_kat in *;
                         repeat rewrite -> set_equiv_iff_kat in *;
                         repeat rewrite -> singl_rel_iff_kat in *;
+                        repeat rewrite -> reflexive_iff_kat in *;
+                        repeat rewrite -> transitive_iff_kat in *;
+                        repeat rewrite -> upward_closed_iff_kat in *;
                         idtac.
 
 Require Import RelationAlgebra.kat_reification.
