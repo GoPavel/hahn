@@ -172,7 +172,7 @@ Proof. reflexivity. Qed.
 Lemma union_rel_iff_cup: union r1 r2 = cup r1 r2.
 Proof. reflexivity. Qed.
 
-Lemma empty_rel_iff_bot: (∅₂ : relation A) = bot.
+Lemma empty_rel_iff_bot: (∅₂ : relation A) = @bot (mor tt tt).
 Proof. reflexivity. Qed.
 
 Lemma clos_refl_trans_iff_str: clos_refl_trans r = @str _ tt r.
@@ -411,23 +411,24 @@ Ltac kat' :=
 (*   || fail "typed hkat is not supported yet");  *)
 (*   subst u; revert L; pre_dec true. *)
 
+(* TODO: problem with [bot] and [0]
+         Now we can't just unify or rewrite all [bot] to [0].
+         Ambiguity of notation [bot] make hard to understand which term we have.
+         Maybe we should change all [bot] to [@bot (mor tt)] ~ 0.
+         But now we just duplicate matching [bot] and [0].
+ *)
+
 Ltac aggregate_hoare_hypotheses' :=
   repeat
     match goal with
       | H: _ ≡ _ |- _ =>
         apply (ab_to_hoare (n:=tt)) in H ||
-        (rewrite (cp_c _ _ H); clear H) ||
-        (rewrite (pc_c _ _ H); clear H) ||
         apply weq_spec in H as [? ?]
     end;
   repeat
     match goal with
       | H: _ ≦ _ |- _ =>
-        apply (ab'_to_hoare (n:=tt)) in H ||
-        apply (bpqc_to_hoare (* (n:=tt) (m:=tt) *)) in H ||
-        apply (pbcq_to_hoare (* (n:=tt) (m:=tt) *) ) in H ||
-        apply (qcp_to_hoare  (* (n:=tt) (m:=tt) *) ) in H ||
-        apply (qpc_to_hoare  (* (n:=tt) (m:=tt) *) ) in H
+        apply (ab'_to_hoare (n:=tt)) in H
       | H: _ ≦ 0,  H': _ ≦ 0 |- _ =>
         apply (join_leq _ _ _ H') in H; clear H'
       | H: _ ≦ bot,  H': _ ≦ bot |- _ =>
@@ -439,56 +440,82 @@ Ltac aggregate_hoare_hypotheses'' :=
     match goal with
       | H: _ ≡ _ |- _ =>
         apply (ab_to_hoare (n:=tt)) in H ||
-        (rewrite (cp_c _ _ H); clear H) ||
-        (rewrite (pc_c _ _ H); clear H) ||
+        (rewrite (cp_c (n:=tt) _ _ H); clear H) ||
+        (rewrite (pc_c (n:=tt) _ _ H); clear H) ||
         apply weq_spec in H as [? ?]
     end;
   repeat
     match goal with
+      | H: _ ≦ 0,  H': _ ≦ 0 |- _ =>
+        idtac
+      | H: _ ≦ bot,  H': _ ≦ bot |- _ =>
+        idtac
       | H: _ ≦ _ |- _ =>
         apply (ab'_to_hoare (n:=tt)) in H ||
         apply (bpqc_to_hoare (n:=tt) (m:=tt)) in H ||
         apply (pbcq_to_hoare (n:=tt) (m:=tt) ) in H ||
         apply (qcp_to_hoare  (n:=tt) (m:=tt) ) in H ||
         apply (qpc_to_hoare  (n:=tt) (m:=tt) ) in H
+    end;
+  repeat
+    match goal with
       | H: _ ≦ 0,  H': _ ≦ 0 |- _ =>
         apply (join_leq _ _ _ H') in H; clear H'
       | H: _ ≦ bot,  H': _ ≦ bot |- _ =>
         apply (join_leq _ _ _ H') in H; clear H'
     end.
 
+Local Ltac hkat_stuff :=
+  let L := fresh "L" in intro L;
+  let u := fresh "u" in
+  ((ra_get_kat_alphabet; intro u;
+    eapply (elim_hoare_hypotheses_weq (u^*) (u^*)); [eassumption|])
+  || fail "typed hkat is not supported yet");
+  subst u; revert L; pre_dec true.
+
 Ltac hkat' :=
   lift_to_kat_all;
   intros; aggregate_hoare_hypotheses'; rewrite ?leq_iff_cup;
   (apply (catch_kat_weq tt tt) || fail "could not find a KAT structure");
-  let L := fresh "L" in intro L;
-  let u := fresh "u" in
-  ((ra_get_kat_alphabet; intro u;
-    eapply (elim_hoare_hypotheses_weq (u^* ) (u^* )); [eassumption|])
-  || fail "typed hkat is not supported yet");
-  subst u; revert L; pre_dec true.
-
+  match goal with
+    | H: _ ≦ 0 |- _  =>
+      hkat_stuff
+    | H: _ ≦ bot |- _  =>
+      hkat_stuff
+    | _ => pre_dec true
+  end.
 
 Ltac hkat'' :=
   lift_to_kat_all;
   intros; aggregate_hoare_hypotheses''; rewrite ?leq_iff_cup;
   (apply (catch_kat_weq tt tt) || fail "could not find a KAT structure");
-  let L := fresh "L" in intro L;
-  let u := fresh "u" in
-  ((ra_get_kat_alphabet; intro u;
-    eapply (elim_hoare_hypotheses_weq (u^* ) (u^* )); [eassumption|])
-  || fail "typed hkat is not supported yet");
-  subst u; revert L; pre_dec true.
-
+  match goal with
+    | H: _ ≦ 0 |- _ =>
+      hkat_stuff
+    | H: _ ≦ bot |- _ =>
+      hkat_stuff
+    | _ => pre_dec true
+  end.
 
 Section Testing.
 
 Variable A : Type.
 Variables r r': relation A.
-Variables dom dom1 dom2: A -> Prop.
+Variables dom dom1 dom2 d d1 d2: A -> Prop.
 
 Goal forall `{r: relation A}, r ≡ r.
 Proof. intro. kat'. Qed.
+
+(* BUG in relation-algebra
+     When we have only [cp_c] there isn't any hypotheses with shape [r ≦ 0] after aggregation.
+     So hkat have fail in that case.
+ *)
+Lemma cp_c `{L: laws} {n} (c: tst n) (p: X n n):
+  [c]⋅p ≡ [c] -> p ≡ [!c]⋅p+[c].
+Proof. Fail hkat. Abort.
+
+Goal ⦗d⦘;;r <--> ⦗d⦘ -> ⦗d⦘;;r <--> ⦗d⦘.
+Proof. hkat''. Qed.
 
 (* Notation "x ^+" := (itr tt x)   (left associativity, at level 5, format "x ^+"): ra_terms. *)
 
@@ -553,7 +580,7 @@ Proof. Abort. (* That type of hypotheses is not supported *)
 Goal r ⊆ bot -> r ⊆ r'.
 Proof. hkat'. Qed.
 
-Lemma acyclic_restr d : acyclic r -> acyclic (restr_rel d r).
+Lemma acyclic_restr: acyclic r -> acyclic (restr_rel d r).
 Proof. Abort.
 
 Goal dom1 ≦ dom2 -> ⦗dom1⦘ ≦ ⦗dom2⦘.
