@@ -605,6 +605,27 @@ Implicit Type s : A -> Prop.
 Lemma ct_of_cross s s' : (s × s')⁺ <--> s × s'.
 Proof. lift_to_kat_all. Fail kat'. Abort.
 
+Definition prefix_clos x (r: relation A) := r ;; ⦗x⦘ ⊆ ⦗x⦘ ;; r.
+
+(* Lemma pre_agg_prefix_clos *)
+
+Goal forall (H1: prefix_clos d r) (H2: prefix_clos d r'),
+    prefix_clos d (r ;; r).
+Proof.
+  unfold prefix_clos.
+  lift_to_kat.
+  hkat''.
+Qed.
+
+Goal (r ∪ r);;⦗(@neg dset')d⦘ <--> (r;;⦗(@neg dset')d⦘) ∪ (r;;⦗(@neg dset')d⦘).
+Proof. kat'. Qed.
+
+Goal (r ∪ r);;⦗(@neg dset')d⦘ ⊆ bot <-> r;;⦗(@neg dset')d⦘ ∪ r;;⦗(@neg dset')d⦘ ⊆ bot.
+Proof.
+  split.
+  - hkat'.
+  - hkat'.
+Qed.
 
 End Testing.
 
