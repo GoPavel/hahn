@@ -11,6 +11,58 @@ Require Import HahnRelationsBasicDef HahnBase.
 
 Require Import Coq.Logic.FunctionalExtensionality.
 
+Require Import RelationAlgebra.rel.
+
+(*
+   We can try reuse hrel.
+   Pros and Cons:
+    + we don't care about Instance and Canonical Structures
+    - we should rewrite all basic definition (leq, weq, inclusion)
+      but now we actually do that.
+    + [kat] and [hkat] work again
+      but we still should use fixed and speed up version of hkat
+ *)
+
+(* Lemma H: forall (A: Type), @hrel A A = relation A. *)
+(* Proof. reflexivity. Qed. *)
+
+Local Axiom prop_ext: forall (P Q: Prop), (P <-> Q) -> P = Q.
+
+Lemma Heq: forall (A: Type) (r r': relation A), r <--> r' <-> r ≡ r'.
+Proof. unfold weq, same_relation, inclusion; simpl; firstorder. Qed.
+(* Proof. unfold weq. simpl. *)
+(*        intros; split; intros. *)
+(*        - rewrite H0. reflexivity. *)
+(*        - do 2 (apply functional_extensionality; intro). *)
+(*          apply prop_ext; apply H0. *)
+(* Qed. *)
+
+Goal forall (A B: Type) (r: @hrel A B), r ≡ r.
+Proof. kat. Qed.
+
+Lemma H1: forall {A: Type} (r: hrel A A) {x y: A}, clos_trans r x y <-> r^+ x y.
+Proof. simpl. unfold hrel_itr, hrel_str, hrel_dot.
+       intros; split; intros.
+       - induction H.
+         + exists y. assumption. exists O. simpl. reflexivity.
+         + destruct IHclos_trans1. destruct H2.
+           destruct IHclos_trans2. destruct H4.
+           admit.
+       - admit.
+Admitted.
+
+Lemma H1':  forall {A: Type} (r: hrel A A), clos_trans r = r^+.
+Proof. intros.
+       do 2 (apply functional_extensionality; intro).
+       apply prop_ext; apply H1. Qed.
+
+Lemma H2: forall {A: Type} (r r': hrel A A), r ;; r' = r ⋅ r'.
+Proof. simpl. unfold hrel_dot. Admitted.
+
+Goal forall (A: Type) (r: hrel A A), r ;; r⁺ <--> r⁺ ;; r.
+Proof. intros. rewrite -> Heq. rewrite -> (H1'). do 2 rewrite H2. kat. Qed.
+
+
 Set Printing Coercions.
 Set Implicit Arguments.
 
