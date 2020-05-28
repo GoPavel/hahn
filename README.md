@@ -1,3 +1,14 @@
+# Experiment with KAT
+
+Try to simplify proofs using [relation-algebra](https://github.com/damien-pous/relation-algebra#applications).
+
+New module [HahnKat.v](https://github.com/GoPavel/hahn/blob/experiments-with-kat/HahnKat.v) contains instances of Canonical Structures and Typeclasses and hacked version of original tactics `kat`/`hkat`.
+
+Introduce tactics:
+- `kat'` - solve KAT
+- `hkat'` - solve KAT with simple hypotheses kind of (`r < 0`), but faster that original `hkat`
+- `hkat''` - solve KAT with Hoare hypotheses
+
 # Hahn : A Coq library for lists and relations
 
 [![Build Status](https://travis-ci.com/vafeiadis/hahn.svg?branch=master)](https://travis-ci.com/vafeiadis/hahn)
