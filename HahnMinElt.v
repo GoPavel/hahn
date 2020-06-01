@@ -6,6 +6,9 @@ Require Import HahnBase HahnList HahnSets HahnRelationsBasic.
 Require Import HahnEquational HahnRewrite HahnMaxElt.
 Require Import NPeano Omega Setoid.
 
+Require Import HahnKat.
+Require Import RelationAlgebra.lattice.
+
 Set Implicit Arguments.
 
 Local Notation "a <--> b" := (same_relation a b)  (at level 60).
@@ -16,6 +19,41 @@ Definition min_elt A (r: relation A) (a : A) :=
 Definition wmin_elt A (r: relation A) (a : A) :=
   forall b (REL: r b a), a = b.
 
+
+Lemma min_elt_iff_kat A (r: relation A) (a: A):
+  min_elt r a <-> r ;; ⦗eq a⦘ ⊆ bot.
+Proof.
+  unfold_all. unfold min_elt.
+  firstorder.
+  - apply (H x). rewrite H2; assumption.
+  - apply (H b a). exists a. auto.
+Qed.
+
+Ltac lift_min_elt := repeat rewrite min_elt_iff_kat in *.
+
+Local Axiom LEM: forall (A: Type) (a b: A), (a = b) \/ (not (a = b)). (* TODO *)
+
+Lemma wmin_elt_iff_kat A (r: relation A) (a: A):
+  wmin_elt r a <-> ⦗@neg dset' (eq a)⦘ ;; r ;; ⦗eq a⦘ ⊆ bot.
+Proof.
+  unfold_all; unfold wmin_elt.
+  split.
+  - intros H x y [z [[H0 H1] [z0 [H2 [H3 H4]]]]].
+    rewrite <- H4 in *; clear H4 H3.
+    apply H in H2. rewrite <- H2 in *. symmetry in H0. apply H1; apply H0.
+  - intros.
+    assert (a <> b -> False).
+    {
+      specialize (H b a). intro.
+      apply H. exists b. split; [> split; [> reflexivity | assumption] | exists a; auto].
+    }
+    pose (lem := LEM a b).
+    destruct lem.
+    + assumption.
+    + apply H0 in H1. destruct H1.
+Qed.
+
+Ltac lift_wmin_elt := repeat rewrite wmin_elt_iff_kat in *.
 
 Section BasicProperties.
 
@@ -130,6 +168,18 @@ Section MoreProperties.
 
 Variable A : Type.
 Implicit Type r : relation A.
+
+Lemma dom_iff_kat r b:
+  (forall x y, r x y -> x = b) <-> ⦗@neg dset' (eq b)⦘ ;; r ⊆ bot.
+Proof.
+  split; unfold_all; firstorder.
+  - apply H2; symmetry. rewrite H0; apply (H x0 y); apply H1.
+  - destruct (LEM x b); try assumption.
+    exfalso; apply (H x y); exists x.
+    split; [> split; [> reflexivity | firstorder] | assumption].
+Qed.
+
+Ltac lift_dom := rewrite -> dom_iff_kat in *.
 
 Lemma seq_min r r' b
       (MAX: min_elt r b) (DOM: forall x y, r' x y -> x = b) :

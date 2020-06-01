@@ -6,6 +6,7 @@ Require Import HahnBase HahnList HahnSets HahnRelationsBasic.
 Require Import HahnEquational HahnRewrite.
 Require Import NPeano Omega Setoid.
 
+Require Import HahnKat.
 
 Set Implicit Arguments.
 
@@ -14,6 +15,52 @@ Definition max_elt A (r: relation A) (a : A) :=
 
 Definition wmax_elt A (r: relation A) (a : A) :=
   forall b (REL: r a b), a = b.
+
+Require Import RelationAlgebra.lattice.
+
+Local Lemma sym A: forall (x y: A), x = y <-> y = x.
+Proof. firstorder. Qed.
+
+Lemma max_elt_iff_kat (A: Type) (a: A) r:
+  max_elt r a <-> ⦗eq a⦘ ;; r ⊆ bot.
+Proof.
+  unfold max_elt. split.
+  - intro. unfold inclusion, bot, seq, eqv_rel; simpl.
+    intros x y [z [[H1 H2] H3]].
+    rewrite <- H1 in H3; rewrite <- H2 in H3.
+    apply H in H3. assumption.
+  - unfold inclusion, bot, seq, eqv_rel. simpl.
+    intros. apply H with (x:=a)(y:=b).
+    exists a. auto.
+Qed.
+
+Ltac lift_max_elt := repeat rewrite max_elt_iff_kat in *.
+
+Local Axiom LEM: forall (A: Type) (a b: A), (a = b) \/ (not (a = b)). (* TODO *)
+
+Lemma wmax_elt_iff_kat (A: Type) (a: A) r:
+    wmax_elt r a <-> ⦗eq a⦘ ;; r ;; ⦗(@neg dset')(eq a)⦘ ⊆ bot.
+Proof.
+  unfold wmax_elt, inclusion, bot, seq, eqv_rel. simpl.
+  split.
+  - intros H x y [z [[H0 H1] [z0 [H3 [H4 H5]]]]].
+    apply H5.
+    rewrite H4 in *; clear H4 z0.
+    rewrite <- H0 in *; clear H0 z.
+    rewrite <- H1 in H3; clear H1. apply H in H3. assumption.
+  - intros.
+    assert (a <> b -> False).
+    { intro. specialize (H a b).
+      apply H. exists a. split; [> split; reflexivity | exists b].
+      split; [> apply REL | split; [> reflexivity | intro; apply H0; assumption]].
+    }
+    remember (LEM a b) as lem. clear Heqlem.
+    destruct lem.
+    + assumption.
+    + apply H0 in H1. destruct H1.
+Qed.
+
+Ltac lift_wmax_elt := repeat rewrite -> wmax_elt_iff_kat in *.
 
 Local Notation "a <--> b" := (same_relation a b)  (at level 60).
 
@@ -120,6 +167,18 @@ Section MoreProperties.
 
 Variable A : Type.
 Implicit Type r : relation A.
+
+Lemma cod_iff_kat r b:
+  (forall x y, r x y -> y = b) <-> r ;; ⦗@neg dset' (eq b)⦘ ⊆ bot.
+Proof.
+  split; unfold_all; firstorder.
+  specialize (H x y).
+  destruct (LEM y b); try assumption.
+  exfalso; apply H.
+  exists y; split; [> assumption | split; [> reflexivity | firstorder ]].
+Qed.
+
+Ltac lift_cod := rewrite -> cod_iff_kat in *.
 
 Lemma seq_max r r' b
       (MAX: max_elt r' b) (COD: forall x y, r x y -> y = b) :

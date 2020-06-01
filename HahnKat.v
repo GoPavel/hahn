@@ -294,8 +294,8 @@ Lemma set_equiv_iff_kat: @set_equiv A = weq.
 Proof. unfold set_equiv. unfold weq. simpl. unfold iff. unfold set_subset.
        rel_ext. firstorder. Qed.
 
-Lemma singl_rel_iff_kat: forall {a b: A}, singl_rel a b = [fun x => x = a]⋅top⋅[fun x => x = b].
 (* NOTE: not supported by KAT *)
+Lemma singl_rel_iff_kat: forall {a b: A}, singl_rel a b = [eq a]⋅top⋅[eq b].
 Proof.
   simpl. unfold seq, singl_rel. unfold inj'. simpl.
   intros; rel_ext.
