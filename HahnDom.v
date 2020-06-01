@@ -56,8 +56,12 @@ Proof.
     + apply H0 in H1. destruct H1.
 Qed.
 
+Lemma lift_dom_impl {d d': A -> Prop}: (forall a, d a -> d' a) <-> (d ≦ d').
+Proof. reflexivity. Qed.
+
 Ltac lift_dom := repeat rewrite -> doma_iff_kat in *;
-                 repeat rewrite -> domb_iff_kat in *.
+                 repeat rewrite -> domb_iff_kat in *;
+                 repeat rewrite -> lift_dom_impl in *.
 
 Section Lemmas.
 

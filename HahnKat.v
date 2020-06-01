@@ -4,7 +4,7 @@ Add LoadPath "../relation-algebra-1.7.1".
 Require Import RelationAlgebra.kat_tac.
 Require Import RelationAlgebra.lattice.
 Require Import RelationAlgebra.monoid.
-Require Import RelationAlgebra.prop.
+Require Export RelationAlgebra.prop.
 Require Import RelationAlgebra.kat.
 
 Require Import HahnRelationsBasicDef HahnBase.
