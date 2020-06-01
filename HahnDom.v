@@ -5,6 +5,9 @@ Set Implicit Arguments.
 
 (** * Calculating the (co)domain of a relation *)
 
+Require Import HahnKat.
+Require Import RelationAlgebra.lattice.
+
 Section Domains.
 
 Local Notation "a <--> b" := (same_relation a b)  (at level 60).
@@ -22,6 +25,39 @@ Section Definitions.
 
   Definition dom_cond d := (fun e => dom_rel (r ⨾ ⦗ eq e ⦘) ⊆₁ d).
 End Definitions.
+
+Local Axiom LEM: forall (A: Type) (d : A -> Prop) (x: A), (d x) \/ (not (d x)). (* TODO *)
+
+Lemma doma_iff_kat r d: doma r d <-> ⦗(@neg dset') d⦘ ;; r ⊆ ∅₂.
+Proof.
+  split.
+    + unfold_all. intros DA x y [z [[H0 H1] H2]].
+      rewrite <- H0 in H2; apply DA in H2. apply H1; apply H2.
+    + unfold_all. unfold doma. intros.
+      specialize (H x y).
+      assert (not (d x) -> False).
+      { intro. apply H. exists x. split; [> split; [> reflexivity | assumption] | assumption]. }
+      destruct (LEM d x).
+      * assumption.
+      * apply H0 in H1. destruct H1.
+Qed.
+
+Lemma domb_iff_kat r d: domb r d <-> (r ;; ⦗(@neg dset') d⦘ ⊆ ∅₂).
+Proof.
+  split; unfold_all. intro H.
+  - intros x y [z [H0 [H1 H2]]].
+    rewrite H1 in *; apply H in H0. apply H2; apply H0.
+  - unfold domb. intros.
+    specialize (H x y).
+    assert (not (d y) -> False).
+    { intro. apply H. exists y. auto. }
+    destruct (LEM d y).
+    + assumption.
+    + apply H0 in H1. destruct H1.
+Qed.
+
+Ltac lift_dom := repeat rewrite -> doma_iff_kat in *;
+                 repeat rewrite -> domb_iff_kat in *.
 
 Section Lemmas.
 
