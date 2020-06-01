@@ -533,6 +533,10 @@ Qed.
 
 End Domains.
 
+Ltac lift_dom := repeat rewrite -> doma_iff_kat in *;
+                 repeat rewrite -> domb_iff_kat in *;
+                 repeat rewrite -> lift_dom_impl in *.
+
 Add Parametric Morphism A : (@doma A) with signature
   inclusion --> set_subset ==> Basics.impl as doma_mori.
 Proof.
