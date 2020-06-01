@@ -42,7 +42,6 @@ Canonical Structure rel_lattice_ops {A: Type}: lattice.ops :=
      bot := bot;
      top := top
   |}.
-(* Print Canonical Projections. *)
 
 Instance rel_lattice_laws {A: Type}:
   lattice.laws (BL+STR+CNV+DIV) (@rel_lattice_ops A) := pw_laws  _.
@@ -54,7 +53,7 @@ Definition rel_monoid_ops {A: Type}: monoid.ops :=
      one n := refl_top;
      itr n := @clos_trans A;
      str n := @clos_refl_trans A;
-     cnv n m := @transp A; (* TODO: not used *)
+     cnv n m := @transp A;
      ldv n m p := assert_false (fun _ a => a);
      rdv n m p := assert_false (fun _ a => a);
   |}.
@@ -91,13 +90,11 @@ Proof.
     + eauto using clos_trans.
 Qed.
 
-Definition eqv_rel' : forall {A: Type} {cond: A -> Prop}, relation A
-  := fun _ (cond: _) x y =>  x = y /\ cond x.
-
-Print Coercions.
-
+(* Debug: *)
+(* Print Coercions. *)
 (* Set Printing Universes. *)
 (* Check fun (A: Type@{lattice.pw}) => ob (@rel_monoid_ops A). *)
+
 Definition dset' {A: Type}: lattice.ops := pw_ops Prop_lattice_ops A.
 
 Definition inj' {A: Type} (cond: (@dset' A)): relation A
@@ -110,7 +107,7 @@ Canonical Structure rel_kat_ops {A: Type}: kat.ops :=
   |}.
 
 Ltac unfold_all :=
-  unfold eqv_rel, inj', union, is_true, inter_rel, seq, same_relation, inclusion, singl_rel; simpl.
+  unfold eqv_rel, inj', union, is_true, inter_rel, seq, transp, same_relation, inclusion, singl_rel; simpl.
 
 Instance rel_kat_laws {A: Type}: kat.laws (@rel_kat_ops A).
 Proof.
@@ -184,6 +181,9 @@ Proof. reflexivity. Qed.
 Lemma seq_iff_dot: r1 ;; r2 = @dot _ tt tt tt r1 r2.
 Proof. reflexivity. Qed.
 
+Lemma transp_iff_cnv: transp r = @cnv _ tt tt r.
+Proof. reflexivity. Qed.
+
 Local Notation " [ p ] " := (inj (n:=tt) p): ra_terms. 
 
 Lemma dom_iff_test: forall (dom: A -> Prop), ⦗dom⦘ = [dom].
@@ -193,7 +193,7 @@ Lemma minus_rel_iff_kat: r1 \ r2 = r1 ⊓ neg r2.
 Proof. reflexivity. Qed.
 
 (* ASK *)
-Axiom prop_ext: forall (P Q: Prop), (P <-> Q) -> P = Q.
+Local Axiom prop_ext: forall (P Q: Prop), (P <-> Q) -> P = Q.
 
 Ltac rel_ext :=
   apply functional_extensionality; intro x;
@@ -222,6 +222,7 @@ Qed. (* TODO: redefine refl_top *)
 
 Local Notation "x ^+" := (itr tt x)   (left associativity, at level 5, format "x ^+"): ra_terms.
 
+(* NOTE: not supported by KAT *)
 Lemma acyclic_iff_kat: acyclic r <-> 1 ⊓ (r^+) ≡ 0.
 Proof.
   unfold acyclic, irreflexive; simpl.
@@ -250,6 +251,7 @@ Proof.
   - apply H with (a:=x)(a0:=x). split; [> constructor | assumption ].
 Qed.
 
+(* NOTE: not supported by KAT *)
 Lemma cross_rel_iff_kat: cross_rel d1 d2 = [d1]⋅top⋅[d2].
 Proof.
   rel_ext.
@@ -269,6 +271,7 @@ Ltac pred_ext :=
   apply functional_extensionality; intro x;
   apply prop_ext.
 
+(* TODO: try use it instead of dset' *)
 Lemma set_empty_iff_kat: @set_empty A = bot.
 Proof. reflexivity. Qed.
 
@@ -292,6 +295,7 @@ Proof. unfold set_equiv. unfold weq. simpl. unfold iff. unfold set_subset.
        rel_ext. firstorder. Qed.
 
 Lemma singl_rel_iff_kat: forall {a b: A}, singl_rel a b = [fun x => x = a]⋅top⋅[fun x => x = b].
+(* NOTE: not supported by KAT *)
 Proof.
   simpl. unfold seq, singl_rel. unfold inj'. simpl.
   intros; rel_ext.
@@ -435,6 +439,8 @@ Ltac aggregate_hoare_hypotheses' :=
         apply (join_leq _ _ _ H') in H; clear H'
     end.
 
+(* TODO: Add phase of clearing non-KAT hypothesis.
+   We can do it, because [hkat] can't succeeded without goal solving *)
 Ltac aggregate_hoare_hypotheses'' :=
   repeat
     match goal with
@@ -580,6 +586,13 @@ Proof. Abort. (* That type of hypotheses is not supported *)
 Goal r ⊆ bot -> r ⊆ r'.
 Proof. hkat'. Qed.
 
+(* KAT doesn't support transp *)
+Goal transp r ;; transp r <--> transp (r ;; r).
+Proof. lift_to_kat. repeat rewrite transp_iff_cnv. Fail kat'. Abort.
+
+Goal ⦗d⦘ <--> transp ⦗d⦘.
+Proof. Fail kat'. Abort.
+
 Lemma acyclic_restr: acyclic r -> acyclic (restr_rel d r).
 Proof. Abort.
 
@@ -598,6 +611,7 @@ Proof. lift_to_kat_all. hkat'. Qed.
 (* Local Notation dot' := (@dot _ tt tt tt). *)
 Local Notation top := (@lattice.top rel_lattice_ops).
 
+(* ⊤ isn't supported by KAT *)
 Goal top ;; ⦗dom1⦘;; (top;;⦗dom1⦘)＊ ≡ top ;; ⦗dom1⦘.
 Proof. Fail kat'. Abort.
 
