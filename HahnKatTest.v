@@ -13,6 +13,9 @@ Variable A : Type.
 Variables r r': relation A.
 Variables dom dom1 dom2 d d1 d2: A -> Prop.
 
+Goal r ⊆ r ∪ r'.
+Proof. kat'. Qed.
+
 Goal forall `{r: relation A}, r ≡ r.
 Proof. intro. kat'. Qed.
 
@@ -62,7 +65,7 @@ Abort.
 
 Goal r⁺ ∩ (one tt) <--> bot.
 Proof.
-  lift_to_kat.
+  lift_to_kat_all.
   (* rewrite -> acyclic_iff_kat. *)
 Abort.
 
@@ -92,7 +95,7 @@ Proof. hkat'. Qed.
 
 (* KAT doesn't support transp *)
 Goal transp r ;; transp r <--> transp (r ;; r).
-Proof. lift_to_kat. repeat rewrite transp_iff_cnv. Fail kat'. Abort.
+Proof. lift_to_kat_all. repeat rewrite transp_iff_cnv. Fail kat'. Abort.
 
 Goal ⦗d⦘ <--> transp ⦗d⦘.
 Proof. Fail kat'. Abort.
@@ -131,7 +134,7 @@ Goal forall (H1: prefix_clos d r) (H2: prefix_clos d r'),
     prefix_clos d (r ;; r).
 Proof.
   unfold prefix_clos.
-  lift_to_kat.
+  lift_to_kat_all.
   hkat''.
 Qed.
 

@@ -335,16 +335,17 @@ Section PropertiesSeqUnion.
   Lemma seq_eqvK_l (dom1 dom2 : A -> Prop) (IMP: forall x, dom2 x -> dom1 x) :
     ⦗dom1⦘ ⨾ ⦗dom2⦘ <--> ⦗dom2⦘.
   Proof.
-    assert (dom2 ≦ dom1).
-    { simpl. assumption. }
-    hkat'. Qed.
+    assert (dom2 ≦ dom1). { assumption. }
+    hkat'.
+  Qed.
 
   Lemma seq_eqvK_r (dom1 dom2 : A -> Prop) (IMP: forall x, dom1 x -> dom2 x) :
     ⦗dom1⦘ ⨾ ⦗dom2⦘ <--> ⦗dom1⦘.
-  Proof. 
+  Proof.
     assert (dom1 ≦ dom2).
     { simpl. assumption. }
-    hkat'. Qed.
+    hkat'.
+  Qed.
 
   Lemma seq_eqvC (doma domb : A -> Prop) :
     ⦗doma⦘ ⨾ ⦗domb⦘ <--> ⦗domb⦘ ⨾ ⦗doma⦘.
@@ -353,9 +354,10 @@ Section PropertiesSeqUnion.
   Lemma seq_eqv (doma domb : A -> Prop) :
     ⦗doma⦘ ⨾ ⦗domb⦘ <--> ⦗fun x => doma x /\ domb x⦘.
   Proof.
-    assert (⦗fun x => doma x /\ domb x⦘ = ⦗cap doma domb⦘). reflexivity.
+    assert ((fun x => doma x /\ domb x) = cap doma domb). { reflexivity. }
     rewrite H.
-    kat'. Qed.
+    kat'.
+  Qed.
 
   Lemma union_absorb_l r r' (SUB: r ⊆ r') : r ∪ r' <--> r'.
   Proof. u. Qed.
@@ -364,11 +366,7 @@ Section PropertiesSeqUnion.
   Proof. u. Qed.
 
   Lemma id_union (s s': A -> Prop) : ⦗s ∪₁ s'⦘ <--> ⦗s⦘ ∪ ⦗s'⦘.
-  Proof.
-    assert (s ∪₁ s' = s ⊔ s'). reflexivity.
-    rewrite H.
-    lift_to_kat. kat'.
-    Qed.
+  Proof. kat'. Qed.
 
 End PropertiesSeqUnion.
 
@@ -1295,8 +1293,8 @@ Qed.
 
 Lemma seqA2 A (r r' r'' : relation A) x y :
   ((r⨾ r')⨾ r'') x y <-> (r⨾ r'⨾ r'') x y.
-Proof.
-  kat'.
+Proof. 
+  generalize x y; kat'.
 Qed.
 
 Lemma inclusion_t_r_t A (r r' r'': relation A) :

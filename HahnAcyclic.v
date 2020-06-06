@@ -197,11 +197,11 @@ Section PathDom.
 
     rewrite ct_end, seqA, !seq_union_l, !seqA.
     rewrite <- rt_ct in H0; eapply irreflexive_inclusion, H0.
-    clear -A B; lift_dom; hkat'.
+    clear -A B; hkat'.
 
     rewrite ct_begin, irreflexive_seqC, <- !seqA, !seq_union_r, !seqA.
     rewrite <- ct_rt in H0; eapply irreflexive_inclusion, H0.
-    clear -A B; lift_dom; hkat'.
+    clear -A B; hkat'.
 
     rewrite seqA; sin_rewrite ct_ct.
     eapply irreflexive_inclusion, H0; eauto using inclusion_t_r_t with hahn.

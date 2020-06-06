@@ -637,7 +637,7 @@ Hint Immediate inclusion_eqv_rt inclusion_eqv_cr : hahn.
 Lemma clos_trans_of_clos_trans A (r : relation A) x y :
   r⁺⁺ x y <-> r⁺ x y.
 Proof.
-  kat'.
+  generalize x y; kat'.
 Qed.
 
 Lemma clos_trans_of_clos_trans1 A (r r' : relation A) x y :

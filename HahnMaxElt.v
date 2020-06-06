@@ -22,45 +22,28 @@ Local Lemma sym A: forall (x y: A), x = y <-> y = x.
 Proof. firstorder. Qed.
 
 Lemma max_elt_iff_kat (A: Type) (a: A) r:
-  max_elt r a <-> ⦗eq a⦘ ;; r ⊆ bot.
+  max_elt r a <-> ⦗eq a⦘ ;; r ⊆ ∅₂.
 Proof.
-  unfold max_elt. split.
-  - intro. unfold inclusion, bot, seq, eqv_rel; simpl.
-    intros x y [z [[H1 H2] H3]].
-    rewrite <- H1 in H3; rewrite <- H2 in H3.
-    apply H in H3. assumption.
-  - unfold inclusion, bot, seq, eqv_rel. simpl.
-    intros. apply H with (x:=a)(y:=b).
-    exists a. auto.
+  unfold_all; unfold max_elt; firstorder.
+  - eapply H. rewrite H2, H0. apply H1.
+  - eapply H. esplits; eauto.
 Qed.
-
-Ltac lift_max_elt := repeat rewrite max_elt_iff_kat in *.
 
 Local Axiom LEM: forall (A: Type) (a b: A), (a = b) \/ (not (a = b)). (* TODO *)
 
 Lemma wmax_elt_iff_kat (A: Type) (a: A) r:
-    wmax_elt r a <-> ⦗eq a⦘ ;; r ;; ⦗(@neg dset')(eq a)⦘ ⊆ bot.
+    wmax_elt r a <-> ⦗eq a⦘ ;; r ;; ⦗(@neg dset')(eq a)⦘ ⊆ ∅₂.
 Proof.
-  unfold wmax_elt, inclusion, bot, seq, eqv_rel. simpl.
-  split.
-  - intros H x y [z [[H0 H1] [z0 [H3 [H4 H5]]]]].
-    apply H5.
-    rewrite H4 in *; clear H4 z0.
-    rewrite <- H0 in *; clear H0 z.
-    rewrite <- H1 in H3; clear H1. apply H in H3. assumption.
-  - intros.
-    assert (a <> b -> False).
-    { intro. specialize (H a b).
-      apply H. exists a. split; [> split; reflexivity | exists b].
-      split; [> apply REL | split; [> reflexivity | intro; apply H0; assumption]].
-    }
-    remember (LEM a b) as lem. clear Heqlem.
-    destruct lem.
+  unfold_all; unfold wmax_elt; firstorder.
+  - apply H4. apply H. congruence.
+  - assert (a <> b -> False).
+    { intro; eapply H; esplits; eauto. }
+    destruct (LEM a b).
     + assumption.
     + apply H0 in H1. destruct H1.
 Qed.
 
-Ltac lift_wmax_elt := repeat rewrite -> wmax_elt_iff_kat in *.
+Hint Rewrite max_elt_iff_kat wmax_elt_iff_kat: redefDb.
 
 Local Notation "a <--> b" := (same_relation a b)  (at level 60).
 
@@ -83,34 +66,22 @@ Lemma set_equiv_wmax_elt (S: r <--> r') : wmax_elt r ≡₁ wmax_elt r'.
 Proof. unfold wmax_elt, same_relation, set_equiv in *; intuition; eauto. Qed.
 
 Lemma max_elt_weaken : max_elt r a -> wmax_elt r a.
-Proof.
-  lift_max_elt; lift_wmax_elt; hkat'.
-Qed.
+Proof. hkat'. Qed.
 
 Lemma max_elt_union : max_elt r a -> max_elt r' a -> max_elt (r +++ r') a.
-Proof.
-  lift_max_elt; hkat'.
-Qed.
+Proof. hkat'. Qed.
 
 Lemma wmax_elt_union : wmax_elt r a -> wmax_elt r' a -> wmax_elt (r +++ r') a.
-Proof.
-  lift_wmax_elt; hkat'.
-Qed.
+Proof. hkat'. Qed.
 
 Lemma max_elt_t : max_elt r a -> max_elt (r⁺) a.
-Proof.
-  lift_max_elt; hkat'.
-Qed.
+Proof. hkat'. Qed.
 
 Lemma wmax_elt_rt : wmax_elt r a -> wmax_elt (r＊) a.
-Proof.
-  lift_wmax_elt; hkat'.
-Qed.
+Proof. hkat'. Qed.
 
 Lemma wmax_elt_t : wmax_elt r a -> wmax_elt (r⁺) a.
-Proof.
-  lift_wmax_elt; hkat'.
-Qed.
+Proof. hkat'. Qed.
 
 Lemma wmax_elt_eqv (f: A -> Prop) : wmax_elt (eqv_rel f) a.
 Proof.
@@ -131,29 +102,19 @@ Qed.
 
 Lemma wmax_elt_r :
   wmax_elt r a -> wmax_elt (r^?) a.
-Proof.
-  lift_wmax_elt; hkat'.
-Qed.
+Proof. hkat'. Qed.
 
 Lemma max_elt_seq1 : max_elt r a -> max_elt (r ⨾ r') a.
-Proof.
-  lift_max_elt; hkat'.
-Qed.
+Proof. hkat'. Qed.
 
 Lemma wmax_elt_seq2 : wmax_elt r a -> wmax_elt r' a -> wmax_elt (r ⨾ r') a.
-Proof.
-  lift_wmax_elt; hkat'.
-Qed.
+Proof. hkat'. Qed.
 
 Lemma wmax_elt_seq1 : max_elt r a -> wmax_elt (r ⨾ r') a.
-Proof.
-  lift_max_elt; lift_wmax_elt; hkat'.
-Qed.
+Proof. hkat'. Qed.
 
 Lemma max_elt_seq2 : wmax_elt r a -> max_elt r' a -> max_elt (r ⨾ r') a.
-Proof.
-  lift_max_elt; lift_wmax_elt; hkat'.
-Qed.
+Proof. hkat'. Qed.
 
 End BasicProperties.
 
@@ -178,85 +139,61 @@ Proof.
   exists y; split; [> assumption | split; [> reflexivity | firstorder ]].
 Qed.
 
-Ltac lift_cod := rewrite -> cod_iff_kat in *.
+Hint Rewrite cod_iff_kat: redefDb.
 
 Lemma seq_max r r' b
       (MAX: max_elt r' b) (COD: forall x y, r x y -> y = b) :
   r ⨾ r' <--> ∅₂.
-Proof.
-  lift_cod; lift_max_elt; hkat'.
-Qed.
+Proof. hkat'. Qed.
 
 Lemma seq_max_t r r' b
       (MAX: max_elt r' b) (COD: forall x y, r x y -> y = b) :
   r⨾ r' ⁺ <--> ∅₂.
-Proof.
-  lift_cod; lift_max_elt; hkat'.
-Qed.
+Proof. hkat'. Qed.
 
 Lemma seq_max_rt r r' b
       (MAX: max_elt r' b) (COD: forall x y, r x y -> y = b) :
   r ⨾ r'＊ <--> r.
-Proof.
-  lift_cod; lift_max_elt; hkat'.
-Qed.
+Proof. hkat'. Qed.
 
 Lemma seq_max_r r r' b
       (MAX: max_elt r' b) (COD: forall x y, r x y -> y = b) :
   r ⨾ r'^? <--> r.
-Proof.
-  lift_cod; lift_max_elt; hkat'.
-Qed.
+Proof. hkat'. Qed.
 
 Lemma seq_eq_max r b (MAX: max_elt r b) :
   ⦗eq b⦘ ⨾ r <--> ∅₂.
-Proof.
-  lift_max_elt; hkat'.
-Qed.
+Proof. hkat'. Qed.
 
 Lemma seq_eq_max_t r b (MAX: max_elt r b) :
   ⦗eq b⦘ ⨾ r⁺ <--> ∅₂.
-Proof.
-  lift_max_elt; hkat'.
-Qed.
+Proof. hkat'. Qed.
 
 Lemma seq_eq_max_rt r b (MAX: max_elt r b) :
   ⦗eq b⦘ ⨾ r＊ <--> ⦗eq b⦘.
-Proof.
-  lift_max_elt; hkat'.
-Qed.
+Proof. hkat'. Qed.
 
 Lemma seq_eq_max_r r b (MAX: max_elt r b) :
   ⦗eq b⦘ ⨾ r^? <--> ⦗eq b⦘.
-Proof.
-  lift_max_elt; hkat'.
-Qed.
+Proof. hkat'. Qed.
 
 Lemma seq_singl_max r a b (MAX: max_elt r b) :
   singl_rel a b ⨾ r <--> ∅₂.
-Proof.
-  lift_max_elt; hkat'.
-Qed.
+Proof. hkat'. Qed.
 
 Lemma seq_singl_max_t r a b (MAX: max_elt r b) :
   singl_rel a b ⨾ r⁺ <--> ∅₂.
-Proof.
-  lift_max_elt; hkat'.
-Qed.
+Proof. hkat'. Qed.
 
 Lemma seq_singl_max_rt r a b (MAX: max_elt r b) :
   singl_rel a b ⨾ r＊ <--> singl_rel a b.
-Proof.
-  lift_max_elt; hkat'.
-Qed.
+Proof. hkat'. Qed.
 
 Lemma seq_singl_max_r r a b (MAX: max_elt r b) :
   singl_rel a b ⨾ r^? <--> singl_rel a b.
-Proof.
-  lift_max_elt; hkat'.
-Qed.
+Proof. hkat'. Qed.
 
-Lemma max_elt_test r: ⦗max_elt r⦘ ;; r ⊆ bot.
+Lemma max_elt_test r: ⦗max_elt r⦘ ;; r ⊆ ∅₂.
 Proof. basic_solver. Qed.
 
 Lemma seq_eqv_max r : 

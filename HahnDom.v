@@ -30,38 +30,27 @@ Local Axiom LEM: forall (A: Type) (d : A -> Prop) (x: A), (d x) \/ (not (d x)). 
 
 Lemma doma_iff_kat r d: doma r d <-> ⦗(@neg dset') d⦘ ;; r ⊆ ∅₂.
 Proof.
-  split.
-    + unfold_all. intros DA x y [z [[H0 H1] H2]].
-      rewrite <- H0 in H2; apply DA in H2. apply H1; apply H2.
-    + unfold_all. unfold doma. intros.
-      specialize (H x y).
-      assert (not (d x) -> False).
-      { intro. apply H. exists x. split; [> split; [> reflexivity | assumption] | assumption]. }
-      destruct (LEM d x).
-      * assumption.
-      * apply H0 in H1. destruct H1.
+  unfold_all. unfold doma. firstorder.
+  - eapply H2, H. rewrite H0; apply H1.
+  - assert (not (d x) -> False).
+    { intro. eapply H. esplits; eauto. }
+    destruct (LEM d x).
+    + assumption.
+    + apply H0 in H1. destruct H1.
 Qed.
 
 Lemma domb_iff_kat r d: domb r d <-> (r ;; ⦗(@neg dset') d⦘ ⊆ ∅₂).
 Proof.
-  split; unfold_all. intro H.
-  - intros x y [z [H0 [H1 H2]]].
-    rewrite H1 in *; apply H in H0. apply H2; apply H0.
-  - unfold domb. intros.
-    specialize (H x y).
-    assert (not (d y) -> False).
-    { intro. apply H. exists y. auto. }
+  unfold_all. unfold domb. split.
+  - firstorder.
+  - intros.
+    assert (not (d y) -> False). { eauto. }
     destruct (LEM d y).
     + assumption.
     + apply H0 in H1. destruct H1.
 Qed.
 
-Lemma lift_dom_impl {d d': A -> Prop}: (forall a, d a -> d' a) <-> (d ≦ d').
-Proof. reflexivity. Qed.
-
-Ltac lift_dom := repeat rewrite -> doma_iff_kat in *;
-                 repeat rewrite -> domb_iff_kat in *;
-                 repeat rewrite -> lift_dom_impl in *.
+Hint Rewrite doma_iff_kat domb_iff_kat: redefDb.
 
 Section Lemmas.
 
@@ -70,16 +59,16 @@ Section Lemmas.
   Variables d d' : A -> Prop.
 
   Lemma eqv_doma : doma ⦗d⦘ d.
-  Proof. lift_dom; kat'. Qed.
+  Proof. kat'. Qed.
 
   Lemma eqv_domb : domb ⦗d⦘ d.
-  Proof. lift_dom; kat'. Qed.
+  Proof. kat'. Qed.
 
   Lemma seq_eqv_doma : doma r d -> doma (⦗d'⦘ ⨾ r) d.
-  Proof. lift_dom; hkat'. Qed.
+  Proof. hkat'. Qed.
 
   Lemma seq_eqv_domb : domb r d -> domb (r ⨾ ⦗d'⦘) d.
-  Proof. lift_dom; hkat'. Qed.
+  Proof. hkat'. Qed.
 
   Lemma restr_eq_rel_doma : doma r d -> doma (restr_eq_rel f r) d.
   Proof. unfold doma, restr_eq_rel; ins; desf; eauto. Qed.
@@ -88,28 +77,28 @@ Section Lemmas.
   Proof. unfold domb, restr_eq_rel; ins; desf; eauto. Qed.
 
   Lemma seq_doma : doma r d -> doma (r ⨾ r') d.
-  Proof. lift_dom; hkat'. Qed.
+  Proof. hkat'. Qed.
 
   Lemma seq_domb : domb r' d -> domb (r ⨾ r') d.
-  Proof. lift_dom; hkat'. Qed.
+  Proof. hkat'. Qed.
 
   Lemma union_doma : doma r d -> doma r' d -> doma (r ∪ r') d.
-  Proof. lift_dom. hkat'. Qed.
+  Proof. hkat'. Qed.
 
   Lemma union_domb : domb r d -> domb r' d -> domb (r ∪ r') d.
-  Proof. lift_dom. hkat'. Qed.
+  Proof. hkat'. Qed.
 
   Lemma ct_doma : doma r d -> doma r⁺ d.
-  Proof. lift_dom; hkat'. Qed.
+  Proof. hkat'. Qed.
 
   Lemma ct_domb : domb r d -> domb r⁺ d.
-  Proof. lift_dom; hkat'. Qed.
+  Proof. hkat'. Qed.
 
   Lemma seq_r_doma : doma r d -> doma r' d -> doma (r^? ⨾ r') d.
-  Proof. lift_dom. hkat'. Qed.
+  Proof. hkat'. Qed.
 
   Lemma seq_r_domb : domb r d -> domb r' d -> domb (r ⨾ r'^?) d.
-  Proof. lift_dom. hkat'. Qed.
+  Proof. hkat'. Qed.
 
   Lemma minus_doma : doma r d -> doma (r \ r') d.
   Proof. unfold doma, minus_rel; ins; desf; eauto. Qed.
@@ -120,26 +109,26 @@ Section Lemmas.
   Lemma doma_inter_r : doma r (d ∩₁ d') <-> doma r d /\ doma r d'.
   Proof.
     split; [> intro; split | intros [H1 H2]].
-    all: lift_dom; hkat'.
+    all: hkat'.
   Qed.
 
   Lemma domb_inter_r : domb r (d ∩₁ d') <-> domb r d /\ domb r d'.
   Proof.
     split; [> intro; split | intros [H1 H2]].
-    all: lift_dom; hkat'.
+    all: hkat'.
   Qed.
 
   Lemma restr_doma : doma (restr_rel d r) d.
-  Proof. lift_dom; kat'. Qed.
+  Proof. kat'. Qed.
 
   Lemma restr_domb : domb (restr_rel d r) d.
-  Proof. lift_dom; kat'. Qed.
+  Proof. kat'. Qed.
 
   Lemma restr_doma_mon : doma r d -> doma (restr_rel d' r) d.
-  Proof. lift_dom; hkat'. Qed.
+  Proof. hkat'. Qed.
 
   Lemma restr_domb_mon : domb r d -> domb (restr_rel d' r) d.
-  Proof. lift_dom; hkat'. Qed.
+  Proof. hkat'. Qed.
 
   Lemma dom_empty : dom_rel (A:=A) ∅₂ ≡₁ ∅.
   Proof. unfolder; split; ins; desf. Qed. 
@@ -191,47 +180,51 @@ Section Lemmas.
 
   (* NOTE: cross_rel contains top, that isn't support fully *)
   Lemma cross_doma : doma (d × d') d.
-  Proof. lift_dom. kat'. Qed.
+  Proof. kat'. Qed.
 
   (* NOTE: cross_rel contains top, that isn't support fully *)
   Lemma cross_domb : domb (d × d') d'.
-  Proof. lift_dom. kat'. Qed.
+  Proof. kat'. Qed.
+
+  Lemma lift_dom_impl: (forall a, d a -> d' a) <-> (d ≦ d').
+  Proof. reflexivity. Qed.
+  Hint Rewrite lift_dom_impl: redefDb.
 
   Lemma doma_implies : (forall a, d a -> d' a) -> doma r d -> doma r d'.
-  Proof. lift_dom. hkat'. Qed.
+  Proof. hkat'. Qed.
 
   Lemma domb_implies : (forall a, d a -> d' a) -> domb r d -> domb r d'.
-  Proof. lift_dom. hkat'. Qed.
+  Proof. hkat'. Qed.
 
   Lemma doma_fold :
     (doma r d) -> (forall a, d a -> d' a) -> ⦗d'⦘ ⨾ r <--> r.
-  Proof. lift_dom. hkat'. Qed.
+  Proof. hkat'. Qed.
 
   Lemma domb_fold :
     (domb r d) -> (forall a, d a -> d' a) -> r ⨾ ⦗d'⦘ <--> r.
-  Proof. lift_dom. hkat'. Qed.
+  Proof. hkat'. Qed.
 
   Lemma doma_rewrite : doma r d -> r ⊆ ⦗d⦘ ⨾ r. 
-  Proof. lift_dom. hkat'. Qed.
+  Proof. hkat'. Qed.
 
   Lemma domb_rewrite : domb r d -> r ⊆ r ⨾ ⦗d⦘. 
-  Proof. lift_dom. hkat'. Qed.
+  Proof. hkat'. Qed.
 
   Lemma doma_helper : r ⊆ ⦗d⦘ ⨾ r <-> doma r d.
   Proof.
-    split; lift_dom; [> hkat'' | hkat'].
+    split; [> hkat'' | hkat'].
   Qed.
 
   Lemma domb_helper : r ⊆ r ⨾ ⦗d⦘ <-> domb r d.
   Proof. 
-    split; lift_dom; [> hkat'' | hkat'].
+    split; [> hkat'' | hkat'].
   Qed.
   
   Lemma domab_helper : 
     r ⊆ ⦗d⦘ ⨾ r ⨾ ⦗d'⦘ <-> doma r d /\ domb r d'.
   Proof.
-    split; lift_dom; intros.
-    - split; (rewrite H; kat').
+    split; intros.
+    - split; lift_to_kat_all; rewrite H; kat'.
     - destruct H; hkat'.
   Qed.
 
@@ -240,9 +233,9 @@ Section Lemmas.
     r ⊆ d × d' <-> doma r d /\ domb r d'.
   Proof.
     split.
-    - lift_dom; rewrite cross_rel_iff_kat.
-      intros. rewrite H. split; kat'.
-    - (* lift_dom. intros [H1 H2]. *)
+    - rewrite cross_rel_iff_kat.
+      intros; lift_to_kat_all; rewrite H; split; kat'.
+    - (* intros [H1 H2]. *)
       (* assert (r ⊆ ⦗d⦘ ;; r ;; ⦗d'⦘). hkat'. *)
       (* rewrite H. kat'.  *)
       unfold doma, domb, cross_rel, inclusion; intuition; firstorder.
@@ -250,17 +243,17 @@ Section Lemmas.
 
   Lemma dom_to_doma : r <--> ⦗d⦘ ⨾ r ⨾ ⦗d'⦘ -> doma r d.
   Proof.
-    lift_dom; intro H; rewrite H; kat'.
+    intro H; lift_to_kat_all; rewrite H; kat'.
   Qed.
 
   Lemma dom_to_domb : r <--> ⦗d⦘ ⨾ r ⨾ ⦗d'⦘ -> domb r d'.
   Proof.
-    lift_dom; intro H; rewrite H; kat'.
+    intro H; lift_to_kat_all; rewrite H; kat'.
   Qed.
 
   Lemma dom_l : r <--> ⦗d⦘ ⨾ r ⨾ ⦗d'⦘ -> r <--> ⦗d⦘ ⨾ r.
   Proof.
-    intro H; rewrite H; kat'.
+    intro H; lift_to_kat_all; rewrite H; kat'.
   Qed.
 
   Lemma dom_r : r <--> ⦗d⦘ ⨾ r ⨾ ⦗d'⦘ -> r <--> r ⨾ ⦗d'⦘.
@@ -406,10 +399,10 @@ Section Lemmas.
 End Lemmas.
 
 Lemma doma_eqv (d : A -> Prop) (r : relation A): doma (⦗d⦘ ⨾ r) d.
-Proof. lift_dom. kat'. Qed.
+Proof. kat'. Qed.
 
 Lemma domb_eqv (d : A -> Prop) (r : relation A): domb (r ⨾ ⦗d⦘) d.
-Proof. lift_dom. kat'. Qed.
+Proof. kat'. Qed.
 
 Lemma acyc_dom (r: relation A) d e
       (E1: r ⊆ (⦗d⦘ ∪ ⦗e⦘) ⨾ r ⨾ (⦗d⦘ ∪ ⦗e⦘))
@@ -454,9 +447,7 @@ Qed.
 
 End Domains.
 
-Ltac lift_dom := repeat rewrite -> doma_iff_kat in *;
-                 repeat rewrite -> domb_iff_kat in *;
-                 repeat rewrite -> lift_dom_impl in *.
+Hint Rewrite doma_iff_kat domb_iff_kat: redefDb.
 
 Add Parametric Morphism A : (@doma A) with signature
   inclusion --> set_subset ==> Basics.impl as doma_mori.

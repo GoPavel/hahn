@@ -281,9 +281,7 @@ Section PathDom.
 
   Lemma path_ur r r' adom bdom (DA: doma r' adom) (DB: domb r' bdom) :
     (r ∪ r')⁺ <--> r⁺ ∪ (r⁺ ⨾ ⦗adom⦘ ∪ r')⁺ ⨾ (⦗bdom⦘ ⨾ r⁺)^?.
-  Proof.
-    lift_dom. hkat'.
-  Qed.
+  Proof. hkat'. Qed.
 
   Lemma path_tur2 r r' adom bdom
         (T: transitive r')
@@ -301,9 +299,7 @@ Section PathDom.
 
   Lemma path_ur2 r r' adom bdom (A: doma r adom) (B: domb r bdom) :
     (r ∪ r')⁺ <--> r'⁺ ∪ (r'⁺ ⨾ ⦗adom⦘)^? ⨾ (r ∪ ⦗bdom⦘ ⨾ r'⁺)⁺.
-  Proof.
-    lift_dom. hkat'.
-  Qed.
+  Proof. hkat'. Qed.
 
 End PathDom.
 
