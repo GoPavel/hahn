@@ -7,8 +7,6 @@ Require Import HahnBase HahnList HahnRelationsBasic HahnRewrite.
 
 Set Implicit Arguments.
 
-Local Notation "a ≡ b" := (same_relation a b)  (at level 60).
-
 Lemma mod_S_expand i n (NZ : n <> 0) : 
   (S i mod n) = if eq_op n 1 then 0 else if eq_op (S (i mod n)) n then 0 else S (i mod n).
 Proof.

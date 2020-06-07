@@ -3,10 +3,6 @@ Require Import HahnRewrite.
 Require Import Setoid.
 Set Implicit Arguments.
 
-Local Notation "a ≡ b" := (same_relation a b)  (at level 60).
-Local Notation "a ^+" := (clos_trans a) (at level 1, only parsing).
-Local Notation "a ^*" := (clos_refl_trans a) (at level 1, only parsing).
-
 Section Defs.
   Variable A : Type.
 

@@ -9,6 +9,10 @@ Require Import RelationAlgebra.kat.
 
 Require Import HahnRelationsBasicDef HahnBase.
 
+Require Export Setoid Morphisms. 
+Arguments Proper {_} _ _ : simpl never.
+Arguments respectful {_ _} _ _ _ _: simpl never.
+
 Require Import Coq.Logic.FunctionalExtensionality.
 
 Set Implicit Arguments.
@@ -40,8 +44,6 @@ Canonical Structure rel_lattice_ops {A: Type}: lattice.ops :=
      bot := bot_rel;
      top := top_rel;
   |}.
-
-Require Export Setoid Morphisms. 
 
 Instance rel_lattice_laws {A: Type}:
   lattice.laws (BDL+CKA) (@rel_lattice_ops A).

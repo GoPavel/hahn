@@ -6,8 +6,6 @@ Require Import HahnBase HahnList HahnRelationsBasic.
 
 Set Implicit Arguments.
 
-Local Notation "a ≡ b" := (same_relation a b)  (at level 60).
-
 (** We define three constructions:
 - [total_order_from_list] constructs a total order from a list of elements.
 - [mk_tou] constructs a union of total orders from a list of element lists.

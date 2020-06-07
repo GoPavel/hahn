@@ -7,11 +7,8 @@ Require Import HahnEquational HahnRewrite HahnMaxElt.
 Require Import NPeano Omega Setoid.
 
 Require Import HahnKat.
-Require Import RelationAlgebra.lattice.
 
 Set Implicit Arguments.
-
-Local Notation "a <--> b" := (same_relation a b)  (at level 60).
 
 Definition min_elt A (r: relation A) (a : A) :=
   forall b (REL: r b a), False.
@@ -31,7 +28,7 @@ Qed.
 Local Axiom LEM: forall (A: Type) (a b: A), (a = b) \/ (not (a = b)). (* TODO *)
 
 Lemma wmin_elt_iff_kat A (r: relation A) (a: A):
-  wmin_elt r a <-> ⦗@neg dset' (eq a)⦘ ;; r ;; ⦗eq a⦘ ⊆ ∅₂.
+  wmin_elt r a <-> ⦗set_compl (eq a)⦘ ;; r ;; ⦗eq a⦘ ⊆ ∅₂.
 Proof.
   unfold_all; unfold wmin_elt; firstorder.
   - apply H2; apply H; congruence.
@@ -66,10 +63,10 @@ Proof. unfold min_elt, inclusion, set_subset in *; intuition; eauto. Qed.
 Lemma set_subset_wmin_elt (S: r' ⊆ r) : wmin_elt r ⊆₁ wmin_elt r'.
 Proof. unfold wmin_elt, inclusion, set_subset in *; intuition; eauto. Qed.
 
-Lemma set_equiv_min_elt (S: r <--> r') : min_elt r ≡₁ min_elt r'.
+Lemma set_equiv_min_elt (S: r ≡ r') : min_elt r ≡₁ min_elt r'.
 Proof. unfold min_elt, same_relation, set_equiv, set_subset in *; intuition; eauto. Qed.
 
-Lemma set_equiv_wmin_elt (S: r <--> r') : wmin_elt r ≡₁ wmin_elt r'.
+Lemma set_equiv_wmin_elt (S: r ≡ r') : wmin_elt r ≡₁ wmin_elt r'.
 Proof. unfold wmin_elt, same_relation, set_equiv in *; intuition; eauto. Qed.
 
 Lemma min_elt_weaken : min_elt r a -> wmin_elt r a.
@@ -139,7 +136,7 @@ Variable A : Type.
 Implicit Type r : relation A.
 
 Lemma dom_iff_kat r b:
-  (forall x y, r x y -> x = b) <-> ⦗@neg dset' (eq b)⦘ ;; r ⊆ bot.
+  (forall x y, r x y -> x = b) <-> ⦗set_compl (eq b)⦘ ;; r ⊆ ∅₂.
 Proof.
   split; unfold_all; firstorder.
   - apply H2; symmetry. rewrite H0; apply (H x0 y); apply H1.
@@ -152,111 +149,111 @@ Hint Rewrite dom_iff_kat: redefDb.
 
 Lemma seq_min r r' b
       (MAX: min_elt r b) (DOM: forall x y, r' x y -> x = b) :
-  r ⨾ r' <--> ∅₂.
+  r ⨾ r' ≡ ∅₂.
 Proof. hkat'. Qed.
 
 Lemma seq_min_t r r' b
       (MAX: min_elt r b) (DOM: forall x y, r' x y -> x = b) :
-  r ⁺ ⨾ r'  <--> ∅₂.
+  r ⁺ ⨾ r'  ≡ ∅₂.
 Proof. hkat'. Qed.
 
 Lemma seq_min_rt r r' b
       (MAX: min_elt r b) (COD: forall x y, r' x y -> x = b) :
-  r ＊ ⨾ r' <--> r'.
+  r ＊ ⨾ r' ≡ r'.
 Proof. hkat'. Qed.
 
 Lemma seq_min_r r r' b
       (MAX: min_elt r b) (COD: forall x y, r' x y -> x = b) :
-  r ^? ⨾ r' <--> r'.
+  r ^? ⨾ r' ≡ r'.
 Proof. hkat'. Qed.
 
 Lemma seq_min_eq r b (MAX: min_elt r b) :
-  r ⨾⦗eq b⦘ <--> ∅₂.
+  r ⨾⦗eq b⦘ ≡ ∅₂.
 Proof. hkat'. Qed.
 
 Lemma seq_min_t_eq r b (MAX: min_elt r b) :
-  r⁺ ⨾⦗eq b⦘ <--> ∅₂.
+  r⁺ ⨾⦗eq b⦘ ≡ ∅₂.
 Proof. hkat'. Qed.
 
 Lemma seq_min_rt_eq r b (MAX: min_elt r b) :
-  r＊ ⨾⦗eq b⦘ <--> ⦗eq b⦘.
+  r＊ ⨾⦗eq b⦘ ≡ ⦗eq b⦘.
 Proof. hkat'. Qed.
 
 Lemma seq_min_r_eq r b (MAX: min_elt r b) :
-  r^? ⨾⦗eq b⦘ <--> ⦗eq b⦘.
+  r^? ⨾⦗eq b⦘ ≡ ⦗eq b⦘.
 Proof. hkat'. Qed.
 
 Lemma seq_min_singl r a b (MAX: min_elt r a) :
-  r ⨾ singl_rel a b <--> ∅₂.
+  r ⨾ singl_rel a b ≡ ∅₂.
 Proof. hkat'. Qed.
 
 Lemma seq_min_t_singl r a b (MAX: min_elt r a) :
-  r⁺ ⨾ singl_rel a b <--> ∅₂.
+  r⁺ ⨾ singl_rel a b ≡ ∅₂.
 Proof. hkat'. Qed.
 
 Lemma seq_min_rt_singl r a b (MAX: min_elt r a) :
-  r＊ ⨾ singl_rel a b <--> singl_rel a b.
+  r＊ ⨾ singl_rel a b ≡ singl_rel a b.
 Proof. hkat'. Qed.
 
 Lemma seq_min_r_singl r a b (MAX: min_elt r a) :
-  r^? ⨾ singl_rel a b <--> singl_rel a b.
+  r^? ⨾ singl_rel a b ≡ singl_rel a b.
 Proof. hkat'. Qed.
 
 Lemma min_elt_test r: r ;; ⦗min_elt r⦘ ⊆ ∅₂.
 Proof. basic_solver. Qed.
 
 Lemma seq_eqv_min r : 
-  r ⨾ ⦗min_elt r⦘ <--> ∅₂.
+  r ⨾ ⦗min_elt r⦘ ≡ ∅₂.
 Proof.
   pose (@min_elt_test r); hkat'.
 Qed.
 
 Lemma seq_t_eqv_minasd  r :
-  r⁺ ⨾ ⦗min_elt r⦘ <--> ∅₂.
+  r⁺ ⨾ ⦗min_elt r⦘ ≡ ∅₂.
 Proof.
   pose (@min_elt_test r); hkat'.
 Qed.
 
 Lemma seq_rt_eqv_min r :
-  r＊ ⨾ ⦗min_elt r⦘ <--> ⦗min_elt r⦘.
+  r＊ ⨾ ⦗min_elt r⦘ ≡ ⦗min_elt r⦘.
 Proof.
   pose (@min_elt_test r); hkat'.
 Qed.
 
 Lemma seq_r_eqv_min r :
-  r^? ⨾ ⦗min_elt r⦘ <--> ⦗min_elt r⦘.
+  r^? ⨾ ⦗min_elt r⦘ ≡ ⦗min_elt r⦘.
 Proof.
   pose (@min_elt_test r); hkat'.
 Qed.
 
 (* Require Import RelationAlgebra.kat. *)
 
-(* FAIL I can't use [dual min_elt_test_dual] *)
+(* TODO try to use dual *)
 Lemma min_elt_test_dual r: ⦗min_elt r⦘ ⨾ r⁻¹ ⊆ ∅₂.
 Proof.
   basic_solver.
 Qed.
 
 Lemma seq_eqv_min_transp r : 
-  ⦗min_elt r⦘ ⨾ r⁻¹  <--> ∅₂.
+  ⦗min_elt r⦘ ⨾ r⁻¹  ≡ ∅₂.
 Proof.
   pose (@min_elt_test_dual r); hkat'.
 Qed.
 
 Lemma seq_eqv_min_transp_t r :
-  ⦗min_elt r⦘ ⨾ (r⁻¹)⁺ <--> ∅₂.
+  ⦗min_elt r⦘ ⨾ (r⁻¹)⁺ ≡ ∅₂.
 Proof.
   pose (@min_elt_test_dual r); hkat'.
 Qed.
 
 Lemma seq_eqv_min_transp_rt r :
-  ⦗min_elt r⦘ ⨾ (r⁻¹)＊  <--> ⦗min_elt r⦘.
+  ⦗min_elt r⦘ ⨾ (r⁻¹)＊  ≡ ⦗min_elt r⦘.
 Proof.
   pose (@min_elt_test_dual r); hkat'.
 Qed.
 
 Lemma seq_eqv_min_transp_r r :
-  ⦗min_elt r⦘ ⨾ (r⁻¹)^?  <--> ⦗min_elt r⦘.
+  ⦗min_elt r⦘ ⨾ (r⁻¹)^?  ≡ ⦗min_elt r⦘.
 Proof.
   pose (@min_elt_test_dual r); hkat'.
 Qed.
@@ -278,14 +275,14 @@ Qed.
 
 Lemma seq_wmin_rt r r' b
       (MAX: wmin_elt r b) (COD: forall x y, r' x y -> x = b) :
-  r ＊⨾ r' <--> r'.
+  r ＊⨾ r' ≡ r'.
 Proof.
   rewrite rtE; split; relsf; rewrite seq_wmin_t; relsf.
 Qed.
 
 Lemma seq_wmin_r r r' b
       (MAX: wmin_elt r b) (COD: forall x y, r' x y -> x = b) :
-  r ^?⨾ r' <--> r'.
+  r ^?⨾ r' ≡ r'.
 Proof.
   rewrite crE; split; relsf; rewrite seq_wmin; relsf.
 Qed.
@@ -303,13 +300,13 @@ Proof.
 Qed.
 
 Lemma seq_wmin_rt_eq r b (MAX: wmin_elt r b) :
-  r ＊ ⨾ ⦗eq b⦘ <--> ⦗eq b⦘.
+  r ＊ ⨾ ⦗eq b⦘ ≡ ⦗eq b⦘.
 Proof.
   rewrite rtE; split; relsf; rewrite seq_wmin_t_eq; relsf.
 Qed.
 
 Lemma seq_wmin_r_eq r b (MAX: wmin_elt r b) :
-  r ^? ⨾ ⦗eq b⦘ <--> ⦗eq b⦘.
+  r ^? ⨾ ⦗eq b⦘ ≡ ⦗eq b⦘.
 Proof.
   rewrite crE; split; relsf; rewrite seq_wmin_eq; relsf.
 Qed.
@@ -328,13 +325,13 @@ Proof.
 Qed.
 
 Lemma seq_wmin_rt_singl r a b (MAX: wmin_elt r a) :
-  r ＊ ⨾ singl_rel a b <--> singl_rel a b.
+  r ＊ ⨾ singl_rel a b ≡ singl_rel a b.
 Proof.
   rewrite rtE; split; relsf; rewrite seq_wmin_t_singl; relsf.
 Qed.
 
 Lemma seq_wmin_r_singl r a b (MAX: wmin_elt r a) :
-  r ^? ⨾ singl_rel a b <--> singl_rel a b.
+  r ^? ⨾ singl_rel a b ≡ singl_rel a b.
 Proof.
   rewrite crE; split; relsf; rewrite seq_wmin_singl; relsf.
 Qed.

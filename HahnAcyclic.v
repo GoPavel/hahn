@@ -8,15 +8,8 @@ Require Import HahnEquational HahnMaxElt HahnRewrite.
 Require Import HahnDom HahnMinPath HahnPath.
 
 Require Import HahnKat.
-Require Import RelationAlgebra.kat.
 
 Set Implicit Arguments.
-
-Local Notation "a <--> b" := (same_relation a b)  (at level 60).
-(*
-Local Notation "a ^+" := (clos_trans a) (at level 1, only parsing).
-Local Notation "a ^*" := (clos_refl_trans a) (at level 1, only parsing).
-*)
 
 Lemma acyclic_restr A d (r: relation A) : acyclic r -> acyclic (restr_rel d r).
 Proof.
@@ -274,14 +267,14 @@ Qed.
 (** Paths with disconnected relations *)
 (******************************************************************************)
 
-Lemma acyclic_disj A (r : relation A) (D: r ⨾ r <--> ∅₂) : acyclic r.
+Lemma acyclic_disj A (r : relation A) (D: r ⨾ r ≡ ∅₂) : acyclic r.
 Proof.
   by apply irreflexive_disj, ct_ct_disj.
 Qed.
 
 Lemma acyclic_unc X (r r' : relation X)
-      (A : r ⨾ r <--> ∅₂)
-      (B : r' ⨾ r' <--> ∅₂) :
+      (A : r ⨾ r ≡ ∅₂)
+      (B : r' ⨾ r' ≡ ∅₂) :
   acyclic (r ∪ r') <-> acyclic (r ⨾ r').
 Proof.
   unfold acyclic.
@@ -352,7 +345,7 @@ Proof.
   ins; unfold pref_union.
   assert (EQ: restr_rel (fun x => ~ dom x)
                     (fun x y => r x y \/ r' x y /\ ~ r y x)
-          <--> restr_rel (fun x => ~ dom x) r).
+          ≡ restr_rel (fun x => ~ dom x) r).
     unfold restr_rel; split; red; ins; desf; eauto.
     by specialize_full DL; eauto; ins; desf.
 

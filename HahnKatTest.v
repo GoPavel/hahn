@@ -9,6 +9,8 @@ Require Import HahnRelationsBasicDef HahnBase.
 Set Printing Coercions.
 Set Implicit Arguments.
 
+Notation "a <--> b" := (same_relation a b)  (at level 60, only parsing).
+
 Variable A : Type.
 Variables r r': relation A.
 Variables dom dom1 dom2 d d1 d2: A -> Prop.
@@ -90,7 +92,7 @@ Lemma inclusion_r_rt' : r ⊆ r' -> (union (@one _ tt) r) ⊆ r'＊.
 Proof. Abort. (* That type of hypotheses is not supported *)
  *)
 
-Goal r ⊆ bot -> r ⊆ r'.
+Goal r ⊆ ∅₂ -> r ⊆ r'.
 Proof. hkat'. Qed.
 
 (* KAT doesn't support transp *)
@@ -141,7 +143,7 @@ Qed.
 Goal (r ∪ r);;⦗(@neg dset')d⦘ <--> (r;;⦗(@neg dset')d⦘) ∪ (r;;⦗(@neg dset')d⦘).
 Proof. kat'. Qed.
 
-Goal (r ∪ r);;⦗(@neg dset')d⦘ ⊆ bot <-> r;;⦗(@neg dset')d⦘ ∪ r;;⦗(@neg dset')d⦘ ⊆ bot.
+Goal (r ∪ r);;⦗(@neg dset')d⦘ ⊆ ∅₂ <-> r;;⦗(@neg dset')d⦘ ∪ r;;⦗(@neg dset')d⦘ ⊆ ∅₂.
 Proof.
   split.
   - hkat'.

@@ -6,11 +6,8 @@ Set Implicit Arguments.
 (** * Calculating the (co)domain of a relation *)
 
 Require Import HahnKat.
-Require Import RelationAlgebra.lattice.
 
 Section Domains.
-
-Local Notation "a <--> b" := (same_relation a b)  (at level 60).
 
 Variable A B : Type.
 
@@ -28,7 +25,7 @@ End Definitions.
 
 Local Axiom LEM: forall (A: Type) (d : A -> Prop) (x: A), (d x) \/ (not (d x)). (* TODO *)
 
-Lemma doma_iff_kat r d: doma r d <-> ⦗(@neg dset') d⦘ ;; r ⊆ ∅₂.
+Lemma doma_iff_kat r d: doma r d <-> ⦗set_compl d⦘ ;; r ⊆ ∅₂.
 Proof.
   unfold_all. unfold doma. firstorder.
   - eapply H2, H. rewrite H0; apply H1.
@@ -39,7 +36,7 @@ Proof.
     + apply H0 in H1. destruct H1.
 Qed.
 
-Lemma domb_iff_kat r d: domb r d <-> (r ;; ⦗(@neg dset') d⦘ ⊆ ∅₂).
+Lemma domb_iff_kat r d: domb r d <-> (r ;; ⦗set_compl d⦘ ⊆ ∅₂).
 Proof.
   unfold_all. unfold domb. split.
   - firstorder.
@@ -186,7 +183,7 @@ Section Lemmas.
   Lemma cross_domb : domb (d × d') d'.
   Proof. kat'. Qed.
 
-  Lemma lift_dom_impl: (forall a, d a -> d' a) <-> (d ≦ d').
+  Lemma lift_dom_impl: (forall a, d a -> d' a) <-> (d ⊆₁ d').
   Proof. reflexivity. Qed.
   Hint Rewrite lift_dom_impl: redefDb.
 
@@ -197,11 +194,11 @@ Section Lemmas.
   Proof. hkat'. Qed.
 
   Lemma doma_fold :
-    (doma r d) -> (forall a, d a -> d' a) -> ⦗d'⦘ ⨾ r <--> r.
+    (doma r d) -> (forall a, d a -> d' a) -> ⦗d'⦘ ⨾ r ≡ r.
   Proof. hkat'. Qed.
 
   Lemma domb_fold :
-    (domb r d) -> (forall a, d a -> d' a) -> r ⨾ ⦗d'⦘ <--> r.
+    (domb r d) -> (forall a, d a -> d' a) -> r ⨾ ⦗d'⦘ ≡ r.
   Proof. hkat'. Qed.
 
   Lemma doma_rewrite : doma r d -> r ⊆ ⦗d⦘ ⨾ r. 
@@ -241,27 +238,27 @@ Section Lemmas.
       unfold doma, domb, cross_rel, inclusion; intuition; firstorder.
   Qed.
 
-  Lemma dom_to_doma : r <--> ⦗d⦘ ⨾ r ⨾ ⦗d'⦘ -> doma r d.
+  Lemma dom_to_doma : r ≡ ⦗d⦘ ⨾ r ⨾ ⦗d'⦘ -> doma r d.
   Proof.
     intro H; lift_to_kat_all; rewrite H; kat'.
   Qed.
 
-  Lemma dom_to_domb : r <--> ⦗d⦘ ⨾ r ⨾ ⦗d'⦘ -> domb r d'.
+  Lemma dom_to_domb : r ≡ ⦗d⦘ ⨾ r ⨾ ⦗d'⦘ -> domb r d'.
   Proof.
     intro H; lift_to_kat_all; rewrite H; kat'.
   Qed.
 
-  Lemma dom_l : r <--> ⦗d⦘ ⨾ r ⨾ ⦗d'⦘ -> r <--> ⦗d⦘ ⨾ r.
+  Lemma dom_l : r ≡ ⦗d⦘ ⨾ r ⨾ ⦗d'⦘ -> r ≡ ⦗d⦘ ⨾ r.
   Proof.
     intro H; lift_to_kat_all; rewrite H; kat'.
   Qed.
 
-  Lemma dom_r : r <--> ⦗d⦘ ⨾ r ⨾ ⦗d'⦘ -> r <--> r ⨾ ⦗d'⦘.
+  Lemma dom_r : r ≡ ⦗d⦘ ⨾ r ⨾ ⦗d'⦘ -> r ≡ r ⨾ ⦗d'⦘.
   Proof.
     intro H; rewrite H; kat'.
   Qed.
 
-  Lemma dom_helper_1 : r ⊆ ⦗d⦘ ⨾ r ⨾ ⦗d'⦘ <-> r <--> ⦗d⦘ ⨾ r ⨾ ⦗d'⦘.
+  Lemma dom_helper_1 : r ⊆ ⦗d⦘ ⨾ r ⨾ ⦗d'⦘ <-> r ≡ ⦗d⦘ ⨾ r ⨾ ⦗d'⦘.
   Proof.
     split; intros H.
     - split; [> apply H | kat'].
@@ -269,12 +266,12 @@ Section Lemmas.
   Qed.
 
   (* NOTE: top isn't supported *)
-  Lemma dom_helper_2 : r ⊆ ⦗d⦘ ⨾ top ⨾ ⦗d'⦘ <-> r <--> ⦗d⦘ ⨾ r ⨾ ⦗d'⦘.
+  Lemma dom_helper_2 : r ⊆ ⦗d⦘ ⨾ top_rel ⨾ ⦗d'⦘ <-> r ≡ ⦗d⦘ ⨾ r ⨾ ⦗d'⦘.
   Proof.
     unfolder; firstorder.
   Qed.
 
-  Lemma dom_helper_3 : r ⊆ d × d' <-> r <--> ⦗d⦘ ⨾ r ⨾ ⦗d'⦘.
+  Lemma dom_helper_3 : r ⊆ d × d' <-> r ≡ ⦗d⦘ ⨾ r ⨾ ⦗d'⦘.
   Proof.
     unfolder; firstorder.
   Qed.
@@ -391,7 +388,7 @@ Section Lemmas.
   Lemma dom_rel_fun_alt w : (fun a => r a w) ≡₁ dom_rel (r ⨾ ⦗ eq w ⦘).
   Proof. basic_solver 10. Qed.
 
-  Lemma dom_rel_helper (IN:  dom_rel r ⊆₁ d) : r <--> ⦗d⦘ ⨾ r.
+  Lemma dom_rel_helper (IN:  dom_rel r ⊆₁ d) : r ≡ ⦗d⦘ ⨾ r.
   Proof. unfolder in *; basic_solver. Qed.
 
   Lemma dom_rel_helper_in (IN:  dom_rel r ⊆₁ d) : r ⊆ ⦗d⦘ ⨾ r.
@@ -418,7 +415,7 @@ Lemma acyc_dom (r: relation A) d e
 Proof.
   red.
   eapply irr_dom; try edone.
-  { arewrite (⦗d⦘ ∪ ⦗e⦘ <--> ⦗fun x => d x \/ e x⦘) by basic_solver.
+  { arewrite (⦗d⦘ ∪ ⦗e⦘ ≡ ⦗fun x => d x \/ e x⦘) by basic_solver.
     apply domab_helper; split.
     apply ct_doma; eapply domab_helper with (d':= fun x => d x \/ e x).
     rewrite E1 at 1; basic_solver.

@@ -120,7 +120,7 @@ Notation "a ⁺" := (clos_trans a) (at level 1, format "a ⁺").
 Notation "a ＊" := (clos_refl_trans a) (at level 1, format "a ＊").
 Notation "a ⁻¹" := (transp a) (at level 1, format "a ⁻¹").
 Notation "a ⊆ b" := (inclusion a b)  (at level 60).
-(* Notation "a ≡ b" := (same_relation a b)  (at level 60). TODO collision*)
+(* Notation "a ≡ b" := (same_relation a b)  (at level 60). *)
 
 Notation "⋃ x ∈ s , a" := (bunion s (fun x => a))
   (at level 200, x ident, right associativity, 
@@ -146,8 +146,8 @@ Notation "'⋃' x >= n , a" := (bunion (fun t => n <= t) (fun x => a))
 Notation "P +++ Q" := (union P Q) (at level 50, left associativity, only parsing).
 Notation "P ;; Q" := (seq P Q) (at level 44, right associativity, only parsing).
 Notation "<| a |>" := (eqv_rel a) (only parsing).
-(* Notation "a ^+" := (clos_trans a) (at level 1, only parsing). TODO collision*)
-(* Notation "a ^*" := (clos_refl_trans a) (at level 1, only parsing). TODO collsion*)
+(* Notation "a ^+" := (clos_trans a) (at level 1, only parsing). *)
+(* Notation "a ^*" := (clos_refl_trans a) (at level 1, only parsing). *)
 Notation "a ^{-1}" := (transp a) (at level 1, only parsing).
 Notation "a <<= b" := (inclusion a b)  (at level 60, only parsing).
-Notation "a <--> b" := (same_relation a b)  (at level 60(* , only parsing  *)).
+(* Notation "a <--> b" := (same_relation a b)  (at level 60(* , only parsing  *)). *)

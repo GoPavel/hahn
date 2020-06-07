@@ -16,8 +16,6 @@ Definition max_elt A (r: relation A) (a : A) :=
 Definition wmax_elt A (r: relation A) (a : A) :=
   forall b (REL: r a b), a = b.
 
-Require Import RelationAlgebra.lattice.
-
 Local Lemma sym A: forall (x y: A), x = y <-> y = x.
 Proof. firstorder. Qed.
 
@@ -32,7 +30,7 @@ Qed.
 Local Axiom LEM: forall (A: Type) (a b: A), (a = b) \/ (not (a = b)). (* TODO *)
 
 Lemma wmax_elt_iff_kat (A: Type) (a: A) r:
-    wmax_elt r a <-> ⦗eq a⦘ ;; r ;; ⦗(@neg dset')(eq a)⦘ ⊆ ∅₂.
+    wmax_elt r a <-> ⦗eq a⦘ ;; r ;; ⦗set_compl (eq a)⦘ ⊆ ∅₂.
 Proof.
   unfold_all; unfold wmax_elt; firstorder.
   - apply H4. apply H. congruence.
@@ -44,8 +42,6 @@ Proof.
 Qed.
 
 Hint Rewrite max_elt_iff_kat wmax_elt_iff_kat: redefDb.
-
-Local Notation "a <--> b" := (same_relation a b)  (at level 60).
 
 Section BasicProperties.
 
@@ -59,10 +55,10 @@ Proof. unfold max_elt, inclusion, set_subset in *; intuition; eauto. Qed.
 Lemma set_subset_wmax_elt (S: r' ⊆ r) : wmax_elt r ⊆₁ wmax_elt r'.
 Proof. unfold wmax_elt, inclusion, set_subset in *; intuition; eauto. Qed.
 
-Lemma set_equiv_max_elt (S: r <--> r') : max_elt r ≡₁ max_elt r'.
+Lemma set_equiv_max_elt (S: r ≡ r') : max_elt r ≡₁ max_elt r'.
 Proof. unfold max_elt, same_relation, set_equiv, set_subset in *; intuition; eauto. Qed.
 
-Lemma set_equiv_wmax_elt (S: r <--> r') : wmax_elt r ≡₁ wmax_elt r'.
+Lemma set_equiv_wmax_elt (S: r ≡ r') : wmax_elt r ≡₁ wmax_elt r'.
 Proof. unfold wmax_elt, same_relation, set_equiv in *; intuition; eauto. Qed.
 
 Lemma max_elt_weaken : max_elt r a -> wmax_elt r a.
@@ -130,92 +126,90 @@ Variable A : Type.
 Implicit Type r : relation A.
 
 Lemma cod_iff_kat r b:
-  (forall x y, r x y -> y = b) <-> r ;; ⦗@neg dset' (eq b)⦘ ⊆ bot.
+  (forall x y, r x y -> y = b) <-> r ;; ⦗set_compl (eq b)⦘ ⊆ ∅₂.
 Proof.
-  split; unfold_all; firstorder.
-  specialize (H x y).
+  unfold_all; firstorder.
   destruct (LEM y b); try assumption.
-  exfalso; apply H.
-  exists y; split; [> assumption | split; [> reflexivity | firstorder ]].
+  exfalso; eapply H; esplits; eauto.
 Qed.
 
 Hint Rewrite cod_iff_kat: redefDb.
 
 Lemma seq_max r r' b
       (MAX: max_elt r' b) (COD: forall x y, r x y -> y = b) :
-  r ⨾ r' <--> ∅₂.
+  r ⨾ r' ≡ ∅₂.
 Proof. hkat'. Qed.
 
 Lemma seq_max_t r r' b
       (MAX: max_elt r' b) (COD: forall x y, r x y -> y = b) :
-  r⨾ r' ⁺ <--> ∅₂.
+  r⨾ r' ⁺ ≡ ∅₂.
 Proof. hkat'. Qed.
 
 Lemma seq_max_rt r r' b
       (MAX: max_elt r' b) (COD: forall x y, r x y -> y = b) :
-  r ⨾ r'＊ <--> r.
+  r ⨾ r'＊ ≡ r.
 Proof. hkat'. Qed.
 
 Lemma seq_max_r r r' b
       (MAX: max_elt r' b) (COD: forall x y, r x y -> y = b) :
-  r ⨾ r'^? <--> r.
+  r ⨾ r'^? ≡ r.
 Proof. hkat'. Qed.
 
 Lemma seq_eq_max r b (MAX: max_elt r b) :
-  ⦗eq b⦘ ⨾ r <--> ∅₂.
+  ⦗eq b⦘ ⨾ r ≡ ∅₂.
 Proof. hkat'. Qed.
 
 Lemma seq_eq_max_t r b (MAX: max_elt r b) :
-  ⦗eq b⦘ ⨾ r⁺ <--> ∅₂.
+  ⦗eq b⦘ ⨾ r⁺ ≡ ∅₂.
 Proof. hkat'. Qed.
 
 Lemma seq_eq_max_rt r b (MAX: max_elt r b) :
-  ⦗eq b⦘ ⨾ r＊ <--> ⦗eq b⦘.
+  ⦗eq b⦘ ⨾ r＊ ≡ ⦗eq b⦘.
 Proof. hkat'. Qed.
 
 Lemma seq_eq_max_r r b (MAX: max_elt r b) :
-  ⦗eq b⦘ ⨾ r^? <--> ⦗eq b⦘.
+  ⦗eq b⦘ ⨾ r^? ≡ ⦗eq b⦘.
 Proof. hkat'. Qed.
 
 Lemma seq_singl_max r a b (MAX: max_elt r b) :
-  singl_rel a b ⨾ r <--> ∅₂.
+  singl_rel a b ⨾ r ≡ ∅₂.
 Proof. hkat'. Qed.
 
 Lemma seq_singl_max_t r a b (MAX: max_elt r b) :
-  singl_rel a b ⨾ r⁺ <--> ∅₂.
+  singl_rel a b ⨾ r⁺ ≡ ∅₂.
 Proof. hkat'. Qed.
 
 Lemma seq_singl_max_rt r a b (MAX: max_elt r b) :
-  singl_rel a b ⨾ r＊ <--> singl_rel a b.
+  singl_rel a b ⨾ r＊ ≡ singl_rel a b.
 Proof. hkat'. Qed.
 
 Lemma seq_singl_max_r r a b (MAX: max_elt r b) :
-  singl_rel a b ⨾ r^? <--> singl_rel a b.
+  singl_rel a b ⨾ r^? ≡ singl_rel a b.
 Proof. hkat'. Qed.
 
 Lemma max_elt_test r: ⦗max_elt r⦘ ;; r ⊆ ∅₂.
 Proof. basic_solver. Qed.
 
 Lemma seq_eqv_max r : 
-  ⦗max_elt r⦘ ⨾ r <--> (∅₂).
+  ⦗max_elt r⦘ ⨾ r ≡ (∅₂).
 Proof.
   pose (@max_elt_test r). hkat'.
 Qed.
 
 Lemma seq_eqv_max_t r :
-  ⦗max_elt r⦘ ⨾ r⁺ <--> (∅₂).
+  ⦗max_elt r⦘ ⨾ r⁺ ≡ (∅₂).
 Proof.
   pose (@max_elt_test r). hkat'.
 Qed.
 
 Lemma seq_eqv_max_rt r :
-  ⦗max_elt r⦘ ⨾ r＊ <--> ⦗max_elt r⦘.
+  ⦗max_elt r⦘ ⨾ r＊ ≡ ⦗max_elt r⦘.
 Proof.
   pose (@max_elt_test r). hkat'.
 Qed.
 
 Lemma seq_eqv_max_r r :
-  ⦗max_elt r⦘ ⨾ r^? <--> ⦗max_elt r⦘.
+  ⦗max_elt r⦘ ⨾ r^? ≡ ⦗max_elt r⦘.
 Proof.
   pose (@max_elt_test r). hkat'.
 Qed.
@@ -226,25 +220,25 @@ Proof.
 Qed.
 
 Lemma transp_seq_eqv_max r : 
-  r⁻¹ ⨾ ⦗max_elt r⦘ <--> (∅₂).
+  r⁻¹ ⨾ ⦗max_elt r⦘ ≡ (∅₂).
 Proof.
   pose (@max_elt_test_dual r). hkat'.
 Qed.
 
 Lemma transp_seq_eqv_max_t r :
-  (r⁻¹)⁺ ⨾ ⦗max_elt r⦘ <--> (∅₂).
+  (r⁻¹)⁺ ⨾ ⦗max_elt r⦘ ≡ (∅₂).
 Proof.
   pose (@max_elt_test_dual r); hkat'.
 Qed.
 
 Lemma transp_seq_eqv_max_rt r :
-  (r⁻¹)＊ ⨾ ⦗max_elt r⦘  <--> ⦗max_elt r⦘.
+  (r⁻¹)＊ ⨾ ⦗max_elt r⦘  ≡ ⦗max_elt r⦘.
 Proof.
   pose (@max_elt_test_dual r); hkat'.
 Qed.
 
 Lemma transp_seq_eqv_max_r r :
-  (r⁻¹)^? ⨾ ⦗max_elt r⦘ <--> ⦗max_elt r⦘.
+  (r⁻¹)^? ⨾ ⦗max_elt r⦘ ≡ ⦗max_elt r⦘.
 Proof.
   pose (@max_elt_test_dual r); hkat'.
 Qed.
@@ -266,14 +260,14 @@ Qed.
 
 Lemma seq_wmax_rt r r' b
       (MAX: wmax_elt r' b) (COD: forall x y, r x y -> y = b) :
-  r⨾ r' ＊ <--> r.
+  r⨾ r' ＊ ≡ r.
 Proof.
   rewrite rtE; split; relsf; rewrite seq_wmax_t; relsf.
 Qed.
 
 Lemma seq_wmax_r r r' b
       (MAX: wmax_elt r' b) (COD: forall x y, r x y -> y = b) :
-  r⨾ r' ^? <--> r.
+  r⨾ r' ^? ≡ r.
 Proof.
   rewrite crE; split; relsf; rewrite seq_wmax; relsf.
 Qed.
@@ -291,13 +285,13 @@ Proof.
 Qed.
 
 Lemma seq_eq_wmax_rt r b (MAX: wmax_elt r b) :
-  ⦗eq b⦘⨾ r ＊ <--> ⦗eq b⦘.
+  ⦗eq b⦘⨾ r ＊ ≡ ⦗eq b⦘.
 Proof.
   rewrite rtE; split; relsf; rewrite seq_eq_wmax_t; relsf.
 Qed.
 
 Lemma seq_eq_wmax_r r b (MAX: wmax_elt r b) :
-  ⦗eq b⦘⨾ r ^? <--> ⦗eq b⦘.
+  ⦗eq b⦘⨾ r ^? ≡ ⦗eq b⦘.
 Proof.
   rewrite crE; split; relsf; rewrite seq_eq_wmax; relsf.
 Qed.
@@ -316,13 +310,13 @@ Proof.
 Qed.
 
 Lemma seq_singl_wmax_rt r a b (MAX: wmax_elt r b) :
-  singl_rel a b⨾ r ＊ <--> singl_rel a b.
+  singl_rel a b⨾ r ＊ ≡ singl_rel a b.
 Proof.
   rewrite rtE; split; relsf; rewrite seq_singl_wmax_t; relsf.
 Qed.
 
 Lemma seq_singl_wmax_r r a b (MAX: wmax_elt r b) :
-  singl_rel a b⨾ r ^? <--> singl_rel a b.
+  singl_rel a b⨾ r ^? ≡ singl_rel a b.
 Proof.
   rewrite crE; split; relsf; rewrite seq_singl_wmax; relsf.
 Qed.

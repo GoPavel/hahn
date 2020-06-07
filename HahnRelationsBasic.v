@@ -3,9 +3,11 @@ Require Export HahnRelationsBasicDef.
 
 Require Import HahnKat.
 
-(* Require Import RelationAlgebra.lattice. *)
-
 Set Implicit Arguments.
+
+Notation "a ≡ b" := (same_relation a b)  (at level 60).
+Notation "a ^+" := (clos_trans a) (at level 1, only parsing).
+Notation "a ^*" := (clos_refl_trans a) (at level 1, only parsing).
 
 (******************************************************************************)
 (** ** Very basic properties *)
@@ -34,7 +36,7 @@ Variable dom : A -> Prop.
 Variable f: A -> B.
 Variables r r' r'' : relation A.
 
-Lemma immediateE : immediate r <--> r \ (r ⨾ r).
+Lemma immediateE : immediate r ≡ r \ (r ⨾ r).
 Proof.
   unfold immediate, seq, minus_rel.
   repeat split; try red; ins; desf; eauto.
@@ -269,10 +271,10 @@ Qed.
 (** Lemmas about inclusion *)
 (******************************************************************************)
 
-Lemma eq_in_l : r <--> r' -> r ⊆ r'.
+Lemma eq_in_l : r ≡ r' -> r ⊆ r'.
 Proof. by destruct 1. Qed.
 
-Lemma eq_in_r : r <--> r' -> r' ⊆ r.
+Lemma eq_in_r : r ≡ r' -> r' ⊆ r.
 Proof. by destruct 1. Qed.
 
 Lemma inclusion_refl : reflexive (@inclusion A).
@@ -284,7 +286,7 @@ Proof. repeat red; eauto. Qed.
 Lemma inclusion_refl2 : r ⊆ r.
 Proof. kat'. Qed.
 
-Lemma same_relation_refl2 : r <--> r.
+Lemma same_relation_refl2 : r ≡ r.
 Proof. kat'. Qed.
 
 Lemma inclusion_inter_l1 : r ∩ r' ⊆ r.
@@ -644,7 +646,7 @@ Lemma clos_trans_of_clos_trans1 A (r r' : relation A) x y :
   (fun a b => r⁺ a b \/ r' a b)⁺ x y <->
   (fun a b => r a b \/ r' a b)⁺ x y.
 Proof.
-  assert ((r⁺ ∪ r')⁺ <--> (r ∪ r')⁺).
+  assert ((r⁺ ∪ r')⁺ ≡ (r ∪ r')⁺).
   { kat'. }
   destruct H as [H1 H2].
   split; [> apply H1 | apply H2].

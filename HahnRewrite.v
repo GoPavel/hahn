@@ -7,8 +7,6 @@ Set Implicit Arguments.
 (** We add some support for rewriting with [inclusion] and [same_relation]
 relations. We start with some basic helper lemmas. *)
 
-Local Notation "a ≡ b" := (same_relation a b)  (at level 60).
-
 Section HelperLemmas.
 
   Variable A : Type.
