@@ -226,8 +226,6 @@ Proof.
   pose (@min_elt_test r); hkat'.
 Qed.
 
-(* Require Import RelationAlgebra.kat. *)
-
 (* TODO try to use dual *)
 Lemma min_elt_test_dual r: ⦗min_elt r⦘ ⨾ r⁻¹ ⊆ ∅₂.
 Proof.
