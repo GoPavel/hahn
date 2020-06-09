@@ -278,26 +278,10 @@ Ltac kat' :=
   intros; rewrite ?leq_iff_cup;
     (apply (catch_kat_weq tt tt) || fail "could not find a KAT structure");
     pre_dec true.
-
-(* TODO: doc *)
-Ltac aggregate_hoare_hypotheses' :=
-  repeat
-    match goal with
-      | H: _ ≡ _ |- _ =>
-        apply (ab_to_hoare (n:=tt)) in H ||
-        (rewrite weq_spec in H; destruct H as [? ?])
-    end;
-  repeat
-    match goal with
-      | H: _ ≦ _ |- _ =>
-        apply (ab'_to_hoare (n:=tt)) in H
-      | H: _ ≦ 0,  H': _ ≦ 0 |- _ =>
-        apply (join_leq _ _ _ H') in H; clear H'
-    end.
-
+ 
 (* TODO: Add phase of clearing non-KAT hypothesis.
    We can do it, because [hkat] can't succeeded without goal solving *)
-Ltac aggregate_hoare_hypotheses'' :=
+Ltac aggregate_hoare_hypotheses' :=
   repeat
     match goal with
       | H: _ ≡ _ |- _ =>
@@ -322,7 +306,9 @@ Ltac aggregate_hoare_hypotheses'' :=
         apply (join_leq _ _ _ H') in H; clear H'
     end.
 
-Local Ltac hkat_stuff := rewrite ?leq_iff_cup;
+Ltac hkat' :=
+  lift_to_kat_all;
+  intros; aggregate_hoare_hypotheses'; rewrite ?leq_iff_cup;
   (apply (catch_kat_weq tt tt) || fail "could not find a KAT structure");
   match goal with
     | H: _ ≦ 0 |- _    =>
@@ -335,5 +321,3 @@ Local Ltac hkat_stuff := rewrite ?leq_iff_cup;
     | _ => pre_dec true
   end.
 
-Ltac hkat' := lift_to_kat_all; intros; aggregate_hoare_hypotheses'; hkat_stuff.
-Ltac hkat'' := lift_to_kat_all; intros; aggregate_hoare_hypotheses''; hkat_stuff.

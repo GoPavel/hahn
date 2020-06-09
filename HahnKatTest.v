@@ -30,7 +30,7 @@ Lemma cp_c `{L: laws} {n} (c: tst n) (p: X n n):
 Proof. Fail hkat. Abort.
 
 Goal ⦗d⦘;;r <--> ⦗d⦘ -> ⦗d⦘;;r <--> ⦗d⦘.
-Proof. hkat''. Qed.
+Proof. hkat'. Qed.
 
 (* Notation "x ^+" := (itr tt x)   (left associativity, at level 5, format "x ^+"): ra_terms. *)
 
@@ -137,7 +137,7 @@ Goal forall (H1: prefix_clos d r) (H2: prefix_clos d r'),
 Proof.
   unfold prefix_clos.
   lift_to_kat_all.
-  hkat''.
+  hkat'.
 Qed.
 
 Goal (r ∪ r);;⦗(@neg dset')d⦘ <--> (r;;⦗(@neg dset')d⦘) ∪ (r;;⦗(@neg dset')d⦘).

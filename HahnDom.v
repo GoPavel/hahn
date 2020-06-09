@@ -209,12 +209,12 @@ Section Lemmas.
 
   Lemma doma_helper : r ⊆ ⦗d⦘ ⨾ r <-> doma r d.
   Proof.
-    split; [> hkat'' | hkat'].
+    split; hkat'.
   Qed.
 
   Lemma domb_helper : r ⊆ r ⨾ ⦗d⦘ <-> domb r d.
   Proof. 
-    split; [> hkat'' | hkat'].
+    split; hkat'.
   Qed.
   
   Lemma domab_helper : 

@@ -1355,14 +1355,14 @@ Lemma add_dom_l A (r: relation A) (s s': A -> Prop)
       (IN: r ⨾ ⦗s⦘ ⊆ ⦗s'⦘ ⨾ r) :
   r ⨾ ⦗s⦘ ≡ ⦗s'⦘ ⨾ r ⨾ ⦗s⦘.
 Proof.
-  hkat''.
+  hkat'.
 Qed.
 
 Lemma add_dom_r A (r: relation A) (s s': A -> Prop)
       (IN: ⦗s'⦘ ⨾ r ⊆ r ⨾ ⦗s⦘) :
   ⦗s'⦘ ⨾ r ≡ ⦗s'⦘ ⨾ r ⨾ ⦗s⦘.
 Proof.
-  hkat''.
+  hkat'.
 Qed.
 
 Tactic Notation "rotate" int_or_var(i) := do i (
