@@ -372,6 +372,7 @@ Proof.
     by eapply IHP; do 4 right; eexists k,m,m'; repeat eexists; vauto.
 Qed.
 
+(* Partial *)
 Lemma min_cycle1 X (r r' : relation X) (d : X -> Prop)
     nd (ND: nd = fun x => ~ d x)
     (TOT: is_total d r')

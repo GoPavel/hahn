@@ -13,12 +13,14 @@ Notation "a ^*" := (clos_refl_trans a) (at level 1, only parsing).
 (** ** Very basic properties *)
 (******************************************************************************)
 
+(* Full *)
 Lemma r_refl A (r: relation A) x : r^? x x.
 Proof.
   assert (refl_top ⊆ r^?) by kat'.
   apply H; constructor.
 Qed.
 
+(* Full *)
 Lemma r_step A (r: relation A) x y : r x y -> r^? x y.
 Proof.
   generalize x y; kat'.
@@ -207,15 +209,19 @@ Proof.
   unfold restr_rel; red; ins; desf; eauto.
 Qed.
 
+(* Full *)
 Lemma transitive_ct : transitive r⁺.
 Proof. kat'. Qed.
 
+(* Full *)
 Lemma transitive_rt : transitive r＊.
 Proof. kat'. Qed.
 
+(* Full *)
 Lemma reflexive_rt : reflexive r＊.
 Proof. kat'. Qed.
 
+(* Full *)
 Lemma reflexive_cr : reflexive r^?.
 Proof. kat'. Qed.
 
@@ -243,6 +249,7 @@ Proof.
   unfold irreflexive, restr_eq_rel; split; ins; desf; eauto.
 Qed.
 
+(* Full *)
 Lemma upward_closed_seq P :
   upward_closed r P ->
   upward_closed r' P ->
@@ -251,12 +258,14 @@ Proof.
   hkat'.
 Qed.
 
+(* Full *)
 Lemma upward_closed_ct P :
   upward_closed r P -> upward_closed r⁺ P.
 Proof.
   hkat'.
 Qed.
 
+(* Full *)
 Lemma upward_closed_rt P :
   upward_closed r P -> upward_closed r＊ P.
 Proof.
@@ -278,9 +287,11 @@ Proof. repeat red; ins. Qed.
 Lemma inclusion_trans : transitive (@inclusion A).
 Proof. repeat red; eauto. Qed.
 
+(* Full *)
 Lemma inclusion_refl2 : r ⊆ r.
 Proof. kat'. Qed.
 
+(* Full *)
 Lemma same_relation_refl2 : r ≡ r.
 Proof. kat'. Qed.
 
@@ -302,9 +313,11 @@ Proof. clear; firstorder. Qed.
 Lemma inclusion_inter_mon s s' : r ⊆ r' -> s ⊆ s' -> r ∩ s ⊆ r' ∩ s'.
 Proof. clear; firstorder. Qed.
 
+(* Full *)
 Lemma inclusion_union_r1 : r ⊆ r ∪ r'.
 Proof. kat'. Qed.
 
+(* Full *)
 Lemma inclusion_union_r2 : r' ⊆ r ∪ r'.
 Proof. kat'. Qed.
 
@@ -358,6 +371,7 @@ Proof.
   unfold inclusion, seq, clos_refl; ins; desf; eauto.
 Qed.
 
+(* Full *)
 Lemma inclusion_restr : restr_rel dom r ⊆ r.
 Proof.
   kat'.
@@ -400,6 +414,7 @@ Proof.
   by unfold minus_rel, union, inclusion; clear; intros; tauto.
 Qed.
 
+(* Full *)
 Lemma inclusion_eqv_rel_true : ⦗dom⦘  ⊆ ⦗fun _ => True⦘.
 Proof.
   kat'.
@@ -407,11 +422,13 @@ Qed.
 
 (** Inclusions involving reflexive closure. *)
 
+(* Full *)
 Lemma inclusion_id_cr : ⦗fun _ => True⦘ ⊆ r^?.
 Proof.
   kat'.
 Qed.
 
+(* Full *)
 Lemma inclusion_eqv_cr : ⦗dom⦘ ⊆ r^?.
 Proof.
   kat'.
@@ -440,6 +457,7 @@ Proof.
   unfold seq; red; ins; desf; eauto using t_step.
 Qed.
 
+(* Full *)
 Lemma inclusion_t_rt : r⁺ ⊆  r＊.
 Proof.
   kat'.
@@ -472,11 +490,13 @@ Qed.
 
 (** Inclusions involving reflexive-transitive closure. *)
 
+(* Full *)
 Lemma inclusion_id_rt : ⦗fun _ => True⦘ ⊆ r'＊.
 Proof.
   kat'.
 Qed.
 
+(* Full *)
 Lemma inclusion_eqv_rt : ⦗dom⦘ ⊆ r'＊.
 Proof.
   kat'.
@@ -631,12 +651,14 @@ Hint Immediate inclusion_acyclic : hahn.
 Hint Immediate inclusion_t_rt : hahn.
 Hint Immediate inclusion_eqv_rt inclusion_eqv_cr : hahn.
 
+(* Full *)
 Lemma clos_trans_of_clos_trans A (r : relation A) x y :
   r⁺⁺ x y <-> r⁺ x y.
 Proof.
   generalize x y; kat'.
 Qed.
 
+(* Full *)
 Lemma clos_trans_of_clos_trans1 A (r r' : relation A) x y :
   (fun a b => r⁺ a b \/ r' a b)⁺ x y <->
   (fun a b => r a b \/ r' a b)⁺ x y.

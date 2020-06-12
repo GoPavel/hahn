@@ -126,6 +126,7 @@ Section AcyclicUnionTotal.
   Variable A : Type.
   Implicit Type r : relation A.
 
+  (* Partial *)
   Lemma acyclic_decomp_u_total r dom r' (T: is_total dom r') (DB: domb r' dom) :
       acyclic (r ∪ r') <-> acyclic r /\ irreflexive (r＊ ⨾ r'⁺).
   Proof.
@@ -172,6 +173,7 @@ Section PathDom.
   Variable X : Type.
   Implicit Type r : relation X.
 
+  (* Partial *)
   Lemma acyclic_du r r' adom bdom (A: doma r adom) (B: domb r bdom) :
     acyclic r' ->
     acyclic (r ∪ ⦗bdom⦘ ⨾ r'⁺ ⨾ ⦗adom⦘) ->
@@ -306,6 +308,7 @@ Proof.
   by rewrite ct_end, seqA, H, <- seqA, <- ct_end, ct_unit.
 Qed.
 
+(* Partial *)
 Lemma acyclic_seq_union_incompat A (r r' r'' : relation A) 
       (DISJ: r' ⨾ r'' ⊆ ∅₂) (DISJ': r'' ⨾ r' ⊆ ∅₂)
       (ACYC: acyclic (r ⨾ r'＊)) (ACYC': acyclic (r''⁺ ⨾ (r ⨾ r'＊)⁺)) :

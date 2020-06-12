@@ -58,15 +58,19 @@ Section Lemmas.
   Variables f g : A -> B.
   Variables d d' : A -> Prop.
 
+  (* Full *)
   Lemma eqv_doma : doma ⦗d⦘ d.
   Proof. kat'. Qed.
 
+  (* Full *)
   Lemma eqv_domb : domb ⦗d⦘ d.
   Proof. kat'. Qed.
 
+  (* Full *)
   Lemma seq_eqv_doma : doma r d -> doma (⦗d'⦘ ⨾ r) d.
   Proof. hkat'. Qed.
 
+  (* Full *)
   Lemma seq_eqv_domb : domb r d -> domb (r ⨾ ⦗d'⦘) d.
   Proof. hkat'. Qed.
 
@@ -76,27 +80,35 @@ Section Lemmas.
   Lemma restr_eq_rel_domb : domb r d -> domb (restr_eq_rel f r) d.
   Proof. unfold domb, restr_eq_rel; ins; desf; eauto. Qed.
 
+  (* Full *)
   Lemma seq_doma : doma r d -> doma (r ⨾ r') d.
   Proof. hkat'. Qed.
 
+  (* Full *)
   Lemma seq_domb : domb r' d -> domb (r ⨾ r') d.
   Proof. hkat'. Qed.
 
+  (* Full *)
   Lemma union_doma : doma r d -> doma r' d -> doma (r ∪ r') d.
   Proof. hkat'. Qed.
 
+  (* Full *)
   Lemma union_domb : domb r d -> domb r' d -> domb (r ∪ r') d.
   Proof. hkat'. Qed.
 
+  (* Full *)
   Lemma ct_doma : doma r d -> doma r⁺ d.
   Proof. hkat'. Qed.
 
+  (* Full *)
   Lemma ct_domb : domb r d -> domb r⁺ d.
   Proof. hkat'. Qed.
 
+  (* Full *)
   Lemma seq_r_doma : doma r d -> doma r' d -> doma (r^? ⨾ r') d.
   Proof. hkat'. Qed.
 
+  (* Full *)
   Lemma seq_r_domb : domb r d -> domb r' d -> domb (r ⨾ r'^?) d.
   Proof. hkat'. Qed.
 
@@ -106,27 +118,33 @@ Section Lemmas.
   Lemma minus_domb : domb r d -> domb (r \ r') d.
   Proof. unfold domb, minus_rel; ins; desf; eauto. Qed.
 
+  (* Partial *)
   Lemma doma_inter_r : doma r (d ∩₁ d') <-> doma r d /\ doma r d'.
   Proof.
     split; [> intro; split | intros [H1 H2]].
     all: hkat'.
   Qed.
 
+  (* Partial *)
   Lemma domb_inter_r : domb r (d ∩₁ d') <-> domb r d /\ domb r d'.
   Proof.
     split; [> intro; split | intros [H1 H2]].
     all: hkat'.
   Qed.
 
+  (* Full *)
   Lemma restr_doma : doma (restr_rel d r) d.
   Proof. kat'. Qed.
 
+  (* Full *)
   Lemma restr_domb : domb (restr_rel d r) d.
   Proof. kat'. Qed.
 
+  (* Full *)
   Lemma restr_doma_mon : doma r d -> doma (restr_rel d' r) d.
   Proof. hkat'. Qed.
 
+  (* Full *)
   Lemma restr_domb_mon : domb r d -> domb (restr_rel d' r) d.
   Proof. hkat'. Qed.
 
@@ -179,10 +197,12 @@ Section Lemmas.
   Proof. unfold doma, domb, transp; eauto. Qed.
 
   (* NOTE: cross_rel contains top, that isn't support fully *)
+  (* Full, Incomplete *)
   Lemma cross_doma : doma (d × d') d.
   Proof. kat'. Qed.
 
   (* NOTE: cross_rel contains top, that isn't support fully *)
+  (* Full, Incomplete  *)
   Lemma cross_domb : domb (d × d') d'.
   Proof. kat'. Qed.
 
@@ -190,36 +210,45 @@ Section Lemmas.
   Proof. reflexivity. Qed.
   Hint Rewrite lift_dom_impl: redefDb.
 
+  (* Full *)
   Lemma doma_implies : (forall a, d a -> d' a) -> doma r d -> doma r d'.
   Proof. hkat'. Qed.
 
+  (* Full *)
   Lemma domb_implies : (forall a, d a -> d' a) -> domb r d -> domb r d'.
   Proof. hkat'. Qed.
 
+  (* Full *)
   Lemma doma_fold :
     (doma r d) -> (forall a, d a -> d' a) -> ⦗d'⦘ ⨾ r ≡ r.
   Proof. hkat'. Qed.
 
+  (* Full *)
   Lemma domb_fold :
     (domb r d) -> (forall a, d a -> d' a) -> r ⨾ ⦗d'⦘ ≡ r.
   Proof. hkat'. Qed.
 
+  (* Full *)
   Lemma doma_rewrite : doma r d -> r ⊆ ⦗d⦘ ⨾ r. 
   Proof. hkat'. Qed.
 
+  (* Full *)
   Lemma domb_rewrite : domb r d -> r ⊆ r ⨾ ⦗d⦘. 
   Proof. hkat'. Qed.
 
+  (* Partial *)
   Lemma doma_helper : r ⊆ ⦗d⦘ ⨾ r <-> doma r d.
   Proof.
     split; hkat'.
   Qed.
 
+  (* Partial *)
   Lemma domb_helper : r ⊆ r ⨾ ⦗d⦘ <-> domb r d.
   Proof. 
     split; hkat'.
   Qed.
   
+  (* Partial *)
   Lemma domab_helper : 
     r ⊆ ⦗d⦘ ⨾ r ⨾ ⦗d'⦘ <-> doma r d /\ domb r d'.
   Proof.
@@ -233,26 +262,31 @@ Section Lemmas.
     unfold doma, domb, cross_rel, inclusion; intuition; firstorder. 
   Qed.
 
+  (* Partial *)
   Lemma dom_to_doma : r ≡ ⦗d⦘ ⨾ r ⨾ ⦗d'⦘ -> doma r d.
   Proof.
     hkat'.
   Qed.
 
+  (* Partial *)
   Lemma dom_to_domb : r ≡ ⦗d⦘ ⨾ r ⨾ ⦗d'⦘ -> domb r d'.
   Proof.
     hkat'.
   Qed.
 
+  (* Partial *)
   Lemma dom_l : r ≡ ⦗d⦘ ⨾ r ⨾ ⦗d'⦘ -> r ≡ ⦗d⦘ ⨾ r.
   Proof.
     hkat'.
   Qed.
 
+  (* Partial *)
   Lemma dom_r : r ≡ ⦗d⦘ ⨾ r ⨾ ⦗d'⦘ -> r ≡ r ⨾ ⦗d'⦘.
   Proof.
     hkat'.
   Qed.
 
+  (* Partial *)
   Lemma dom_helper_1 : r ⊆ ⦗d⦘ ⨾ r ⨾ ⦗d'⦘ <-> r ≡ ⦗d⦘ ⨾ r ⨾ ⦗d'⦘.
   Proof.
     split; hkat'.
@@ -269,6 +303,7 @@ Section Lemmas.
     unfolder; firstorder.
   Qed.
 
+  (* Partial *)
   Lemma step_dom 
         (E: r ⊆ (⦗d⦘ ∪ ⦗d'⦘) ⨾ r ⨾ (⦗d⦘ ∪ ⦗d'⦘))
         dd (DD: dd = ⦗d⦘ ⨾ r ⨾ ⦗d⦘)
@@ -280,6 +315,7 @@ Section Lemmas.
     subst; hkat'.
   Qed.
 
+  (* Partial *)
   Lemma path_dom
         (E1: r ⊆ (⦗d⦘ ∪ ⦗d'⦘) ⨾ r ⨾ (⦗d⦘ ∪ ⦗d'⦘))
         (E2: ⦗d⦘ ⨾ ⦗d'⦘ ⊆ ∅₂)
@@ -295,6 +331,7 @@ Section Lemmas.
     subst; hkat'.
   Qed.
 
+  (* Partial *)
   Lemma path_dom_same
         (E1: r ⊆ (⦗d⦘ ∪ ⦗d'⦘) ⨾ r ⨾ (⦗d⦘ ∪ ⦗d'⦘))
         (E2: ⦗d⦘ ⨾ ⦗d'⦘ ⊆ ∅₂)
@@ -381,12 +418,15 @@ Section Lemmas.
   Proof. unfolder in *; basic_solver. Qed.
 End Lemmas.
 
+(* Full *)
 Lemma doma_eqv (d : A -> Prop) (r : relation A): doma (⦗d⦘ ⨾ r) d.
 Proof. kat'. Qed.
 
+(* Full *)
 Lemma domb_eqv (d : A -> Prop) (r : relation A): domb (r ⨾ ⦗d⦘) d.
 Proof. kat'. Qed.
 
+(* Partial *)
 Lemma acyc_dom (r: relation A) d e
       (E1: r ⊆ (⦗d⦘ ∪ ⦗e⦘) ⨾ r ⨾ (⦗d⦘ ∪ ⦗e⦘))
       (E2: ⦗d⦘ ⨾ ⦗e⦘ ⊆ ∅₂)

@@ -40,11 +40,13 @@ Qed.
 
 (******************************************************************************)
 
+(* Full *)
 Lemma rt_unionE A (r r' : relation A) : (r ∪ r')＊ ≡ r'＊ ⨾ (r ⨾ r'＊)＊.
 Proof.
   kat'.
 Qed.
 
+(* Full *)
 Lemma ct_unionE A (r r' : relation A) : (r ∪ r')⁺ ≡ r'⁺ ∪ r'＊ ⨾ (r ⨾ r'＊)⁺.
 Proof.
   kat'.
@@ -55,6 +57,7 @@ Qed.
 (** Extension of a relation with a singleton *)
 (******************************************************************************)
 
+(* Partial *)
 Lemma ct_union_singl A (r : relation A) a b :
   (r ∪ singl_rel a b)⁺ ≡ r⁺ ∪ r＊ ⨾ singl_rel a b ⨾ r＊.
 Proof.
@@ -92,6 +95,7 @@ Section PathUnionTotal.
   Variable A : Type.
   Implicit Type r : relation A.
 
+  (* Partial *)
   Lemma path_decomp_u_total r dom r' (T: is_total dom r') (DB: domb r' dom)
       (IRR: irreflexive (r＊ ⨾ r'⁺)) :
     (r ∪ r')⁺ ≡ r⁺ ∪ r＊ ⨾ r'⁺ ⨾ r＊.
@@ -124,6 +128,7 @@ Section PathAbsorb.
   Variable A : Type.
   Implicit Type r : relation A.
 
+  (* Partial *)
   Lemma path_absorb1 r r' (F: r' ⨾ r ⊆ r') :
     (r ∪ r')⁺ ≡ r⁺ ∪ r'⁺ ∪ r⁺ ⨾ r'⁺.
   Proof.
@@ -136,6 +141,7 @@ Section PathAbsorb.
     kat'.
   Qed.
 
+  (* Partial *)
   Lemma path_absorb2 r r' (F: r' ⨾ r ⊆ r) :
     (r ∪ r')⁺ ≡ r⁺ ∪ r'⁺ ∪ r⁺ ⨾ r'⁺.
   Proof.
@@ -187,6 +193,7 @@ Section PathAbsorb.
     right; repeat eexists; eauto using clos_refl_trans.
   Qed.
 
+  (* Partial *)
   Lemma seq_ct_absorb_l r r' : r ⨾ r'⁺ ⊆ r ∪ ((r ⨾ r') \ r) ⨾ r'＊.
   Proof.
     rewrite <- seq_rt_absorb_l. kat'.
@@ -199,6 +206,7 @@ Section PathAbsorb.
     auto using seq_rt_absorb_l, transitive_transp.
   Qed.
 
+  (* Partial *)
   Lemma seq_ct_absorb_r r r' : r⁺ ⨾ r' ⊆ r' ∪ r＊ ⨾ ((r ⨾ r') \ r').
   Proof.
     rewrite <- seq_rt_absorb_r; kat'.
@@ -263,6 +271,7 @@ Section PathDom.
   Variable X : Type.
   Implicit Type r : relation X.
 
+  (* Partial *)
   Lemma path_tur r r' adom bdom
         (T: transitive r) (DA: doma r' adom) (DB: domb r' bdom) :
     (r ∪ r')⁺ ≡ r ∪ (r ⨾ ⦗adom⦘ ∪ r')⁺ ⨾ (⦗bdom⦘ ⨾ r)^?.
@@ -276,10 +285,12 @@ Section PathDom.
     kat'.
   Qed.
 
+  (* Full *)
   Lemma path_ur r r' adom bdom (DA: doma r' adom) (DB: domb r' bdom) :
     (r ∪ r')⁺ ≡ r⁺ ∪ (r⁺ ⨾ ⦗adom⦘ ∪ r')⁺ ⨾ (⦗bdom⦘ ⨾ r⁺)^?.
   Proof. hkat'. Qed.
 
+  (* Partial *)
   Lemma path_tur2 r r' adom bdom
         (T: transitive r')
         (DA: doma r adom) (DB: domb r bdom) :
@@ -294,6 +305,7 @@ Section PathDom.
     kat'.
   Qed.
 
+  (* Full *)
   Lemma path_ur2 r r' adom bdom (A: doma r adom) (B: domb r bdom) :
     (r ∪ r')⁺ ≡ r'⁺ ∪ (r'⁺ ⨾ ⦗adom⦘)^? ⨾ (r ∪ ⦗bdom⦘ ⨾ r'⁺)⁺.
   Proof. hkat'. Qed.
@@ -316,6 +328,7 @@ Proof.
     forward eapply (D c); eauto; intro; desf; exfalso; eauto.
 Qed.
 
+(* Full *)
 Lemma clos_trans_rotl A (r r' : relation A) :
   (r ⨾ r')⁺ ≡ r ⨾ (r' ⨾ r)＊ ⨾ r'.
 Proof.
@@ -374,6 +387,7 @@ Section PathUnionTransitive.
 
   Hint Resolve inclusion_seq_l inclusion_seq_r : hahn_full.
 
+  (* Partial *)
   Lemma path_ut r r' (T: transitive r') :
     (r ∪ r')＊ ≡ r＊ ⨾ (r' ⨾ r⁺)＊ ⨾ r'^?.
   Proof.
@@ -390,6 +404,7 @@ Section PathUnionTransitive.
     - kat'.
   Qed.
 
+  (* Partial *)
   Lemma path_ut2 r r' (T: transitive r') :
     (r ∪ r')⁺ ≡ r⁺ ∪ r＊⨾ (r'⨾ r⁺)＊ ⨾ r'⨾ r＊.
   Proof.
@@ -410,28 +425,33 @@ Section PathUnion.
   Variable A : Type.
   Implicit Type r : relation A.
 
+  (* Full *)
   Lemma path_ut_first r r' :
     (r ∪ r')⁺ ≡ r⁺ ∪ r＊ ⨾ r' ⨾ (r ∪ r')＊.
   Proof.
     kat'.
   Qed.
 
+  (* Full *)
   Lemma path_ut_last r r' :
     (r ∪ r')⁺ ≡ r⁺ ∪ (r ∪ r')＊ ⨾ r' ⨾ r＊.
   Proof.
     kat'.
   Qed.
 
+  (* Full *)
   Lemma path_union (r r': relation A) : (r ∪ r')⁺ ⊆ r⁺ ∪ (r＊ ⨾ r')⁺ ⨾ r＊.
   Proof.
     kat'.
   Qed.
 
+  (* Full *)
   Lemma path_union1 (r r': relation A) : (r ∪ r')⁺ ⊆ r'⁺ ∪ r'＊ ⨾ (r ∪ r ⨾ r'⁺)⁺.
   Proof.
     kat'.
   Qed.
 
+  (* Full *)
   Lemma path_union2 (r r': relation A) : 
     (r ∪ r')⁺ ⊆ r⁺ ∪ r'⁺ ⨾ r＊ ∪ r'＊ ⨾ (r⁺ ⨾ r'⁺)⁺ ⨾ r＊.
   Proof.
@@ -468,6 +488,7 @@ Proof.
   eapply F in NEQ; desf; eauto 8 using clos_refl_trans.
 Qed.
 
+(* Partial *)
 Lemma path_utd :
   forall X (r r' : relation X) (T: transitive r') dom
          (F: is_total dom r') (DA: doma r' dom) (DB: domb r' dom)
@@ -484,11 +505,13 @@ Qed.
 (** Paths with disconnected relations *)
 (******************************************************************************)
 
+(* Full *)
 Lemma ct_no_step A (r : relation A) (D: r ⨾ r ≡ ∅₂) : r⁺ ≡ r.
 Proof.
   hkat'.
 Qed.
 
+(* Full *)
 Lemma ct_ct_disj A (r : relation A) (D: r ⨾ r ≡ ∅₂) : r⁺ ⨾ r⁺ ≡ ∅₂.
 Proof.
   hkat'.
@@ -499,6 +522,7 @@ Proof.
   red; ins; eapply D; vauto.
 Qed.
 
+(* Full *)
 Lemma path_unc X (r r' : relation X)
       (A : r ⨾ r ≡ ∅₂)
       (B : r' ⨾ r' ≡ ∅₂) :
@@ -508,6 +532,7 @@ Proof.
   hkat'.
 Qed.
 
+(* Full *)
 Lemma pathp_unc X (r r' : relation X)
       (A : r ⨾ r ≡ ∅₂)
       (B : r' ⨾ r' ≡ ∅₂) :
@@ -519,6 +544,7 @@ Qed.
 (** Paths with specific attributes *)
 (******************************************************************************)
 
+(* Partial *)
 Lemma path_specific_absorb A (r r' : relation A) : 
   r ⨾ r' ⊆ r ⨾ r ->
   r' ⨾ r' ⊆ r' ⨾ r ->
