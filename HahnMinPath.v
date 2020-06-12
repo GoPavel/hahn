@@ -4,6 +4,7 @@
 
 Require Import NPeano Omega.
 Require Import HahnBase HahnList HahnRelationsBasic HahnRewrite.
+Require Import HahnKat.
 
 Set Implicit Arguments.
 
@@ -383,8 +384,7 @@ Lemma min_cycle1 X (r r' : relation X) (d : X -> Prop)
     irreflexive (⦗nd⦘ ⨾ r ⨾ ⦗d⦘ ⨾ r'^? ⨾ ⦗d⦘ ⨾
                  r ⨾ ⦗nd⦘ ⨾ (⦗nd⦘ ⨾ r ⨾ ⦗nd⦘)＊).
 Proof.
-  assert (AA: restr_rel nd r ≡ ⦗nd⦘⨾ r⨾ ⦗nd⦘).
-    by red; unfold seq, eqv_rel, restr_rel, inclusion in *; split; ins; desf; eauto 10.
+  assert (AA: restr_rel nd r ≡ ⦗nd⦘⨾ r⨾ ⦗nd⦘) by kat'.
   forward (eapply min_cycle; eauto) as N; subst; rewrite N, <- !AA; clear.
   unfold irreflexive, seq, eqv_rel;
   split; ins; desf; splits; ins; desf; eauto.
