@@ -213,8 +213,6 @@ Proof. kat'. Qed.
 Lemma transitive_rt : transitive r＊.
 Proof. kat'. Qed.
 
-Ltac lift_reflexive := repeat rewrite -> reflexive_iff_kat in *.
-
 Lemma reflexive_rt : reflexive r＊.
 Proof. kat'. Qed.
 

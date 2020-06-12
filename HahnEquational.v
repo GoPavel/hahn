@@ -672,11 +672,11 @@ Section PropertiesClos.
   Qed.
 
   Lemma cr_seq (r r' : relation A) : r^? ⨾ r' ≡ r' ∪ r ⨾ r'.
-  Proof. split; autounfold with unfolderDb; ins; desf; eauto. Qed.
+  Proof. kat'. Qed.
 
+  (* NOTE FAIL: hypotheses [a]p ≦ q[b] isn't complete for p != q *)
   Lemma cr_helper (r r' : relation A) d (H: r ⨾ ⦗d⦘ ⊆ ⦗d⦘ ⨾ r') : r^? ⨾ ⦗d⦘ ⊆ ⦗d⦘ ⨾ r'^? .
   Proof.
-    (* lift_to_kat_all. aggregate_hoare_hypotheses''. hkat'. TODO *)
     rewrite crE.
     autounfold with unfolderDb in *; ins; desf; eauto.
     edestruct H; eauto. desf. eauto.
@@ -1293,7 +1293,7 @@ Lemma inclusion_step2_ct A (r r' r'': relation A) :
   r' ⊆ r'' ->
   r ⨾ r' ⊆ r''⁺.
 Proof.
-  ins; rewrite H, H0, <- ct_ct; eauto with hahn.
+  ins; rewrite H, H0, <- ct_ct; kat'.
 Qed.
 
 Lemma inclusion_ct_seq_eqv_l A dom (r : relation A) :
