@@ -314,19 +314,20 @@ Section PropertiesSeqUnion.
   Lemma seq_eqvK (dom : A -> Prop) : ⦗dom⦘ ⨾ ⦗dom⦘ ≡ ⦗dom⦘.
   Proof. kat'. Qed.
 
+  Lemma impl_iff_subset (d1 d2: A -> Prop): (forall x, d1 x -> d2 x) = d1 ⊆₁ d2.
+  Proof. reflexivity. Qed.
+  Lemma and_iff_cap (d1 d2: A -> Prop): (fun x => d1 x /\ d2 x) = d1 ∩₁ d2.
+  Proof. reflexivity. Qed.
+
+  Hint Rewrite and_iff_cap impl_iff_subset: redefDb.
+
   Lemma seq_eqvK_l (dom1 dom2 : A -> Prop) (IMP: forall x, dom2 x -> dom1 x) :
     ⦗dom1⦘ ⨾ ⦗dom2⦘ ≡ ⦗dom2⦘.
-  Proof.
-    assert (dom2 ⊆₁ dom1) by assumption.
-    hkat'.
-  Qed.
+  Proof. hkat'. Qed.
 
   Lemma seq_eqvK_r (dom1 dom2 : A -> Prop) (IMP: forall x, dom1 x -> dom2 x) :
     ⦗dom1⦘ ⨾ ⦗dom2⦘ ≡ ⦗dom1⦘.
-  Proof.
-    assert (dom1 ⊆₁ dom2) by assumption.
-    hkat'.
-  Qed.
+  Proof. hkat'. Qed.
 
   Lemma seq_eqvC (doma domb : A -> Prop) :
     ⦗doma⦘ ⨾ ⦗domb⦘ ≡ ⦗domb⦘ ⨾ ⦗doma⦘.
@@ -334,11 +335,7 @@ Section PropertiesSeqUnion.
 
   Lemma seq_eqv (doma domb : A -> Prop) :
     ⦗doma⦘ ⨾ ⦗domb⦘ ≡ ⦗fun x => doma x /\ domb x⦘.
-  Proof.
-    assert ((fun x => doma x /\ domb x) = doma ∩₁ domb) by reflexivity.
-    rewrite H.
-    kat'.
-  Qed.
+  Proof. kat'. Qed.
 
   Lemma union_absorb_l r r' (SUB: r ⊆ r') : r ∪ r' ≡ r'.
   Proof. u. Qed.
@@ -499,8 +496,7 @@ Section PropertiesClos.
         by exists 0.
       by exists (S a); vauto.
     apply inclusion_bunion_l; ins.
-    induction x; ins; [|rewrite IHx];
-      unfold eqv_rel, seq; red; ins; desf; vauto.
+    induction x; ins; [|rewrite IHx]; kat'.
   Qed.
 
   Lemma ct_begin r : r⁺ ≡ r ⨾ r ＊.
@@ -741,7 +737,7 @@ Section good_ctx_lemmas.
 
   Lemma seq_pow_l r n : r ^^ n ⨾ r ≡ r ⨾ r ^^ n.
   Proof.
-    induction n; ins; autorewrite with hahn; try done.
+    induction n; ins. kat'.
     by rewrite IHn at 1; rewrite seqA.
   Qed.
 
@@ -1085,11 +1081,7 @@ Proof. by ins; rewrite H. Qed.
 
 Lemma pow_rt (n : nat) A (r: relation A) : r^^n ⊆ r＊.
 Proof.
-  induction n; simpl; eauto with hahn.
-  rewrite IHn.
-  assert (r ⊆ r＊) by eauto with hahn.
-  rewrite H at 2.
-  by rewrite rt_rt.
+  induction n; simpl; [|rewrite IHn]; kat'.
 Qed.
 
 (* Hint Resolve pow_t pow_rt : hahn.
@@ -1104,13 +1096,15 @@ Section PropertiesCross.
   Variable A : Type.
   Implicit Type s : A -> Prop.
 
+  (* NOTE: cross_rel isn't supported by [kat]*)
+
   Lemma cross_false_r s : s × ∅ ≡ ∅₂.
-  Proof. u. Qed.
+  Proof. kat'. Qed.
 
   Lemma cross_false_l s : ∅ × s ≡ ∅₂.
-  Proof. u. Qed.
+  Proof. kat'. Qed.
 
-  Lemma ct_of_cross s s' : (s × s')⁺ ≡ s × s'. (* TODO *)
+  Lemma ct_of_cross s s' : (s × s')⁺ ≡ s × s'.
   Proof. u; induction H; desf; eauto. Qed.
 
 End PropertiesCross.

@@ -15,16 +15,13 @@ Notation "a ^*" := (clos_refl_trans a) (at level 1, only parsing).
 
 Lemma r_refl A (r: relation A) x : r^? x x.
 Proof.
-  assert (refl_top ⊆ r^?).
-  { kat'. }
+  assert (refl_top ⊆ r^?) by kat'.
   apply H; constructor.
 Qed.
 
 Lemma r_step A (r: relation A) x y : r x y -> r^? x y.
 Proof.
-  assert (r ⊆ r^?).
-  { kat'. }
-  exact (H x y).
+  generalize x y; kat'.
 Qed.
 
 Hint Immediate r_refl r_step.
@@ -646,8 +643,7 @@ Lemma clos_trans_of_clos_trans1 A (r r' : relation A) x y :
   (fun a b => r⁺ a b \/ r' a b)⁺ x y <->
   (fun a b => r a b \/ r' a b)⁺ x y.
 Proof.
-  assert ((r⁺ ∪ r')⁺ ≡ (r ∪ r')⁺).
-  { kat'. }
+  assert ((r⁺ ∪ r')⁺ ≡ (r ∪ r')⁺) by kat'.
   destruct H as [H1 H2].
   split; [> apply H1 | apply H2].
 Qed.

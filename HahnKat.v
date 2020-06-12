@@ -9,7 +9,8 @@ Require Import RelationAlgebra.kat.
 
 Require Import HahnRelationsBasicDef HahnBase.
 
-Require Export Setoid Morphisms. 
+(* Fix unnecessary simplification, that RelationAlgebra brought *)
+Require Export Setoid Morphisms.
 Arguments Proper {_} _ _ : simpl never.
 Arguments respectful {_ _} _ _ _ _: simpl never.
 
@@ -112,9 +113,9 @@ Proof.
   constructor; simpl; intros.
   - apply lower_laws.
   - apply (pw_laws (H:=lower_lattice_laws)).
-  - constructor; try discriminate; autounfold with unfolderDb; simpl; firstorder.
+  - constructor; try discriminate; unfold_all; firstorder.
   - unfold_all; firstorder.
-  - unfold_all; simpl.
+  - unfold_all.
     firstorder; rewrite H0 in *; rewrite <- H in *; trivial.
 Qed.
 
@@ -132,6 +133,9 @@ Proof. unfold_all. firstorder. Qed.
 
 Lemma inclusion_iff_leq: r1 ⊆ r2 <-> r1 ≦ r2.
 Proof. simpl. firstorder. Qed.
+
+Lemma impl_rel_iff_leq: (forall x y, r1 x y -> r2 x y) <-> r1 ≦ r2.
+Proof. unfold_all. firstorder. Qed.
 
 Lemma inter_rel_iff_cap: inter_rel r1 r2 = cap r1 r2.
 Proof. reflexivity. Qed.
@@ -260,7 +264,7 @@ Qed.
 End Lifting.
 
 (* TODO: We shouldn't rewrite general operation, we should relay on unification *)
-Hint Rewrite same_rel_iff_weq iff_rel_iff_weq inclusion_iff_leq : redefDb.
+Hint Rewrite same_rel_iff_weq iff_rel_iff_weq inclusion_iff_leq impl_rel_iff_leq : redefDb.
 Hint Rewrite inter_rel_iff_cap union_rel_iff_cup seq_iff_dot empty_rel_iff_bot
      clos_refl_trans_iff_str clos_trans_iff_itr lift_clos_refl dom_iff_test : redefDb.
 Hint Rewrite restr_rel_iff_kat acyclic_iff_kat irreflexive_iff_kat cross_rel_iff_kat

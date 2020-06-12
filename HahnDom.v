@@ -229,7 +229,7 @@ Section Lemmas.
   Lemma domab_helper2 :
     r ⊆ d × d' <-> doma r d /\ domb r d'.
   Proof.
-    unfold doma, domb, cross_rel, inclusion; intuition; firstorder.
+    unfold doma, domb, cross_rel, inclusion; intuition; firstorder. 
   Qed.
 
   Lemma dom_to_doma : r ≡ ⦗d⦘ ⨾ r ⨾ ⦗d'⦘ -> doma r d.
