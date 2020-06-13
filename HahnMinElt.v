@@ -17,6 +17,7 @@ Definition wmin_elt A (r: relation A) (a : A) :=
   forall b (REL: r b a), a = b.
 
 
+(* redef_proof *)
 Lemma min_elt_iff_kat A (r: relation A) (a: A):
   min_elt r a <-> r ;; ⦗eq a⦘ ⊆ ∅₂.
 Proof.
@@ -25,6 +26,7 @@ Proof.
   - apply (H b a). exists a. auto.
 Qed.
 
+(* redef_proof *)
 Lemma wmin_elt_iff_kat A (r: relation A) (a: A):
   wmin_elt r a <-> ⦗set_compl (eq a)⦘ ;; r ;; ⦗eq a⦘ ⊆ ∅₂.
 Proof.
@@ -143,6 +145,7 @@ Section MoreProperties.
 Variable A : Type.
 Implicit Type r : relation A.
 
+(* redef_proof *)
 Lemma dom_iff_kat r b:
   (forall x y, r x y -> x = b) <-> ⦗set_compl (eq b)⦘ ;; r ⊆ ∅₂.
 Proof.

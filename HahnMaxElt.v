@@ -19,6 +19,7 @@ Definition wmax_elt A (r: relation A) (a : A) :=
 Local Lemma sym A: forall (x y: A), x = y <-> y = x.
 Proof. firstorder. Qed.
 
+(* redef_proof *)
 Lemma max_elt_iff_kat (A: Type) (a: A) r:
   max_elt r a <-> ⦗eq a⦘ ;; r ⊆ ∅₂.
 Proof.
@@ -27,6 +28,7 @@ Proof.
   - eapply H. esplits; eauto.
 Qed.
 
+(* redef_proof *)
 Lemma wmax_elt_iff_kat (A: Type) (a: A) r:
     wmax_elt r a <-> ⦗eq a⦘ ;; r ;; ⦗set_compl (eq a)⦘ ⊆ ∅₂.
 Proof.
@@ -39,6 +41,7 @@ Proof.
     + apply H0 in H1. destruct H1.
 Qed.
 
+(* redef_statement *)
 Hint Rewrite max_elt_iff_kat wmax_elt_iff_kat: redefDb.
 
 Section BasicProperties.
@@ -133,6 +136,7 @@ Section MoreProperties.
 Variable A : Type.
 Implicit Type r : relation A.
 
+(* redef_proof *)
 Lemma cod_iff_kat r b:
   (forall x y, r x y -> y = b) <-> r ;; ⦗set_compl (eq b)⦘ ⊆ ∅₂.
 Proof.

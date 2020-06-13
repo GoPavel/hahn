@@ -59,8 +59,8 @@ def analyze(lemmas):
             if def_occur(d, l.statement):
                 i = True
                 redef_stat[d][is_full] += 1
-        if not i and is_full == 'partial':
-            print(l)
+        # if not i and is_full == 'partial':
+        #     print(l)
 
     total = {s: tactic_stat['kat'][s] + tactic_stat['hkat'][s] for s in ['full', 'partial']}
 

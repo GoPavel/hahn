@@ -23,6 +23,7 @@ Section Definitions.
   Definition dom_cond d := (fun e => dom_rel (r ⨾ ⦗ eq e ⦘) ⊆₁ d).
 End Definitions.
 
+(* redef_proof *)
 Lemma doma_iff_kat r d: doma r d <-> ⦗set_compl d⦘ ;; r ⊆ ∅₂.
 Proof.
   unfold_all. unfold doma. firstorder.
@@ -34,6 +35,7 @@ Proof.
     + apply H0 in H1. destruct H1.
 Qed.
 
+(* redef_proof *)
 Lemma domb_iff_kat r d: domb r d <-> (r ;; ⦗set_compl d⦘ ⊆ ∅₂).
 Proof.
   unfold_all. unfold domb. split.

@@ -143,39 +143,51 @@ Variables r r1 r2: relation A.
 Variable d d1 d2: A -> Prop.
 Local Notation " [ p ] " := (inj (n:=tt) p): ra_terms.
 
+(* redef_proof *)
 Lemma same_rel_iff_weq: same_relation r1 r2 <-> r1 ≡ r2.
 Proof. reflexivity. Qed.
 
+(* redef_proof *)
 Lemma iff_rel_iff_weq: (forall x y, r1 x y <-> r2 x y) <-> r1 ≡ r2.
 Proof. unfold_all. firstorder. Qed.
 
+(* redef_proof *)
 Lemma inclusion_iff_leq: r1 ⊆ r2 <-> r1 ≦ r2.
 Proof. reflexivity.  Qed.
 
+(* redef_proof *)
 Lemma impl_rel_iff_leq: (forall x y, r1 x y -> r2 x y) <-> r1 ≦ r2.
 Proof. unfold_all. firstorder. Qed.
 
+(* redef_proof *)
 Lemma inter_rel_iff_cap: inter_rel r1 r2 = cap r1 r2.
 Proof. reflexivity. Qed.
 
+(* redef_proof *)
 Lemma union_rel_iff_cup: union r1 r2 = cup r1 r2.
 Proof. reflexivity. Qed.
 
+(* redef_proof *)
 Lemma empty_rel_iff_bot: (∅₂ : relation A) = @bot (mor tt tt).
 Proof. reflexivity. Qed.
 
+(* redef_proof *)
 Lemma clos_refl_trans_iff_str: clos_refl_trans r = @str _ tt r.
 Proof. reflexivity. Qed.
 
+(* redef_proof *)
 Lemma clos_trans_iff_itr: clos_trans r = @itr _ tt r.
 Proof. reflexivity. Qed.
 
+(* redef_proof *)
 Lemma seq_iff_dot: r1 ;; r2 = @dot _ tt tt tt r1 r2.
 Proof. reflexivity. Qed.
 
+(* redef_proof *)
 Lemma transp_iff_cnv: transp r = @cnv _ tt tt r.
 Proof. reflexivity. Qed.
 
+(* redef_proof *)
 Lemma dom_iff_test: forall (dom: A -> Prop), ⦗dom⦘ = [dom].
 Proof. reflexivity. Qed.
 
@@ -187,42 +199,54 @@ Ltac rel_ext :=
   apply functional_extensionality; intro y;
   apply prop_ext.
 
+(* redef_proof *)
 Lemma restr_rel_iff_kat: restr_rel d r = ([d]⋅r⋅[d]).
 Proof. rel_ext; unfold_all; firstorder; congruence. Qed.
 
+(* redef_proof *)
 Lemma lift_clos_refl: r^? = (refl_top ⊔ r).
 Proof. unfold_all; reflexivity. Qed.
 
+(* redef_proof *)
 Lemma set_empty_iff_kat: @set_empty A = bot.
 Proof. reflexivity. Qed.
 
+(* redef_proof *)
 Lemma set_full_iff_kat: @set_full A = top.
 Proof. reflexivity. Qed.
 
+(* redef_proof *)
 Lemma set_compl_iff_kat: @set_compl A = neg.
 Proof. reflexivity. Qed.
 
+(* redef_proof *)
 Lemma set_union_iff_kat: @set_union A = cup.
 Proof. reflexivity. Qed.
 
+(* redef_proof *)
 Lemma set_inter_iff_kat: @set_inter A = cap.
 Proof. reflexivity. Qed.
 
+(* redef_proof *)
 Lemma set_subset_iff_kat: @set_subset A = leq.
 Proof. reflexivity. Qed.
 
+(* redef_proof *)
 Lemma set_equiv_iff_kat: @set_equiv A = weq.
 Proof. rel_ext. firstorder. Qed.
 
+(* redef_proof *)
 Lemma reflexive_iff_kat: reflexive r <-> refl_top ≦ r.
 Proof.
   unfold_all; firstorder.
   rewrite H0; apply H.
 Qed.
 
+(* redef_proof *)
 Lemma transitive_iff_kat: transitive r <-> (@dot _ tt tt tt) r r ≦ r.
 Proof. unfold_all; firstorder. Qed.
 
+(* redef_proof *)
 Lemma upward_closed_iff_kat: upward_closed r d <-> [@neg dset' d]⋅r⋅[d] ≦ bot.
 Proof.
   unfold_all. firstorder.

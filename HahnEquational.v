@@ -328,8 +328,10 @@ Section PropertiesSeqUnion.
   Lemma seq_eqvK (dom : A -> Prop) : ⦗dom⦘ ⨾ ⦗dom⦘ ≡ ⦗dom⦘.
   Proof. kat'. Qed.
 
+  (* redef_proof *)
   Lemma impl_iff_subset (d1 d2: A -> Prop): (forall x, d1 x -> d2 x) = d1 ⊆₁ d2.
   Proof. reflexivity. Qed.
+  (* redef_proof *)
   Lemma and_iff_cap (d1 d2: A -> Prop): (fun x => d1 x /\ d2 x) = d1 ∩₁ d2.
   Proof. reflexivity. Qed.
 
