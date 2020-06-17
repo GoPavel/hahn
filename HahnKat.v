@@ -326,6 +326,9 @@ Ltac aggregate_hoare_hypotheses' :=
         apply (join_leq _ _ _ H') in H; clear H'
     end.
 
+(* NOTE: bug with using pc_c cp_c fixed.
+     There was an issue is [hkat] has waited for at least one hypothesis [r ≤ 0].
+     And matching allows saving error message. *)
 Ltac hkat' :=
   lift_to_kat_all;
   intros; aggregate_hoare_hypotheses'; rewrite ?leq_iff_cup;

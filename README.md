@@ -7,7 +7,6 @@ New modules
   - instances of Canonical Structures and Typeclasses
   - redefinition original tactics `kat`/`hkat`
   - lemmas for lifting old definitions to KAT
-- [HahnKatTest.v](https://github.com/GoPavel/hahn/blob/experiments-with-kat/HahnKatTest.v) - temporary module with tests for instances in HahnKat.v
 
 Introduce tactics:
 - `kat'` - solve KAT
