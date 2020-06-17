@@ -119,11 +119,24 @@ Proof.
     firstorder; rewrite H0 in *; rewrite <- H in *; trivial.
 Qed.
 
+Notation " [ p ]ₖₐₜ " := (inj (n:=tt) p).
+Notation "a ;;ₖₐₜ b" := (monoid.dot tt tt tt a b) (left associativity, at level 25).
+Notation "a ≦ₖₐₜ b" := (lattice.leq a b) (at level 79).
+Notation "a ≡ₖₐₜ b" := (lattice.weq a b) (at level 79).
+Notation "!ₖₐₜ x" := (neg x) (right associativity, at level 20, format "!ₖₐₜ x").
+Notation "a ⊔ₖₐₜ b" := (lattice.cup a b) (left associativity, at level 50).
+Notation "a ⊓ₖₐₜ b" := (lattice.cap a b) (left associativity, at level 40).
+Notation "1ₖₐₜ" := (refl_top).
+Notation "0ₖₐₜ" := (bot).
+Notation "itrₖₐₜ x" := (itr tt x) (left associativity, at level 5, format "itrₖₐₜ x").
+Notation "strₖₐₜ x" := (str tt x) (left associativity, at level 5, format "strₖₐₜ x").
+
 Section Lifting.
 
 Variable A : Type.
 Variables r r1 r2: relation A.
 Variable d d1 d2: A -> Prop.
+Local Notation " [ p ] " := (inj (n:=tt) p): ra_terms. 
 
 Lemma same_rel_iff_weq: same_relation r1 r2 <-> r1 ≡ r2.
 Proof. unfold_all. firstorder. Qed.
@@ -183,10 +196,8 @@ Qed.
 Lemma lift_clos_refl: r^? = (refl_top ⊔ r).
 Proof. unfold_all; reflexivity. Qed.
 
-Local Notation "x ^+" := (itr tt x)   (left associativity, at level 5, format "x ^+"): ra_terms.
-
 (* NOTE: not supported by KAT *)
-Lemma acyclic_iff_kat: acyclic r <-> 1 ⊓ (r^+) ≡ 0.
+Lemma acyclic_iff_kat: acyclic r <-> 1 ⊓ (itr tt r) ≡ 0.
 Proof.
   unfold_all; firstorder.
   apply H with (x:=x); rewrite H0 at 2; apply H1.
