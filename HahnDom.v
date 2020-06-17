@@ -49,6 +49,7 @@ Qed.
 
 Hint Rewrite doma_iff_kat domb_iff_kat: redefDb.
 
+(* redef_proof *)
 Lemma sift_union (d1 d2: A -> Prop): (⦗d1⦘ ∪ ⦗d2⦘ ≡ ⦗d1 ∪₁ d2⦘).
 Proof. kat'. Qed.
 
@@ -238,13 +239,13 @@ Section Lemmas.
   Lemma domb_rewrite : domb r d -> r ⊆ r ⨾ ⦗d⦘. 
   Proof. hkat'. Qed.
 
-  (* Partial *)
+  (* Full *)
   Lemma doma_helper : r ⊆ ⦗d⦘ ⨾ r <-> doma r d.
   Proof.
     split; hkat'.
   Qed.
 
-  (* Partial *)
+  (* Full *)
   Lemma domb_helper : r ⊆ r ⨾ ⦗d⦘ <-> domb r d.
   Proof. 
     split; hkat'.
@@ -264,31 +265,31 @@ Section Lemmas.
     unfold doma, domb, cross_rel, inclusion; intuition; firstorder. 
   Qed.
 
-  (* Partial *)
+  (* Full *)
   Lemma dom_to_doma : r ≡ ⦗d⦘ ⨾ r ⨾ ⦗d'⦘ -> doma r d.
   Proof.
     hkat'.
   Qed.
 
-  (* Partial *)
+  (* Full *)
   Lemma dom_to_domb : r ≡ ⦗d⦘ ⨾ r ⨾ ⦗d'⦘ -> domb r d'.
   Proof.
     hkat'.
   Qed.
 
-  (* Partial *)
+  (* Full *)
   Lemma dom_l : r ≡ ⦗d⦘ ⨾ r ⨾ ⦗d'⦘ -> r ≡ ⦗d⦘ ⨾ r.
   Proof.
     hkat'.
   Qed.
 
-  (* Partial *)
+  (* Full *)
   Lemma dom_r : r ≡ ⦗d⦘ ⨾ r ⨾ ⦗d'⦘ -> r ≡ r ⨾ ⦗d'⦘.
   Proof.
     hkat'.
   Qed.
 
-  (* Partial *)
+  (* Full *)
   Lemma dom_helper_1 : r ⊆ ⦗d⦘ ⨾ r ⨾ ⦗d'⦘ <-> r ≡ ⦗d⦘ ⨾ r ⨾ ⦗d'⦘.
   Proof.
     split; hkat'.
@@ -305,7 +306,7 @@ Section Lemmas.
     unfolder; firstorder.
   Qed.
 
-  (* Partial *)
+  (* Full *)
   Lemma step_dom 
         (E: r ⊆ (⦗d⦘ ∪ ⦗d'⦘) ⨾ r ⨾ (⦗d⦘ ∪ ⦗d'⦘))
         dd (DD: dd = ⦗d⦘ ⨾ r ⨾ ⦗d⦘)
@@ -317,7 +318,7 @@ Section Lemmas.
     subst; hkat'.
   Qed.
 
-  (* Partial *)
+  (* Full *)
   Lemma path_dom
         (E1: r ⊆ (⦗d⦘ ∪ ⦗d'⦘) ⨾ r ⨾ (⦗d⦘ ∪ ⦗d'⦘))
         (E2: ⦗d⦘ ⨾ ⦗d'⦘ ⊆ ∅₂)
@@ -333,7 +334,7 @@ Section Lemmas.
     subst; hkat'.
   Qed.
 
-  (* Partial *)
+  (* Full *)
   Lemma path_dom_same
         (E1: r ⊆ (⦗d⦘ ∪ ⦗d'⦘) ⨾ r ⨾ (⦗d⦘ ∪ ⦗d'⦘))
         (E2: ⦗d⦘ ⨾ ⦗d'⦘ ⊆ ∅₂)
