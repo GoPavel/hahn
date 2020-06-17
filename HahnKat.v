@@ -296,7 +296,7 @@ Ltac aggregate_hoare_hypotheses' :=
     end;
   repeat
     match goal with
-      | H: _ ≦ 0,  H': _ ≦ 0 |- _     => idtac
+      | H: _ ≦ 0,  H': _ ≦ 0 |- _     => fail
       | H: _ ≦ _ |- _ =>
         apply (ab'_to_hoare (n:=tt)) in H ||
         apply (bpqc_to_hoare (n:=tt) (m:=tt)) in H ||
