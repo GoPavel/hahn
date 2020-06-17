@@ -49,6 +49,11 @@ Qed.
 
 Hint Rewrite doma_iff_kat domb_iff_kat: redefDb.
 
+Lemma sift_union (d1 d2: A -> Prop): (⦗d1⦘ ∪ ⦗d2⦘ ≡ ⦗d1 ∪₁ d2⦘).
+Proof. kat'. Qed.
+
+Hint Rewrite sift_union: redefDb.
+
 Section Lemmas.
 
   Variables r r' : relation A.
@@ -220,9 +225,7 @@ Section Lemmas.
   Lemma domab_helper : 
     r ⊆ ⦗d⦘ ⨾ r ⨾ ⦗d'⦘ <-> doma r d /\ domb r d'.
   Proof.
-    split; intros.
-    - split; lift_to_kat_all; rewrite H; kat'.
-    - destruct H; hkat'.
+    split; intro H; [split | destruct H]; hkat'.
   Qed.
 
 (* NOTE FAIL: kat fail because not support ⊤ fully. *)
@@ -234,29 +237,27 @@ Section Lemmas.
 
   Lemma dom_to_doma : r ≡ ⦗d⦘ ⨾ r ⨾ ⦗d'⦘ -> doma r d.
   Proof.
-    intro H; lift_to_kat_all; rewrite H; kat'.
+    hkat'.
   Qed.
 
   Lemma dom_to_domb : r ≡ ⦗d⦘ ⨾ r ⨾ ⦗d'⦘ -> domb r d'.
   Proof.
-    intro H; lift_to_kat_all; rewrite H; kat'.
+    hkat'.
   Qed.
 
   Lemma dom_l : r ≡ ⦗d⦘ ⨾ r ⨾ ⦗d'⦘ -> r ≡ ⦗d⦘ ⨾ r.
   Proof.
-    intro H; lift_to_kat_all; rewrite H; kat'.
+    hkat'.
   Qed.
 
   Lemma dom_r : r ≡ ⦗d⦘ ⨾ r ⨾ ⦗d'⦘ -> r ≡ r ⨾ ⦗d'⦘.
   Proof.
-    intro H; rewrite H; kat'.
+    hkat'.
   Qed.
 
   Lemma dom_helper_1 : r ⊆ ⦗d⦘ ⨾ r ⨾ ⦗d'⦘ <-> r ≡ ⦗d⦘ ⨾ r ⨾ ⦗d'⦘.
   Proof.
-    split; intros H.
-    - split; [> apply H | kat'].
-    - rewrite H; kat'.
+    split; hkat'.
   Qed.
 
   (* NOTE: top isn't supported *)
@@ -278,7 +279,7 @@ Section Lemmas.
         ee (EE: ee = ⦗d'⦘ ⨾ r ⨾ ⦗d'⦘) :
     r ⊆ dd ∪ de ∪ ed ∪ ee.
   Proof.
-    rewrite E. subst. kat'.
+    subst; hkat'.
   Qed.
 
   Lemma path_dom
@@ -292,14 +293,8 @@ Section Lemmas.
        (ee⁺ ∪ (ee＊ ⨾ ed ⨾ dd＊ ⨾ de)⁺ ⨾ ee＊ ) ∪
        (ee＊ ⨾ ed ⨾ dd＊ ⨾ de)＊ ⨾ ee＊ ⨾ ed ⨾ dd＊ ∪
        (dd＊ ⨾ de ⨾ ee＊ ⨾ ed)＊ ⨾ dd＊ ⨾ de ⨾ ee＊.
-  Proof. 
-    apply inclusion_t_ind_right.
-    { rewrite step_dom at 1; try eassumption.
-      repeat apply inclusion_union_l; rewrite ?seqA.
-      1,4: sin_rewrite !ct_end.
-      all: try hkat'. }
-    rewrite step_dom at 1; try eassumption.
-    { rewrite ?DD, ?ED, ?DE, ?EE. hkat'. }
+  Proof.
+    subst; hkat'.
   Qed.
 
   Lemma path_dom_same
@@ -311,8 +306,7 @@ Section Lemmas.
         ee (EE: ee = ⦗d'⦘ ⨾ r ⨾ ⦗d'⦘) : 
     ⦗d⦘ ⨾ r⁺ ⨾ ⦗d⦘ ⊆ dd⁺ ∪ (dd＊ ⨾ de ⨾ ee＊ ⨾ ed)⁺ ⨾ dd＊.
   Proof.
-    rewrite path_dom; try edone.
-    { rewrite ?DD, ?ED, ?DE, ?EE. hkat'. }
+    subst; hkat'.
   Qed.
 
   Lemma irr_dom
@@ -409,17 +403,11 @@ Lemma acyc_dom (r: relation A) d e
 Proof.
   red.
   eapply irr_dom; try edone.
-  { arewrite (⦗d⦘ ∪ ⦗e⦘ ≡ ⦗fun x => d x \/ e x⦘) by basic_solver.
-    apply domab_helper; split.
-    apply ct_doma; eapply domab_helper with (d':= fun x => d x \/ e x).
-    rewrite E1 at 1; basic_solver.
-    apply ct_domb; eapply domab_helper with (d := fun x => d x \/ e x).
-    rewrite E1 at 1; basic_solver. }
+  { clear -E1 E2; hkat'.  }
   sin_rewrite path_dom_same; try edone.
   { repeat rewrite irreflexive_union; splits; try done.
     rewrite irreflexive_seqC.
-    arewrite( dd＊ ⨾ (dd ＊ ⨾ de ⨾ ee ＊ ⨾ ed) ⁺ ⊆ (dd ＊ ⨾ de ⨾ ee ＊ ⨾ ed) ⁺).
-    {  kat'. }
+    arewrite( dd＊ ⨾ (dd ＊ ⨾ de ⨾ ee ＊ ⨾ ed) ⁺ ⊆ (dd ＊ ⨾ de ⨾ ee ＊ ⨾ ed) ⁺) by kat'.
     assert (acyclic (dd ＊ ⨾ de ⨾ ee ＊ ⨾ ed)); try done. (*?*)
     rewrite acyclic_seqC; rewrite !seqA. 
     rewrite acyclic_seqC; rewrite !seqA. 
@@ -429,8 +417,7 @@ Proof.
   sin_rewrite path_dom_same; try edone; try by rewrite seq_eqvC.
   repeat rewrite irreflexive_union; splits; try done.
   rewrite irreflexive_seqC.
-  arewrite( ee＊ ⨾ (ee ＊ ⨾ ed ⨾ dd ＊ ⨾ de) ⁺  ⊆ (ee ＊ ⨾ ed ⨾ dd ＊ ⨾ de) ⁺).
-  { kat'. }
+  arewrite( ee＊ ⨾ (ee ＊ ⨾ ed ⨾ dd ＊ ⨾ de) ⁺  ⊆ (ee ＊ ⨾ ed ⨾ dd ＊ ⨾ de) ⁺) by kat'.
   assert (acyclic(ee ＊ ⨾ ed ⨾ dd ＊ ⨾ de)); try done. (*?*)
   rewrite acyclic_seqC; rewrite !seqA. 
   done.

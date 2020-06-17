@@ -287,6 +287,10 @@ Ltac lift_to_kat_all := repeat autorewrite with redefDb in *.
 
 Require Import RelationAlgebra.kat_reification.
 
+Lemma qapb_to_hoare `{L: laws} {n m} (a: tst n) (b: tst m) (p q: X n m): 
+  q ≦ [a]⋅(p⋅[b])-> [!a]⋅q ≦ 0 /\ q⋅[!b] ≦ 0.
+Proof. intro H. split; rewrite H; kat. Qed.
+
 (* TODO: doc *)
 Ltac kat' :=
   lift_to_kat_all;
@@ -303,7 +307,7 @@ Ltac aggregate_hoare_hypotheses' :=
         apply (ab_to_hoare (n:=tt)) in H ||
         (rewrite (cp_c (n:=tt) _ _ H); clear H) ||
         (rewrite (pc_c (n:=tt) _ _ H); clear H) ||
-        (rewrite weq_spec in H; destruct H as [? ?])
+        (rewrite weq_spec in H; destruct H)
     end;
   repeat
     match goal with
@@ -312,6 +316,7 @@ Ltac aggregate_hoare_hypotheses' :=
         apply (ab'_to_hoare (n:=tt)) in H ||
         apply (bpqc_to_hoare (n:=tt) (m:=tt)) in H ||
         apply (pbcq_to_hoare (n:=tt) (m:=tt) ) in H ||
+        (apply (qapb_to_hoare (n:=tt) (m:=tt) ) in H; destruct H) ||
         apply (qcp_to_hoare  (n:=tt) (m:=tt) ) in H ||
         apply (qpc_to_hoare  (n:=tt) (m:=tt) ) in H
     end;
