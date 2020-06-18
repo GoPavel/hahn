@@ -1,13 +1,14 @@
+(******************************************************************************)
 (** * Define KAT instance and canonical stractures *)
+(******************************************************************************)
 
-Add LoadPath "../relation-algebra-1.7.1".
 Require Import RelationAlgebra.kat_tac.
 Require Import RelationAlgebra.lattice.
 Require Import RelationAlgebra.monoid.
 Require Export RelationAlgebra.prop.
 Require Import RelationAlgebra.kat.
 
-Require Import HahnRelationsBasicDef HahnBase.
+Require Import HahnSets HahnRelationsBasicDef HahnBase.
 
 (* Fix unnecessary simplification, that RelationAlgebra brought *)
 Require Export Setoid Morphisms.
@@ -91,6 +92,7 @@ Proof.
       * eauto using clos_trans.
 Qed.
 
+(* TODO: Try to reuse hahn's sets *)
 Definition dset' {A: Type}: lattice.ops := pw_ops Prop_lattice_ops A.
 
 Definition inj' {A: Type} (cond: (@dset' A)): relation A
@@ -104,6 +106,7 @@ Canonical Structure rel_kat_ops {A: Type}: kat.ops :=
      kat.inj n := @inj' A
   |}.
 
+(* utility for get first-order proposition  *)
 Ltac unfold_all := repeat (autounfold with unfolderDb; simpl).
 
 Instance rel_kat_laws {A: Type}: kat.laws (@rel_kat_ops A).
@@ -117,6 +120,7 @@ Proof.
     firstorder; rewrite H0 in *; rewrite <- H in *; trivial.
 Qed.
 
+(* Notation for debug *)
 Notation " [ p ]ₖₐₜ " := (inj (n:=tt) p).
 Notation "a ;;ₖₐₜ b" := (monoid.dot tt tt tt a b) (left associativity, at level 25).
 Notation "a ≦ₖₐₜ b" := (lattice.leq a b) (at level 79).
@@ -129,12 +133,15 @@ Notation "0ₖₐₜ" := (bot).
 Notation "itrₖₐₜ x" := (itr tt x) (left associativity, at level 5, format "itrₖₐₜ x").
 Notation "strₖₐₜ x" := (str tt x) (left associativity, at level 5, format "strₖₐₜ x").
 
+(******************************************************************************)
+(** Lemmas for lifting basic definitions to KAT *)
+(******************************************************************************)
 Section Lifting.
 
 Variable A : Type.
 Variables r r1 r2: relation A.
 Variable d d1 d2: A -> Prop.
-Local Notation " [ p ] " := (inj (n:=tt) p): ra_terms. 
+Local Notation " [ p ] " := (inj (n:=tt) p): ra_terms.
 
 Lemma same_rel_iff_weq: same_relation r1 r2 <-> r1 ≡ r2.
 Proof. unfold_all. firstorder. Qed.
@@ -169,12 +176,10 @@ Proof. reflexivity. Qed.
 Lemma transp_iff_cnv: transp r = @cnv _ tt tt r.
 Proof. reflexivity. Qed.
 
-Local Notation " [ p ] " := (inj (n:=tt) p): ra_terms. 
-
 Lemma dom_iff_test: forall (dom: A -> Prop), ⦗dom⦘ = [dom].
 Proof. reflexivity. Qed.
 
-(* ASK *)
+(* NOTE: We assume that relation is decidable *)
 Local Axiom prop_ext: forall (P Q: Prop), (P <-> Q) -> P = Q.
 
 Ltac rel_ext :=
@@ -183,41 +188,11 @@ Ltac rel_ext :=
   apply prop_ext.
 
 Lemma restr_rel_iff_kat: restr_rel d r = ([d]⋅r⋅[d]).
-Proof.
-  rel_ext; unfold_all; split.
-  - intros [H1 [H2 H3]]; esplits; eauto.
-  - intros. destruct H as [z [[z0 [[H1 H2] H3]] [H4 H5]]].
-    rewrite <- H1 in H3; rewrite -> H4 in *.
-    splits; [> apply H3 | apply H2 | apply H5].
-Qed.
+Proof. rel_ext; unfold_all; firstorder; congruence. Qed.
 
 Lemma lift_clos_refl: r^? = (refl_top ⊔ r).
 Proof. unfold_all; reflexivity. Qed.
 
-(* NOTE: not supported by KAT *)
-Lemma acyclic_iff_kat: acyclic r <-> 1 ⊓ (itr tt r) ≡ 0.
-Proof.
-  unfold_all; firstorder.
-  apply H with (x:=x); rewrite H0 at 2; apply H1.
-Qed.
-
-Lemma irreflexive_iff_kat: irreflexive r <-> cap (one tt) r ≦ bot.
-Proof.
-  unfold_all; firstorder.
-  rewrite H0 in H1; eapply H, H1.
-Qed.
-
-(* NOTE: not supported by KAT *)
-Lemma cross_rel_iff_kat: cross_rel d1 d2 = [d1]⋅top⋅[d2].
-Proof.
-  unfold_all; rel_ext; firstorder.
-  - eexists. esplits; auto.
-  - congruence.
-Qed.
-
-Import hahn.HahnSets.
-
-(* TODO: try use it instead of dset' *)
 Lemma set_empty_iff_kat: @set_empty A = bot.
 Proof. reflexivity. Qed.
 
@@ -237,16 +212,7 @@ Lemma set_subset_iff_kat: @set_subset A = leq.
 Proof. reflexivity. Qed.
 
 Lemma set_equiv_iff_kat: @set_equiv A = weq.
-Proof. unfold set_equiv. unfold weq. simpl. unfold iff. unfold set_subset.
-       rel_ext. firstorder. Qed.
-
-(* NOTE: not supported by KAT *)
-Lemma singl_rel_iff_kat: forall {a b: A}, singl_rel a b = [eq a]⋅top⋅[eq b].
-Proof.
-  unfold_all; intros; rel_ext; firstorder.
-  - esplits; eauto.
-  - rewrite H1, H0; reflexivity.
-Qed.
+Proof. rel_ext. firstorder. Qed.
 
 Lemma reflexive_iff_kat: reflexive r <-> refl_top ≦ r.
 Proof.
@@ -266,9 +232,36 @@ Proof.
     destruct (classic (d x)); [> assumption | apply H0 in H1; destruct H1].
 Qed.
 
+(** not supported by KAT *)
+
+Lemma singl_rel_iff_kat: forall {a b: A}, singl_rel a b = [eq a]⋅top⋅[eq b].
+Proof.
+  unfold_all; intros; rel_ext; firstorder.
+  - esplits; eauto.
+  - rewrite H1, H0; reflexivity.
+Qed.
+
+Lemma acyclic_iff_kat: acyclic r <-> 1 ⊓ (itr tt r) ≡ 0.
+Proof.
+  unfold_all; firstorder.
+  apply H with (x:=x); rewrite H0 at 2; apply H1.
+Qed.
+
+Lemma irreflexive_iff_kat: irreflexive r <-> cap (one tt) r ≦ bot.
+Proof.
+  unfold_all; firstorder.
+  rewrite H0 in H1; eapply H, H1.
+Qed.
+
+Lemma cross_rel_iff_kat: cross_rel d1 d2 = [d1]⋅top⋅[d2].
+Proof.
+  unfold_all; rel_ext; firstorder; [esplits; auto |congruence].
+Qed.
+
 End Lifting.
 
-(* TODO: We shouldn't rewrite general operation, we should relay on unification *)
+(* NOTE: We shouldn't rewrite general operation, we should relay on unification.
+         But matching in (h)kat expected weq\leq operations *)
 Hint Rewrite same_rel_iff_weq iff_rel_iff_weq inclusion_iff_leq impl_rel_iff_leq : redefDb.
 Hint Rewrite inter_rel_iff_cap union_rel_iff_cup seq_iff_dot empty_rel_iff_bot
      clos_refl_trans_iff_str clos_trans_iff_itr lift_clos_refl dom_iff_test : redefDb.
@@ -279,21 +272,24 @@ Hint Rewrite restr_rel_iff_kat acyclic_iff_kat irreflexive_iff_kat cross_rel_iff
 
 Ltac lift_to_kat_all := repeat autorewrite with redefDb in *.
 
-Require Import RelationAlgebra.kat_reification.
+(******************************************************************************)
+(** Redefine hkat/kat tactic *)
+(******************************************************************************)
 
+Import RelationAlgebra.kat_reification.
+
+(* Support new hypothesis as combination of old *)
 Lemma qapb_to_hoare `{L: laws} {n m} (a: tst n) (b: tst m) (p q: X n m): 
   q ≦ [a]⋅(p⋅[b])-> [!a]⋅q ≦ 0 /\ q⋅[!b] ≦ 0.
 Proof. intro H. split; rewrite H; kat. Qed.
 
-(* TODO: doc *)
 Ltac kat' :=
   lift_to_kat_all;
   intros; rewrite ?leq_iff_cup;
     (apply (catch_kat_weq tt tt) || fail "could not find a KAT structure");
     pre_dec true.
- 
-(* TODO: Add phase of clearing non-KAT hypothesis.
-   We can do it, because [hkat] can't succeeded without goal solving *)
+
+(* NOTE: matching reordered for speed up a bit *)
 Ltac aggregate_hoare_hypotheses' :=
   repeat
     match goal with
