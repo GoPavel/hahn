@@ -23,15 +23,13 @@ Section Definitions.
   Definition dom_cond d := (fun e => dom_rel (r ⨾ ⦗ eq e ⦘) ⊆₁ d).
 End Definitions.
 
-Local Axiom LEM: forall (A: Type) (d : A -> Prop) (x: A), (d x) \/ (not (d x)). (* TODO *)
-
 Lemma doma_iff_kat r d: doma r d <-> ⦗set_compl d⦘ ;; r ⊆ ∅₂.
 Proof.
   unfold_all. unfold doma. firstorder.
   - eapply H2, H. rewrite H0; apply H1.
   - assert (not (d x) -> False).
     { intro. eapply H. esplits; eauto. }
-    destruct (LEM d x).
+    destruct (classic (d x)).
     + assumption.
     + apply H0 in H1. destruct H1.
 Qed.
@@ -42,7 +40,7 @@ Proof.
   - firstorder.
   - intros.
     assert (not (d y) -> False). { eauto. }
-    destruct (LEM d y).
+    destruct (classic (d y)).
     + assumption.
     + apply H0 in H1. destruct H1.
 Qed.

@@ -27,8 +27,6 @@ Proof.
   - eapply H. esplits; eauto.
 Qed.
 
-Local Axiom LEM: forall (A: Type) (a b: A), (a = b) \/ (not (a = b)). (* TODO *)
-
 Lemma wmax_elt_iff_kat (A: Type) (a: A) r:
     wmax_elt r a <-> ⦗eq a⦘ ;; r ;; ⦗set_compl (eq a)⦘ ⊆ ∅₂.
 Proof.
@@ -36,7 +34,7 @@ Proof.
   - apply H4. apply H. congruence.
   - assert (a <> b -> False).
     { intro; eapply H; esplits; eauto. }
-    destruct (LEM a b).
+    destruct (classic (a = b)).
     + assumption.
     + apply H0 in H1. destruct H1.
 Qed.
@@ -129,7 +127,7 @@ Lemma cod_iff_kat r b:
   (forall x y, r x y -> y = b) <-> r ;; ⦗set_compl (eq b)⦘ ⊆ ∅₂.
 Proof.
   unfold_all; firstorder.
-  destruct (LEM y b); try assumption.
+  destruct (classic (y = b)); try assumption.
   exfalso; eapply H; esplits; eauto.
 Qed.
 

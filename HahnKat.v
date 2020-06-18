@@ -18,8 +18,6 @@ Require Import Coq.Logic.FunctionalExtensionality.
 
 Set Implicit Arguments.
 
-Local Axiom LEM : forall {A: Type} (P: A -> Prop) (a: A), (P a) \/ (not (P a)).
-
 Instance Prop_lattice_laws: lattice.laws (BL+STR+CNV+DIV) Prop_lattice_ops.
 Proof.
   constructor; (try apply Build_PreOrder); simpl;
@@ -219,10 +217,6 @@ Qed.
 
 Import hahn.HahnSets.
 
-Ltac pred_ext :=
-  apply functional_extensionality; intro x;
-  apply prop_ext.
-
 (* TODO: try use it instead of dset' *)
 Lemma set_empty_iff_kat: @set_empty A = bot.
 Proof. reflexivity. Qed.
@@ -269,7 +263,7 @@ Proof.
   - eapply H4, H; [> rewrite H0; apply H3 | assumption].
   - specialize (H x y).
     assert (not (d x) -> False). { intro; apply H; exists y. esplits; auto. }
-    destruct (LEM d x); [> assumption | apply H0 in H1; destruct H1].
+    destruct (classic (d x)); [> assumption | apply H0 in H1; destruct H1].
 Qed.
 
 End Lifting.

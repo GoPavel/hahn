@@ -25,8 +25,6 @@ Proof.
   - apply (H b a). exists a. auto.
 Qed.
 
-Local Axiom LEM: forall (A: Type) (a b: A), (a = b) \/ (not (a = b)). (* TODO *)
-
 Lemma wmin_elt_iff_kat A (r: relation A) (a: A):
   wmin_elt r a <-> ⦗set_compl (eq a)⦘ ;; r ;; ⦗eq a⦘ ⊆ ∅₂.
 Proof.
@@ -34,7 +32,7 @@ Proof.
   - apply H2; apply H; congruence.
   - assert (a <> b -> False).
     { intro; eapply H; esplits; eauto. }
-    destruct (LEM a b).
+    destruct (classic (a = b)).
     + assumption.
     + apply H0 in H1. destruct H1.
 Qed.
@@ -140,7 +138,7 @@ Lemma dom_iff_kat r b:
 Proof.
   split; unfold_all; firstorder.
   - apply H2; symmetry. rewrite H0; apply (H x0 y); apply H1.
-  - destruct (LEM x b); try assumption.
+  - destruct (classic (x = b)); try assumption.
     exfalso; apply (H x y); exists x.
     split; [> split; [> reflexivity | firstorder] | assumption].
 Qed.
