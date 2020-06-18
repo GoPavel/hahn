@@ -3,6 +3,7 @@ from collections import defaultdict
 from typing import Optional
 import attr
 import re
+import json
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -147,40 +148,53 @@ def read_lemmas(path_dir):
 
 
 def main(args):
-    lemmas = read_lemmas(args.path_dir)
+    new_lemmas = read_lemmas(args.new_dir)
+    old_lemmas = read_lemmas(args.old_dir)
 
     if args.dump_changed:
-        dump_changed(lemmas)
+        dump_changed(lemmas_new)
     elif args.calc_lines:
         with open(args.calc_lines, 'r') as f:
-            names = f.readlines()
-        calc_lines([l for l in lemmas if l.name in names])
+            data = json.load(f)
+        new_cloc = {}
+        old_cloc = {}
+        for k, names in data.items():
+            old_cloc[k] = calc_lines([l for l in old_lemmas if l.name in names])
+            new_cloc[k] = calc_lines([l for l in new_lemmas if l.name in names])
+        for k in sorted(data.keys()):
+            print(f'{k}> -: {old_cloc[k]}, +: {new_cloc[k]}, d: {old_cloc[k] - new_cloc[k]}')
+        cnt_same = 0
+        for l1, l2 in zip([l for l in old_lemmas if l.name in data['all']],
+                          [l for l in new_lemmas if l.name in data['all']]):
+            if calc_lines([l1]) == calc_lines([l2]):
+                cnt_same += 1
+        print(f'proofs with same length: {cnt_same}')
     elif args.calc_redef:
-        calc_redef(lemmas)
+        calc_redef(new_lemmas)
     else:
-        analyze(lemmas)
+        analyze(new_lemmas)
 
 
 def dump_changed(lemmas):
-    with open('changed_lemmas', 'w+') as f:
-        for l in lemmas:
-            if "kat'" in l.proof:
-                f.write(l.name)
+    data = defaultdict(list)
+    for l in lemmas:
+        if "kat'" in l.proof:
+            data['all'].append(l.name)
+        if "hkat'" in l.proof:
+            data['hkat'].append(l.name)
+        elif "kat'" in l.proof:
+            data['kat'].append(l.name)
+        for d in redefs:
+            if def_occur(d, l.statement):
+                data[d].append(l.name)
+    with open('changed_lemmas.json', 'w') as f:
+        json.dump(data, f)
 
-    with open('changed_lemmas_hkat', 'w+') as fkat:
-        with open('changed_lemmas_kat', 'w+') as fhkat:
-            for l in lemmas:
-                if "hkat'" in l.proof:
-                    fhkat.write(l.name)
-                elif "kat'" in l.proof:
-                    fkat.write(l.name)
-
-
-def calc_lines(lemmas):
+def calc_lines(lemmas) -> int:
     total = 0
     for l in lemmas:
         total += len(l.proof.splitlines())
-    print(f'total lines: {total}')
+    return total
 
 
 def calc_redef(lemmas):
@@ -196,7 +210,8 @@ def calc_redef(lemmas):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument("path_dir", type=str)
+    parser.add_argument("new_dir", type=str)
+    parser.add_argument("old_dir", type=str)
     parser.add_argument('--dump_changed', action='store_true')
     parser.add_argument('--calc_lines', type=str)
     parser.add_argument('--calc_redef', action='store_true')
