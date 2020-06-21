@@ -144,13 +144,13 @@ Variable d d1 d2: A -> Prop.
 Local Notation " [ p ] " := (inj (n:=tt) p): ra_terms.
 
 Lemma same_rel_iff_weq: same_relation r1 r2 <-> r1 ≡ r2.
-Proof. unfold_all. firstorder. Qed.
+Proof. reflexivity. Qed.
 
 Lemma iff_rel_iff_weq: (forall x y, r1 x y <-> r2 x y) <-> r1 ≡ r2.
 Proof. unfold_all. firstorder. Qed.
 
 Lemma inclusion_iff_leq: r1 ⊆ r2 <-> r1 ≦ r2.
-Proof. simpl. firstorder. Qed.
+Proof. reflexivity.  Qed.
 
 Lemma impl_rel_iff_leq: (forall x y, r1 x y -> r2 x y) <-> r1 ≦ r2.
 Proof. unfold_all. firstorder. Qed.

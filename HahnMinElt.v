@@ -206,7 +206,7 @@ Proof.
   pose (@min_elt_test r); hkat'.
 Qed.
 
-Lemma seq_t_eqv_minasd  r :
+Lemma seq_t_eqv_min r :
   r⁺ ⨾ ⦗min_elt r⦘ ≡ ∅₂.
 Proof.
   pose (@min_elt_test r); hkat'.
