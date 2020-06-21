@@ -20,6 +20,7 @@ redefs = [
     'upward_closed', 'restr_rel',
     '[^w]max_elt', 'wmax_elt', '[^w]min_elt', 'wmin_elt',
     'DOM:', 'COD:', 'doma', 'domb',
+    'acyclic', '\\^\\^ n', 'singl_rel', '\\\\', 'irreflexive'
 ]
 
 # raw = defaultdict(list)
@@ -151,49 +152,70 @@ def main(args):
     new_lemmas = read_lemmas(args.new_dir)
     old_lemmas = read_lemmas(args.old_dir)
 
-    if args.dump_changed:
-        dump_changed(lemmas_new)
-    elif args.calc_lines:
-        with open(args.calc_lines, 'r') as f:
-            data = json.load(f)
-        new_cloc = {}
-        old_cloc = {}
-        for k, names in data.items():
-            old_cloc[k] = calc_lines([l for l in old_lemmas if l.name in names])
-            new_cloc[k] = calc_lines([l for l in new_lemmas if l.name in names])
-        for k in sorted(data.keys()):
-            print(f'{k}> -: {old_cloc[k]}, +: {new_cloc[k]}, d: {old_cloc[k] - new_cloc[k]}')
-        cnt_same = 0
-        for l1, l2 in zip([l for l in old_lemmas if l.name in data['all']],
-                          [l for l in new_lemmas if l.name in data['all']]):
-            if calc_lines([l1]) == calc_lines([l2]):
-                cnt_same += 1
-        print(f'proofs with same length: {cnt_same}')
+    if args.calc_lines:
+        calc_lines_stat(old_lemmas, new_lemmas)
     elif args.calc_redef:
         calc_redef(new_lemmas)
     else:
         analyze(new_lemmas)
 
-
-def dump_changed(lemmas):
+def calc_lines_stat(old_lemmas, new_lemmas):
     data = defaultdict(list)
-    for l in lemmas:
+    for l in new_lemmas:
+        if l.comment is not None and 'redef_proof' in l.comment:
+            continue
+        data['ALL'].append(l.name)
         if "kat'" in l.proof:
-            data['all'].append(l.name)
+            data['CHANGED'].append(l.name)
         if "hkat'" in l.proof:
-            data['hkat'].append(l.name)
+            data['HKAT'].append(l.name)
         elif "kat'" in l.proof:
-            data['kat'].append(l.name)
+            data['KAT'].append(l.name)
         for d in redefs:
             if def_occur(d, l.statement):
                 data[d].append(l.name)
-    with open('changed_lemmas.json', 'w') as f:
+        if not any(def_occur(d, l.statement) for d in redefs) and 'kat' in l.proof:
+            # data['REL_WITH_TESTS'].append(l.statement)
+            # data['REL_WITH_TESTS'].append(l.proof)
+            data['REL_WITH_TESTS'].append(l.name)
+
+    get_old = lambda names: [l for l in old_lemmas if l.name in names]
+    get_new = lambda names: [l for l in new_lemmas if l.name in names]
+    get_chanaged = lambda lemmas: [l for l in lemmas if l.name in data['CHANGED']]
+    get_full = lambda lemmas: [l for l in lemmas if l.comment is not None and 'Full' in l.comment]
+    get_partial = lambda lemmas: [l for l in lemmas if l.comment is not None and 'Partial' in l.comment]
+
+    with open('.calc_line_stat.json', 'w') as f:
         json.dump(data, f)
+    new_cloc = {}
+    old_cloc = {}
+    for k, names in data.items():
+        old_cloc[k] = calc_lines(get_old(names))
+        new_cloc[k] = calc_lines(get_new(names))
+
+    cnt_same = 0
+    for l1, l2 in zip(get_chanaged(old_lemmas), get_chanaged(new_lemmas)):
+        if calc_lines([l1]) == calc_lines([l2]):
+            cnt_same += 1
+    print(f'proofs with same length: {cnt_same}')
+
+    print('>>> Automated  <<<')
+    automated = 0
+    for k, names in data.items():
+        full_new = get_full(get_new(names))
+        part_new = {l.name: l for l in get_partial(get_new(names))}
+        part_old = {l.name: l for l in get_old(names) if l.name in part_new}
+        automated = calc_lines(full_new)
+        automated += calc_lines(part_old.values()) - calc_lines(part_new.values()) + len(part_new.values())
+        print(f'''{k}>\n -: {old_cloc[k]}, +: {new_cloc[k]}, d: {old_cloc[k] - new_cloc[k]}, a: {automated}, full: {len(full_new)},  part: {len(part_new)}''')
 
 def calc_lines(lemmas) -> int:
     total = 0
     for l in lemmas:
-        total += len(l.proof.splitlines())
+        for line in l.proof.splitlines():
+            line = line.strip()
+            if line != 'Proof.' and line != 'Qed.':
+                total += 1
     return total
 
 
@@ -212,8 +234,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument("new_dir", type=str)
     parser.add_argument("old_dir", type=str)
-    parser.add_argument('--dump_changed', action='store_true')
-    parser.add_argument('--calc_lines', type=str)
+    parser.add_argument('--calc_lines', action='store_true')
     parser.add_argument('--calc_redef', action='store_true')
 
     main(parser.parse_args())
