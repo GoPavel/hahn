@@ -384,7 +384,7 @@ Lemma min_cycle1 X (r r' : relation X) (d : X -> Prop)
     irreflexive (⦗nd⦘ ⨾ r ⨾ ⦗d⦘ ⨾ r'^? ⨾ ⦗d⦘ ⨾
                  r ⨾ ⦗nd⦘ ⨾ (⦗nd⦘ ⨾ r ⨾ ⦗nd⦘)＊).
 Proof.
-  assert (AA: restr_rel nd r ≡ ⦗nd⦘⨾ r⨾ ⦗nd⦘) by kat'.
+  assert (AA: restr_rel nd r ≡ ⦗nd⦘⨾ r⨾ ⦗nd⦘) by hahn_kat.
   forward (eapply min_cycle; eauto) as N; subst; rewrite N, <- !AA; clear.
   unfold irreflexive, seq, eqv_rel;
   split; ins; desf; splits; ins; desf; eauto.

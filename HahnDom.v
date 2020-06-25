@@ -48,7 +48,7 @@ Qed.
 Hint Rewrite doma_iff_kat domb_iff_kat: redefDb.
 
 Lemma sift_union (d1 d2: A -> Prop): (⦗d1⦘ ∪ ⦗d2⦘ ≡ ⦗d1 ∪₁ d2⦘).
-Proof. kat'. Qed.
+Proof. hahn_kat. Qed.
 
 Hint Rewrite sift_union: redefDb.
 
@@ -59,16 +59,16 @@ Section Lemmas.
   Variables d d' : A -> Prop.
 
   Lemma eqv_doma : doma ⦗d⦘ d.
-  Proof. kat'. Qed.
+  Proof. hahn_kat. Qed.
 
   Lemma eqv_domb : domb ⦗d⦘ d.
-  Proof. kat'. Qed.
+  Proof. hahn_kat. Qed.
 
   Lemma seq_eqv_doma : doma r d -> doma (⦗d'⦘ ⨾ r) d.
-  Proof. hkat'. Qed.
+  Proof. hahn_hkat. Qed.
 
   Lemma seq_eqv_domb : domb r d -> domb (r ⨾ ⦗d'⦘) d.
-  Proof. hkat'. Qed.
+  Proof. hahn_hkat. Qed.
 
   Lemma restr_eq_rel_doma : doma r d -> doma (restr_eq_rel f r) d.
   Proof. unfold doma, restr_eq_rel; ins; desf; eauto. Qed.
@@ -77,28 +77,28 @@ Section Lemmas.
   Proof. unfold domb, restr_eq_rel; ins; desf; eauto. Qed.
 
   Lemma seq_doma : doma r d -> doma (r ⨾ r') d.
-  Proof. hkat'. Qed.
+  Proof. hahn_hkat. Qed.
 
   Lemma seq_domb : domb r' d -> domb (r ⨾ r') d.
-  Proof. hkat'. Qed.
+  Proof. hahn_hkat. Qed.
 
   Lemma union_doma : doma r d -> doma r' d -> doma (r ∪ r') d.
-  Proof. hkat'. Qed.
+  Proof. hahn_hkat. Qed.
 
   Lemma union_domb : domb r d -> domb r' d -> domb (r ∪ r') d.
-  Proof. hkat'. Qed.
+  Proof. hahn_hkat. Qed.
 
   Lemma ct_doma : doma r d -> doma r⁺ d.
-  Proof. hkat'. Qed.
+  Proof. hahn_hkat. Qed.
 
   Lemma ct_domb : domb r d -> domb r⁺ d.
-  Proof. hkat'. Qed.
+  Proof. hahn_hkat. Qed.
 
   Lemma seq_r_doma : doma r d -> doma r' d -> doma (r^? ⨾ r') d.
-  Proof. hkat'. Qed.
+  Proof. hahn_hkat. Qed.
 
   Lemma seq_r_domb : domb r d -> domb r' d -> domb (r ⨾ r'^?) d.
-  Proof. hkat'. Qed.
+  Proof. hahn_hkat. Qed.
 
   Lemma minus_doma : doma r d -> doma (r \ r') d.
   Proof. unfold doma, minus_rel; ins; desf; eauto. Qed.
@@ -109,26 +109,26 @@ Section Lemmas.
   Lemma doma_inter_r : doma r (d ∩₁ d') <-> doma r d /\ doma r d'.
   Proof.
     split; [> intro; split | intros [H1 H2]].
-    all: hkat'.
+    all: hahn_hkat.
   Qed.
 
   Lemma domb_inter_r : domb r (d ∩₁ d') <-> domb r d /\ domb r d'.
   Proof.
     split; [> intro; split | intros [H1 H2]].
-    all: hkat'.
+    all: hahn_hkat.
   Qed.
 
   Lemma restr_doma : doma (restr_rel d r) d.
-  Proof. kat'. Qed.
+  Proof. hahn_kat. Qed.
 
   Lemma restr_domb : domb (restr_rel d r) d.
-  Proof. kat'. Qed.
+  Proof. hahn_kat. Qed.
 
   Lemma restr_doma_mon : doma r d -> doma (restr_rel d' r) d.
-  Proof. hkat'. Qed.
+  Proof. hahn_hkat. Qed.
 
   Lemma restr_domb_mon : domb r d -> domb (restr_rel d' r) d.
-  Proof. hkat'. Qed.
+  Proof. hahn_hkat. Qed.
 
   Lemma dom_empty : dom_rel (A:=A) ∅₂ ≡₁ ∅.
   Proof. unfolder; split; ins; desf. Qed. 
@@ -180,50 +180,50 @@ Section Lemmas.
 
   (* NOTE: cross_rel contains top, that isn't support fully *)
   Lemma cross_doma : doma (d × d') d.
-  Proof. kat'. Qed.
+  Proof. hahn_kat. Qed.
 
   (* NOTE: cross_rel contains top, that isn't support fully *)
   Lemma cross_domb : domb (d × d') d'.
-  Proof. kat'. Qed.
+  Proof. hahn_kat. Qed.
 
   Lemma lift_dom_impl: (forall a, d a -> d' a) <-> (d ⊆₁ d').
   Proof. reflexivity. Qed.
   Hint Rewrite lift_dom_impl: redefDb.
 
   Lemma doma_implies : (forall a, d a -> d' a) -> doma r d -> doma r d'.
-  Proof. hkat'. Qed.
+  Proof. hahn_hkat. Qed.
 
   Lemma domb_implies : (forall a, d a -> d' a) -> domb r d -> domb r d'.
-  Proof. hkat'. Qed.
+  Proof. hahn_hkat. Qed.
 
   Lemma doma_fold :
     (doma r d) -> (forall a, d a -> d' a) -> ⦗d'⦘ ⨾ r ≡ r.
-  Proof. hkat'. Qed.
+  Proof. hahn_hkat. Qed.
 
   Lemma domb_fold :
     (domb r d) -> (forall a, d a -> d' a) -> r ⨾ ⦗d'⦘ ≡ r.
-  Proof. hkat'. Qed.
+  Proof. hahn_hkat. Qed.
 
   Lemma doma_rewrite : doma r d -> r ⊆ ⦗d⦘ ⨾ r. 
-  Proof. hkat'. Qed.
+  Proof. hahn_hkat. Qed.
 
   Lemma domb_rewrite : domb r d -> r ⊆ r ⨾ ⦗d⦘. 
-  Proof. hkat'. Qed.
+  Proof. hahn_hkat. Qed.
 
   Lemma doma_helper : r ⊆ ⦗d⦘ ⨾ r <-> doma r d.
   Proof.
-    split; hkat'.
+    split; hahn_hkat.
   Qed.
 
   Lemma domb_helper : r ⊆ r ⨾ ⦗d⦘ <-> domb r d.
   Proof. 
-    split; hkat'.
+    split; hahn_hkat.
   Qed.
   
   Lemma domab_helper : 
     r ⊆ ⦗d⦘ ⨾ r ⨾ ⦗d'⦘ <-> doma r d /\ domb r d'.
   Proof.
-    split; intro H; [split | destruct H]; hkat'.
+    split; intro H; [split | destruct H]; hahn_hkat.
   Qed.
 
 (* NOTE FAIL: kat fail because not support ⊤ fully. *)
@@ -235,27 +235,27 @@ Section Lemmas.
 
   Lemma dom_to_doma : r ≡ ⦗d⦘ ⨾ r ⨾ ⦗d'⦘ -> doma r d.
   Proof.
-    hkat'.
+    hahn_hkat.
   Qed.
 
   Lemma dom_to_domb : r ≡ ⦗d⦘ ⨾ r ⨾ ⦗d'⦘ -> domb r d'.
   Proof.
-    hkat'.
+    hahn_hkat.
   Qed.
 
   Lemma dom_l : r ≡ ⦗d⦘ ⨾ r ⨾ ⦗d'⦘ -> r ≡ ⦗d⦘ ⨾ r.
   Proof.
-    hkat'.
+    hahn_hkat.
   Qed.
 
   Lemma dom_r : r ≡ ⦗d⦘ ⨾ r ⨾ ⦗d'⦘ -> r ≡ r ⨾ ⦗d'⦘.
   Proof.
-    hkat'.
+    hahn_hkat.
   Qed.
 
   Lemma dom_helper_1 : r ⊆ ⦗d⦘ ⨾ r ⨾ ⦗d'⦘ <-> r ≡ ⦗d⦘ ⨾ r ⨾ ⦗d'⦘.
   Proof.
-    split; hkat'.
+    split; hahn_hkat.
   Qed.
 
   (* NOTE: top isn't supported *)
@@ -277,7 +277,7 @@ Section Lemmas.
         ee (EE: ee = ⦗d'⦘ ⨾ r ⨾ ⦗d'⦘) :
     r ⊆ dd ∪ de ∪ ed ∪ ee.
   Proof.
-    subst; hkat'.
+    subst; hahn_hkat.
   Qed.
 
   Lemma path_dom
@@ -292,7 +292,7 @@ Section Lemmas.
        (ee＊ ⨾ ed ⨾ dd＊ ⨾ de)＊ ⨾ ee＊ ⨾ ed ⨾ dd＊ ∪
        (dd＊ ⨾ de ⨾ ee＊ ⨾ ed)＊ ⨾ dd＊ ⨾ de ⨾ ee＊.
   Proof.
-    subst; hkat'.
+    subst; hahn_hkat.
   Qed.
 
   Lemma path_dom_same
@@ -304,7 +304,7 @@ Section Lemmas.
         ee (EE: ee = ⦗d'⦘ ⨾ r ⨾ ⦗d'⦘) : 
     ⦗d⦘ ⨾ r⁺ ⨾ ⦗d⦘ ⊆ dd⁺ ∪ (dd＊ ⨾ de ⨾ ee＊ ⨾ ed)⁺ ⨾ dd＊.
   Proof.
-    subst; hkat'.
+    subst; hahn_hkat.
   Qed.
 
   Lemma irr_dom
@@ -382,10 +382,10 @@ Section Lemmas.
 End Lemmas.
 
 Lemma doma_eqv (d : A -> Prop) (r : relation A): doma (⦗d⦘ ⨾ r) d.
-Proof. kat'. Qed.
+Proof. hahn_kat. Qed.
 
 Lemma domb_eqv (d : A -> Prop) (r : relation A): domb (r ⨾ ⦗d⦘) d.
-Proof. kat'. Qed.
+Proof. hahn_kat. Qed.
 
 Lemma acyc_dom (r: relation A) d e
       (E1: r ⊆ (⦗d⦘ ∪ ⦗e⦘) ⨾ r ⨾ (⦗d⦘ ∪ ⦗e⦘))
@@ -401,11 +401,11 @@ Lemma acyc_dom (r: relation A) d e
 Proof.
   red.
   eapply irr_dom; try edone.
-  { clear -E1 E2; hkat'.  }
+  { clear -E1 E2; hahn_hkat.  }
   sin_rewrite path_dom_same; try edone.
   { repeat rewrite irreflexive_union; splits; try done.
     rewrite irreflexive_seqC.
-    arewrite( dd＊ ⨾ (dd ＊ ⨾ de ⨾ ee ＊ ⨾ ed) ⁺ ⊆ (dd ＊ ⨾ de ⨾ ee ＊ ⨾ ed) ⁺) by kat'.
+    arewrite( dd＊ ⨾ (dd ＊ ⨾ de ⨾ ee ＊ ⨾ ed) ⁺ ⊆ (dd ＊ ⨾ de ⨾ ee ＊ ⨾ ed) ⁺) by hahn_kat.
     assert (acyclic (dd ＊ ⨾ de ⨾ ee ＊ ⨾ ed)); try done. (*?*)
     rewrite acyclic_seqC; rewrite !seqA. 
     rewrite acyclic_seqC; rewrite !seqA. 
@@ -415,7 +415,7 @@ Proof.
   sin_rewrite path_dom_same; try edone; try by rewrite seq_eqvC.
   repeat rewrite irreflexive_union; splits; try done.
   rewrite irreflexive_seqC.
-  arewrite( ee＊ ⨾ (ee ＊ ⨾ ed ⨾ dd ＊ ⨾ de) ⁺  ⊆ (ee ＊ ⨾ ed ⨾ dd ＊ ⨾ de) ⁺) by kat'.
+  arewrite( ee＊ ⨾ (ee ＊ ⨾ ed ⨾ dd ＊ ⨾ de) ⁺  ⊆ (ee ＊ ⨾ ed ⨾ dd ＊ ⨾ de) ⁺) by hahn_kat.
   assert (acyclic(ee ＊ ⨾ ed ⨾ dd ＊ ⨾ de)); try done. (*?*)
   rewrite acyclic_seqC; rewrite !seqA. 
   done.

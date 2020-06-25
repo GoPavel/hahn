@@ -42,12 +42,12 @@ Qed.
 
 Lemma rt_unionE A (r r' : relation A) : (r ∪ r')＊ ≡ r'＊ ⨾ (r ⨾ r'＊)＊.
 Proof.
-  kat'.
+  hahn_kat.
 Qed.
 
 Lemma ct_unionE A (r r' : relation A) : (r ∪ r')⁺ ≡ r'⁺ ∪ r'＊ ⨾ (r ⨾ r'＊)⁺.
 Proof.
-  kat'.
+  hahn_kat.
 Qed.
 
 
@@ -62,7 +62,7 @@ Proof.
   { unfold inclusion, union, singl_rel, seq.
     induction 1; desf; eauto 9 using clos_trans, clos_refl_trans, clos_trans_in_rt.
   }
-  kat'.
+  hahn_kat.
 Qed.
 
 Lemma rt_union_singl A (r : relation A) a b :
@@ -109,7 +109,7 @@ Section PathUnionTotal.
       by eapply t_rt_step in IHC0; desf; eauto.
       by eapply t_rt_step in IHC4; desf; eauto.
     }
-    kat'.
+    hahn_kat.
   Qed.
 
 End PathUnionTotal.
@@ -128,12 +128,12 @@ Section PathAbsorb.
     (r ∪ r')⁺ ≡ r⁺ ∪ r'⁺ ∪ r⁺ ⨾ r'⁺.
   Proof.
     split; cycle 1.
-      kat'.
+      hahn_kat.
     apply inclusion_t_ind_right; relsf;
       repeat apply inclusion_union_l;
       eauto 10 using inclusion_t_r_t with hahn;
     try solve [rewrite (ct_end r'), !seqA, F, <- ct_end; eauto 10 with hahn].
-    kat'.
+    hahn_kat.
   Qed.
 
   Lemma path_absorb2 r r' (F: r' ⨾ r ⊆ r) :
@@ -146,7 +146,7 @@ Section PathAbsorb.
       repeat apply inclusion_union_l;
       eauto 10 using inclusion_r_t_t with hahn;
     try solve [rewrite (ct_begin r), <- !seqA, F, <- ct_begin; eauto 10 with hahn].
-    kat'.
+    hahn_kat.
   Qed.
 
   Lemma path_absorb r r' (F: r' ⨾ r ⊆ r \/ r' ⨾ r ⊆ r') :
@@ -189,7 +189,7 @@ Section PathAbsorb.
 
   Lemma seq_ct_absorb_l r r' : r ⨾ r'⁺ ⊆ r ∪ ((r ⨾ r') \ r) ⨾ r'＊.
   Proof.
-    rewrite <- seq_rt_absorb_l. kat'.
+    rewrite <- seq_rt_absorb_l. hahn_kat.
   Qed.
 
   Lemma seq_rt_absorb_r r r' : r＊ ⨾ r' ⊆ r' ∪ r＊ ⨾ ((r ⨾ r') \ r').
@@ -201,7 +201,7 @@ Section PathAbsorb.
 
   Lemma seq_ct_absorb_r r r' : r⁺ ⨾ r' ⊆ r' ∪ r＊ ⨾ ((r ⨾ r') \ r').
   Proof.
-    rewrite <- seq_rt_absorb_r; kat'.
+    rewrite <- seq_rt_absorb_r; hahn_kat.
   Qed.
 
   Lemma seq_rt_absorb_lt r r' (T: transitive r) :
@@ -273,12 +273,12 @@ Section PathDom.
       apply clos_trans_tn1 in P; induction P; desf; eauto 14 using clos_trans; clear P.
       apply clos_trans_t1n in IHP; induction IHP;
       intuition; desf; eauto 14 using clos_trans.
-    kat'.
+    hahn_kat.
   Qed.
 
   Lemma path_ur r r' adom bdom (DA: doma r' adom) (DB: domb r' bdom) :
     (r ∪ r')⁺ ≡ r⁺ ∪ (r⁺ ⨾ ⦗adom⦘ ∪ r')⁺ ⨾ (⦗bdom⦘ ⨾ r⁺)^?.
-  Proof. hkat'. Qed.
+  Proof. hahn_hkat. Qed.
 
   Lemma path_tur2 r r' adom bdom
         (T: transitive r')
@@ -291,12 +291,12 @@ Section PathDom.
       apply clos_trans_t1n in P; induction P; desf; eauto 14 using clos_trans; clear P.
       apply clos_trans_tn1 in IHP0; induction IHP0;
       intuition; desf; eauto 14 using clos_trans.
-    kat'.
+    hahn_kat.
   Qed.
 
   Lemma path_ur2 r r' adom bdom (A: doma r adom) (B: domb r bdom) :
     (r ∪ r')⁺ ≡ r'⁺ ∪ (r'⁺ ⨾ ⦗adom⦘)^? ⨾ (r ∪ ⦗bdom⦘ ⨾ r'⁺)⁺.
-  Proof. hkat'. Qed.
+  Proof. hahn_hkat. Qed.
 
 End PathDom.
 
@@ -319,7 +319,7 @@ Qed.
 Lemma clos_trans_rotl A (r r' : relation A) :
   (r ⨾ r')⁺ ≡ r ⨾ (r' ⨾ r)＊ ⨾ r'.
 Proof.
-  kat'.
+  hahn_kat.
 Qed.
 
 Lemma immediate_clos_trans_elim A (r : relation A) a b :
@@ -381,13 +381,13 @@ Section PathUnionTransitive.
     - apply inclusion_rt_ind; hahn_rel; eauto 4 with hahn hahn_full.
       apply transitiveI.
       rewrite crE at 1; relsf; unionL.
-        kat'.
+        hahn_kat.
       hahn_frame_l; rewrite rtE with (r:=r) at 1; relsf; hahn_rel; [|hahn_frame_r].
         rewrite rtE with (r:=r' ⨾ r⁺) at 2; relsf; hahn_rel.
         hahn_frame_r; rewrite ct_begin with (r:=r' ⨾ r⁺); rewrite !seqA. relsf. 
-        kat'.
-      kat'.
-    - kat'.
+        hahn_kat.
+      hahn_kat.
+    - hahn_kat.
   Qed.
 
   Lemma path_ut2 r r' (T: transitive r') :
@@ -396,9 +396,9 @@ Section PathUnionTransitive.
     split.
       rewrite ct_end, path_ut; ins; relsf.
       rewrite !seqA, (rewrite_trans_seq_cr_l T), crE; relsf; hahn_rel.
-      kat'.
-      kat'.
-    kat'.
+      hahn_kat.
+      hahn_kat.
+    hahn_kat.
   Qed.
 
 End PathUnionTransitive.
@@ -413,29 +413,29 @@ Section PathUnion.
   Lemma path_ut_first r r' :
     (r ∪ r')⁺ ≡ r⁺ ∪ r＊ ⨾ r' ⨾ (r ∪ r')＊.
   Proof.
-    kat'.
+    hahn_kat.
   Qed.
 
   Lemma path_ut_last r r' :
     (r ∪ r')⁺ ≡ r⁺ ∪ (r ∪ r')＊ ⨾ r' ⨾ r＊.
   Proof.
-    kat'.
+    hahn_kat.
   Qed.
 
   Lemma path_union (r r': relation A) : (r ∪ r')⁺ ⊆ r⁺ ∪ (r＊ ⨾ r')⁺ ⨾ r＊.
   Proof.
-    kat'.
+    hahn_kat.
   Qed.
 
   Lemma path_union1 (r r': relation A) : (r ∪ r')⁺ ⊆ r'⁺ ∪ r'＊ ⨾ (r ∪ r ⨾ r'⁺)⁺.
   Proof.
-    kat'.
+    hahn_kat.
   Qed.
 
   Lemma path_union2 (r r': relation A) : 
     (r ∪ r')⁺ ⊆ r⁺ ∪ r'⁺ ⨾ r＊ ∪ r'＊ ⨾ (r⁺ ⨾ r'⁺)⁺ ⨾ r＊.
   Proof.
-    kat'.
+    hahn_kat.
   Qed.
 End PathUnion.
 
@@ -477,7 +477,7 @@ Proof.
   split.
     unfold inclusion, seq, union in *; ins; desf.
     eapply path_utd_helper with (2:=F) in H; desf; eauto 8; exfalso; eauto 8.
-  kat'.
+  hahn_kat.
 Qed.
 
 
@@ -486,12 +486,12 @@ Qed.
 
 Lemma ct_no_step A (r : relation A) (D: r ⨾ r ≡ ∅₂) : r⁺ ≡ r.
 Proof.
-  hkat'.
+  hahn_hkat.
 Qed.
 
 Lemma ct_ct_disj A (r : relation A) (D: r ⨾ r ≡ ∅₂) : r⁺ ⨾ r⁺ ≡ ∅₂.
 Proof.
-  hkat'.
+  hahn_hkat.
 Qed.
 
 Lemma irreflexive_disj A (r : relation A) (D: r ⨾ r ≡ ∅₂) : irreflexive r.
@@ -505,7 +505,7 @@ Lemma path_unc X (r r' : relation X)
   (r ∪ r')＊ ≡
   (r ⨾ r')＊ ∪ (r' ⨾ r)＊ ∪ r ⨾ (r' ⨾ r)＊ ∪ r' ⨾ (r ⨾ r')＊.
 Proof.
-  hkat'.
+  hahn_hkat.
 Qed.
 
 Lemma pathp_unc X (r r' : relation X)
@@ -513,7 +513,7 @@ Lemma pathp_unc X (r r' : relation X)
       (B : r' ⨾ r' ≡ ∅₂) :
   (r ∪ r')⁺ ≡ (r ⨾ r')⁺ ∪ (r' ⨾ r)⁺ ∪ r ⨾ (r' ⨾ r)＊ ∪ r' ⨾ (r ⨾ r')＊.
 Proof.
-  hkat'.
+  hahn_hkat.
 Qed.
 
 (** Paths with specific attributes *)
@@ -529,11 +529,11 @@ Proof.
     (by rewrite ct_end, !seqA, H, <- seqA; rewrite rt_unit at 1).
   apply inclusion_t_ind_right.
   - (* base *)
-    kat'.
+    hahn_kat.
   - (* step *)
     relsf; unionL.
-    + (* r⁺ ; r *) kat'.
-    + (* (r' ; r＊) ; r *) kat'.
+    + (* r⁺ ; r *) hahn_kat.
+    + (* (r' ; r＊) ; r *) hahn_kat.
     + (* r⁺ ; r' *) by unionR left; rewrite H1.
     + (* (r' ; r＊) ; r' *)
       rewrite rtE at 1; relsf; unionL; unionR right.

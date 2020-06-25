@@ -132,7 +132,7 @@ Section AcyclicUnionTotal.
     split; intuition.
       by eapply inclusion_acyclic; try eassumption; eauto with hahn.
       eapply irreflexive_inclusion; try eassumption.
-      kat'.
+      hahn_kat.
     unfold acyclic; rewrite path_decomp_u_total; eauto.
     eapply irreflexive_union; splits; ins; rewrite irreflexive_seqC, seqA in *; rels.
   Qed.
@@ -182,7 +182,7 @@ Section PathDom.
     rewrite (unionC r), path_ur, <- (unionC r); eauto.
     rewrite seq_union_r, !irreflexive_union; repeat split; ins.
     eapply irreflexive_inclusion, H.
-    kat'.
+    hahn_kat.
     rewrite irreflexive_seqC, seqA, inclusion_ct_seq_eqv_l, !seqA.
     seq_rewrite seq_eqvK; do 2 rewrite ct_of_ct at 1.
     rewrite !crE, !seq_union_l, !seq_id_l, !seq_union_r, !seq_id_r.
@@ -190,11 +190,11 @@ Section PathDom.
 
     rewrite ct_end, seqA, !seq_union_l, !seqA.
     rewrite <- rt_ct in H0; eapply irreflexive_inclusion, H0.
-    clear -A B; hkat'.
+    clear -A B; hahn_hkat.
 
     rewrite ct_begin, irreflexive_seqC, <- !seqA, !seq_union_r, !seqA.
     rewrite <- ct_rt in H0; eapply irreflexive_inclusion, H0.
-    clear -A B; hkat'.
+    clear -A B; hahn_hkat.
 
     rewrite seqA; sin_rewrite ct_ct.
     eapply irreflexive_inclusion, H0; eauto using inclusion_t_r_t with hahn.
@@ -313,7 +313,7 @@ Lemma acyclic_seq_union_incompat A (r r' r'' : relation A)
 Proof.
   ins; desf.
   arewrite ((r' ∪ r'')＊ <<= r'＊ ∪ r''⁺).
-    hkat'.
+    hahn_hkat.
   relsf.
   red; rewrite <- ct_of_union_ct_r.
   apply acyclic_ut; splits; ins.

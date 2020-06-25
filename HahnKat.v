@@ -283,7 +283,7 @@ Lemma qapb_to_hoare `{L: laws} {n m} (a: tst n) (b: tst m) (p q: X n m):
   q ≦ [a]⋅(p⋅[b])-> [!a]⋅q ≦ 0 /\ q⋅[!b] ≦ 0.
 Proof. intro H. split; rewrite H; kat. Qed.
 
-Ltac kat' :=
+Ltac hahn_kat :=
   lift_to_kat_all;
   intros; rewrite ?leq_iff_cup;
     (apply (catch_kat_weq tt tt) || fail "could not find a KAT structure");
@@ -319,7 +319,7 @@ Ltac aggregate_hoare_hypotheses' :=
 (* NOTE: bug with using pc_c cp_c fixed.
      There was an issue is [hkat] has waited for at least one hypothesis [r ≤ 0].
      And matching allows saving error message. *)
-Ltac hkat' :=
+Ltac hahn_hkat :=
   lift_to_kat_all;
   intros; aggregate_hoare_hypotheses'; rewrite ?leq_iff_cup;
   (apply (catch_kat_weq tt tt) || fail "could not find a KAT structure");

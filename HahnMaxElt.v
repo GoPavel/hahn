@@ -60,22 +60,22 @@ Lemma set_equiv_wmax_elt (S: r ≡ r') : wmax_elt r ≡₁ wmax_elt r'.
 Proof. unfold wmax_elt, same_relation, set_equiv in *; intuition; eauto. Qed.
 
 Lemma max_elt_weaken : max_elt r a -> wmax_elt r a.
-Proof. hkat'. Qed.
+Proof. hahn_hkat. Qed.
 
 Lemma max_elt_union : max_elt r a -> max_elt r' a -> max_elt (r +++ r') a.
-Proof. hkat'. Qed.
+Proof. hahn_hkat. Qed.
 
 Lemma wmax_elt_union : wmax_elt r a -> wmax_elt r' a -> wmax_elt (r +++ r') a.
-Proof. hkat'. Qed.
+Proof. hahn_hkat. Qed.
 
 Lemma max_elt_t : max_elt r a -> max_elt (r⁺) a.
-Proof. hkat'. Qed.
+Proof. hahn_hkat. Qed.
 
 Lemma wmax_elt_rt : wmax_elt r a -> wmax_elt (r＊) a.
-Proof. hkat'. Qed.
+Proof. hahn_hkat. Qed.
 
 Lemma wmax_elt_t : wmax_elt r a -> wmax_elt (r⁺) a.
-Proof. hkat'. Qed.
+Proof. hahn_hkat. Qed.
 
 Lemma wmax_elt_eqv (f: A -> Prop) : wmax_elt (eqv_rel f) a.
 Proof.
@@ -96,19 +96,19 @@ Qed.
 
 Lemma wmax_elt_r :
   wmax_elt r a -> wmax_elt (r^?) a.
-Proof. hkat'. Qed.
+Proof. hahn_hkat. Qed.
 
 Lemma max_elt_seq1 : max_elt r a -> max_elt (r ⨾ r') a.
-Proof. hkat'. Qed.
+Proof. hahn_hkat. Qed.
 
 Lemma wmax_elt_seq2 : wmax_elt r a -> wmax_elt r' a -> wmax_elt (r ⨾ r') a.
-Proof. hkat'. Qed.
+Proof. hahn_hkat. Qed.
 
 Lemma wmax_elt_seq1 : max_elt r a -> wmax_elt (r ⨾ r') a.
-Proof. hkat'. Qed.
+Proof. hahn_hkat. Qed.
 
 Lemma max_elt_seq2 : wmax_elt r a -> max_elt r' a -> max_elt (r ⨾ r') a.
-Proof. hkat'. Qed.
+Proof. hahn_hkat. Qed.
 
 End BasicProperties.
 
@@ -136,54 +136,54 @@ Hint Rewrite cod_iff_kat: redefDb.
 Lemma seq_max r r' b
       (MAX: max_elt r' b) (COD: forall x y, r x y -> y = b) :
   r ⨾ r' ≡ ∅₂.
-Proof. hkat'. Qed.
+Proof. hahn_hkat. Qed.
 
 Lemma seq_max_t r r' b
       (MAX: max_elt r' b) (COD: forall x y, r x y -> y = b) :
   r⨾ r' ⁺ ≡ ∅₂.
-Proof. hkat'. Qed.
+Proof. hahn_hkat. Qed.
 
 Lemma seq_max_rt r r' b
       (MAX: max_elt r' b) (COD: forall x y, r x y -> y = b) :
   r ⨾ r'＊ ≡ r.
-Proof. hkat'. Qed.
+Proof. hahn_hkat. Qed.
 
 Lemma seq_max_r r r' b
       (MAX: max_elt r' b) (COD: forall x y, r x y -> y = b) :
   r ⨾ r'^? ≡ r.
-Proof. hkat'. Qed.
+Proof. hahn_hkat. Qed.
 
 Lemma seq_eq_max r b (MAX: max_elt r b) :
   ⦗eq b⦘ ⨾ r ≡ ∅₂.
-Proof. hkat'. Qed.
+Proof. hahn_hkat. Qed.
 
 Lemma seq_eq_max_t r b (MAX: max_elt r b) :
   ⦗eq b⦘ ⨾ r⁺ ≡ ∅₂.
-Proof. hkat'. Qed.
+Proof. hahn_hkat. Qed.
 
 Lemma seq_eq_max_rt r b (MAX: max_elt r b) :
   ⦗eq b⦘ ⨾ r＊ ≡ ⦗eq b⦘.
-Proof. hkat'. Qed.
+Proof. hahn_hkat. Qed.
 
 Lemma seq_eq_max_r r b (MAX: max_elt r b) :
   ⦗eq b⦘ ⨾ r^? ≡ ⦗eq b⦘.
-Proof. hkat'. Qed.
+Proof. hahn_hkat. Qed.
 
 Lemma seq_singl_max r a b (MAX: max_elt r b) :
   singl_rel a b ⨾ r ≡ ∅₂.
-Proof. hkat'. Qed.
+Proof. hahn_hkat. Qed.
 
 Lemma seq_singl_max_t r a b (MAX: max_elt r b) :
   singl_rel a b ⨾ r⁺ ≡ ∅₂.
-Proof. hkat'. Qed.
+Proof. hahn_hkat. Qed.
 
 Lemma seq_singl_max_rt r a b (MAX: max_elt r b) :
   singl_rel a b ⨾ r＊ ≡ singl_rel a b.
-Proof. hkat'. Qed.
+Proof. hahn_hkat. Qed.
 
 Lemma seq_singl_max_r r a b (MAX: max_elt r b) :
   singl_rel a b ⨾ r^? ≡ singl_rel a b.
-Proof. hkat'. Qed.
+Proof. hahn_hkat. Qed.
 
 Lemma max_elt_test r: ⦗max_elt r⦘ ;; r ⊆ ∅₂.
 Proof. basic_solver. Qed.
@@ -191,25 +191,25 @@ Proof. basic_solver. Qed.
 Lemma seq_eqv_max r : 
   ⦗max_elt r⦘ ⨾ r ≡ (∅₂).
 Proof.
-  pose (@max_elt_test r). hkat'.
+  pose (@max_elt_test r). hahn_hkat.
 Qed.
 
 Lemma seq_eqv_max_t r :
   ⦗max_elt r⦘ ⨾ r⁺ ≡ (∅₂).
 Proof.
-  pose (@max_elt_test r). hkat'.
+  pose (@max_elt_test r). hahn_hkat.
 Qed.
 
 Lemma seq_eqv_max_rt r :
   ⦗max_elt r⦘ ⨾ r＊ ≡ ⦗max_elt r⦘.
 Proof.
-  pose (@max_elt_test r). hkat'.
+  pose (@max_elt_test r). hahn_hkat.
 Qed.
 
 Lemma seq_eqv_max_r r :
   ⦗max_elt r⦘ ⨾ r^? ≡ ⦗max_elt r⦘.
 Proof.
-  pose (@max_elt_test r). hkat'.
+  pose (@max_elt_test r). hahn_hkat.
 Qed.
 
 Lemma max_elt_test_dual r: r⁻¹ ⨾ ⦗max_elt r⦘ ⊆ (∅₂).
@@ -220,25 +220,25 @@ Qed.
 Lemma transp_seq_eqv_max r : 
   r⁻¹ ⨾ ⦗max_elt r⦘ ≡ (∅₂).
 Proof.
-  pose (@max_elt_test_dual r). hkat'.
+  pose (@max_elt_test_dual r). hahn_hkat.
 Qed.
 
 Lemma transp_seq_eqv_max_t r :
   (r⁻¹)⁺ ⨾ ⦗max_elt r⦘ ≡ (∅₂).
 Proof.
-  pose (@max_elt_test_dual r); hkat'.
+  pose (@max_elt_test_dual r); hahn_hkat.
 Qed.
 
 Lemma transp_seq_eqv_max_rt r :
   (r⁻¹)＊ ⨾ ⦗max_elt r⦘  ≡ ⦗max_elt r⦘.
 Proof.
-  pose (@max_elt_test_dual r); hkat'.
+  pose (@max_elt_test_dual r); hahn_hkat.
 Qed.
 
 Lemma transp_seq_eqv_max_r r :
   (r⁻¹)^? ⨾ ⦗max_elt r⦘ ≡ ⦗max_elt r⦘.
 Proof.
-  pose (@max_elt_test_dual r); hkat'.
+  pose (@max_elt_test_dual r); hahn_hkat.
 Qed.
 
 Lemma seq_wmax r r' b

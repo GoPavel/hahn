@@ -15,13 +15,13 @@ Notation "a ^*" := (clos_refl_trans a) (at level 1, only parsing).
 
 Lemma r_refl A (r: relation A) x : r^? x x.
 Proof.
-  assert (refl_top ⊆ r^?) by kat'.
+  assert (refl_top ⊆ r^?) by hahn_kat.
   apply H; constructor.
 Qed.
 
 Lemma r_step A (r: relation A) x y : r x y -> r^? x y.
 Proof.
-  generalize x y; kat'.
+  generalize x y; hahn_kat.
 Qed.
 
 Hint Immediate r_refl r_step.
@@ -208,16 +208,16 @@ Proof.
 Qed.
 
 Lemma transitive_ct : transitive r⁺.
-Proof. kat'. Qed.
+Proof. hahn_kat. Qed.
 
 Lemma transitive_rt : transitive r＊.
-Proof. kat'. Qed.
+Proof. hahn_kat. Qed.
 
 Lemma reflexive_rt : reflexive r＊.
-Proof. kat'. Qed.
+Proof. hahn_kat. Qed.
 
 Lemma reflexive_cr : reflexive r^?.
-Proof. kat'. Qed.
+Proof. hahn_kat. Qed.
 
 Lemma reflexive_seq : reflexive r -> reflexive r' -> reflexive (r ⨾ r').
 Proof. vauto. Qed.
@@ -248,19 +248,19 @@ Lemma upward_closed_seq P :
   upward_closed r' P ->
   upward_closed (r ⨾ r') P.
 Proof.
-  hkat'.
+  hahn_hkat.
 Qed.
 
 Lemma upward_closed_ct P :
   upward_closed r P -> upward_closed r⁺ P.
 Proof.
-  hkat'.
+  hahn_hkat.
 Qed.
 
 Lemma upward_closed_rt P :
   upward_closed r P -> upward_closed r＊ P.
 Proof.
-  hkat'.
+  hahn_hkat.
 Qed.
 
 (** Lemmas about inclusion *)
@@ -279,10 +279,10 @@ Lemma inclusion_trans : transitive (@inclusion A).
 Proof. repeat red; eauto. Qed.
 
 Lemma inclusion_refl2 : r ⊆ r.
-Proof. kat'. Qed.
+Proof. hahn_kat. Qed.
 
 Lemma same_relation_refl2 : r ≡ r.
-Proof. kat'. Qed.
+Proof. hahn_kat. Qed.
 
 Lemma inclusion_inter_l1 : r ∩ r' ⊆ r.
 Proof. clear; firstorder. Qed.
@@ -303,10 +303,10 @@ Lemma inclusion_inter_mon s s' : r ⊆ r' -> s ⊆ s' -> r ∩ s ⊆ r' ∩ s'.
 Proof. clear; firstorder. Qed.
 
 Lemma inclusion_union_r1 : r ⊆ r ∪ r'.
-Proof. kat'. Qed.
+Proof. hahn_kat. Qed.
 
 Lemma inclusion_union_r2 : r' ⊆ r ∪ r'.
-Proof. kat'. Qed.
+Proof. hahn_kat. Qed.
 
 Lemma inclusion_union_l : r ⊆ r'' -> r' ⊆ r'' -> r ∪ r' ⊆ r''.
 Proof.
@@ -360,7 +360,7 @@ Qed.
 
 Lemma inclusion_restr : restr_rel dom r ⊆ r.
 Proof.
-  kat'.
+  hahn_kat.
 Qed.
 
 Lemma inclusion_restr_rel_l : r ⊆ r' -> restr_rel dom r ⊆ r'.
@@ -402,19 +402,19 @@ Qed.
 
 Lemma inclusion_eqv_rel_true : ⦗dom⦘  ⊆ ⦗fun _ => True⦘.
 Proof.
-  kat'.
+  hahn_kat.
 Qed.
 
 (** Inclusions involving reflexive closure. *)
 
 Lemma inclusion_id_cr : ⦗fun _ => True⦘ ⊆ r^?.
 Proof.
-  kat'.
+  hahn_kat.
 Qed.
 
 Lemma inclusion_eqv_cr : ⦗dom⦘ ⊆ r^?.
 Proof.
-  kat'.
+  hahn_kat.
 Qed.
 
 Lemma inclusion_step_cr : r ⊆ r' -> r ⊆ r'^?.
@@ -442,7 +442,7 @@ Qed.
 
 Lemma inclusion_t_rt : r⁺ ⊆  r＊.
 Proof.
-  kat'.
+  hahn_kat.
 Qed.
 
 Lemma inclusion_t_t : r ⊆ r' -> r⁺ ⊆ r'⁺.
@@ -474,12 +474,12 @@ Qed.
 
 Lemma inclusion_id_rt : ⦗fun _ => True⦘ ⊆ r'＊.
 Proof.
-  kat'.
+  hahn_kat.
 Qed.
 
 Lemma inclusion_eqv_rt : ⦗dom⦘ ⊆ r'＊.
 Proof.
-  kat'.
+  hahn_kat.
 Qed.
 
 Lemma inclusion_step_rt : r ⊆ r' -> r ⊆ r'＊.
@@ -634,14 +634,14 @@ Hint Immediate inclusion_eqv_rt inclusion_eqv_cr : hahn.
 Lemma clos_trans_of_clos_trans A (r : relation A) x y :
   r⁺⁺ x y <-> r⁺ x y.
 Proof.
-  generalize x y; kat'.
+  generalize x y; hahn_kat.
 Qed.
 
 Lemma clos_trans_of_clos_trans1 A (r r' : relation A) x y :
   (fun a b => r⁺ a b \/ r' a b)⁺ x y <->
   (fun a b => r a b \/ r' a b)⁺ x y.
 Proof.
-  assert ((r⁺ ∪ r')⁺ ≡ (r ∪ r')⁺) by kat'.
+  assert ((r⁺ ∪ r')⁺ ≡ (r ∪ r')⁺) by hahn_kat.
   destruct H as [H1 H2].
   split; [> apply H1 | apply H2].
 Qed.
