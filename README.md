@@ -2,19 +2,23 @@
 
 Try to simplify proofs using [relation-algebra](http://perso.ens-lyon.fr/damien.pous/ra/).
 
-New modules
+## What's new?
+
+Introduced tactics:
+- `hahn_kat` - solve KAT
+- `hahn_hkat` - solve KAT with Hoare hypotheses
+
+Added utility module:
 - [HahnKat.v](https://github.com/GoPavel/hahn/blob/experiments-with-kat/HahnKat.v) contains:
   - instances of Canonical Structures and Typeclasses
-  - redefinition original tactics `kat`/`hkat`
-  - lemmas for lifting old definitions to KAT
+  - redefinition of original tactics `kat`/`hkat` from relation-algebra
+  - lemmas for lifting hahn's definitions to KAT
 
-Introduce tactics:
-- `kat'` - solve KAT
-- `hkat'` - solve KAT with Hoare hypotheses
-
-TODOS:
-- [ ] Add docs
-- [ ] Check `LEM` and `prop_ext` axioms 
+TODOs:
+- [ ] Examine using `prop_ext` axioms 
+- [ ] Examine problem with canonical structures deducing 
+- [ ] Code review
+- [ ] Add PR to relation-algebra about a bug with excluding alone `pc_c`/`cp_c`.
 
 # Hahn : A Coq library for lists and relations
 
