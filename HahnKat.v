@@ -1,11 +1,10 @@
 (******************************************************************************)
-(** * Define KAT instance and canonical stractures *)
+(** * Define KAT instance and canonical structures *)
 (******************************************************************************)
 
 Require Import RelationAlgebra.kat_tac.
 Require Import RelationAlgebra.lattice.
 Require Import RelationAlgebra.monoid.
-Require Export RelationAlgebra.prop.
 Require Import RelationAlgebra.kat.
 
 Require Import HahnSets HahnRelationsBasicDef HahnBase.
@@ -15,15 +14,7 @@ Require Export Setoid Morphisms.
 Arguments Proper {_} _ _ : simpl never.
 Arguments respectful {_ _} _ _ _ _: simpl never.
 
-Require Import Coq.Logic.FunctionalExtensionality.
-
 Set Implicit Arguments.
-
-Instance Prop_lattice_laws: lattice.laws (BL+STR+CNV+DIV) Prop_lattice_ops.
-Proof.
-  constructor; (try apply Build_PreOrder); simpl;
-    repeat intro; try (discriminate || tauto).
-Qed.
 
 Definition refl_top {A: Type}: relation A := fun x y => x = y.
 Definition top_rel {A: Type}: relation A := fun x y => True.
@@ -33,6 +24,9 @@ Hint Unfold refl_top top_rel bot_rel : unfolderDb.
 
 Arguments union {A}.
 Arguments inter_rel {A}.
+
+(* utility for get first-order proposition  *)
+Ltac unfold_all := repeat (autounfold with unfolderDb; simpl).
 
 Canonical Structure rel_lattice_ops {A: Type}: lattice.ops :=
   {| car := relation A;
@@ -71,7 +65,7 @@ Qed.
 Instance rel_monoid_laws {A: Type}: monoid.laws (BDL+CKA) (@rel_monoid_ops A).
 Proof.
   apply monoid.Build_laws; simpl; try (discriminate_levels || firstorder);
-    autounfold with unfolderDb; intros.
+    unfold_all; intros.
   - apply lower_lattice_laws.
   - firstorder. rewrite H; assumption.
   - rewrite H0. apply rt_refl.
@@ -92,28 +86,39 @@ Proof.
       * eauto using clos_trans.
 Qed.
 
-(* TODO: Try to reuse hahn's sets *)
-Definition dset' {A: Type}: lattice.ops := pw_ops Prop_lattice_ops A.
+Definition dset {A: Type} := A -> Prop.
 
-Definition inj' {A: Type} (cond: (@dset' A)): relation A
-  := fun x y => x = y /\ cond x.
+Canonical Structure dset_ops {A: Type}: lattice.ops :=
+  {| car := @dset A;
+     leq := @set_subset A;
+     weq := @set_equiv A;
+     cup := @set_union A;
+     cap := @set_inter A;
+     neg := @set_compl A;
+     top := @set_full A;
+     bot := @set_empty A;
+  |}.
 
-Hint Unfold dset' inj' : unfolderDb.
+
+Hint Unfold dset : unfolderDb.
+
+Instance dset_lattice_laws {A: Type}: lattice.laws BL (@dset_ops A).
+Proof.
+  constructor; try (unfold_all; firstorder).
+  exact (classic (x x0)).
+Qed.
 
 Canonical Structure rel_kat_ops {A: Type}: kat.ops :=
   {| kat.kar := @rel_monoid_ops A;
-     kat.tst n := @dset' A;
-     kat.inj n := @inj' A
+     kat.tst n := @dset_ops A;
+     kat.inj n := @eqv_rel A;
   |}.
-
-(* utility for get first-order proposition  *)
-Ltac unfold_all := repeat (autounfold with unfolderDb; simpl).
 
 Instance rel_kat_laws {A: Type}: kat.laws (@rel_kat_ops A).
 Proof.
   constructor; simpl; intros.
   - apply lower_laws.
-  - apply (pw_laws (H:=lower_lattice_laws)).
+  - exact dset_lattice_laws.
   - constructor; try discriminate; unfold_all; firstorder.
   - unfold_all; firstorder.
   - unfold_all.
@@ -140,7 +145,7 @@ Section Lifting.
 
 Variable A : Type.
 Variables r r1 r2: relation A.
-Variable d d1 d2: A -> Prop.
+Variable d d1 d2: @dset A.
 Local Notation " [ p ] " := (inj (n:=tt) p): ra_terms.
 
 Lemma same_rel_iff_weq: same_relation r1 r2 <-> r1 ≡ r2.
@@ -193,13 +198,13 @@ Proof. rel_ext; unfold_all; firstorder; congruence. Qed.
 Lemma lift_clos_refl: r^? = (refl_top ⊔ r).
 Proof. unfold_all; reflexivity. Qed.
 
-Lemma set_empty_iff_kat: @set_empty A = bot.
+Lemma set_empty_iff_kat: @set_empty A = @bot dset_ops.
 Proof. reflexivity. Qed.
 
-Lemma set_full_iff_kat: @set_full A = top.
+Lemma set_subset_iff_kat: d1 ⊆₁ d2 = leq d1 d2.
 Proof. reflexivity. Qed.
 
-Lemma set_compl_iff_kat: @set_compl A = neg.
+Lemma set_equiv_iff_kat: d1 ≡₁ d2 = weq d1 d2.
 Proof. reflexivity. Qed.
 
 Lemma set_union_iff_kat: @set_union A = cup.
@@ -223,7 +228,7 @@ Qed.
 Lemma transitive_iff_kat: transitive r <-> (@dot _ tt tt tt) r r ≦ r.
 Proof. unfold_all; firstorder. Qed.
 
-Lemma upward_closed_iff_kat: upward_closed r d <-> [@neg dset' d]⋅r⋅[d] ≦ bot.
+Lemma upward_closed_iff_kat: upward_closed r d <-> [@neg dset_ops d]⋅r⋅[d] ≦ bot.
 Proof.
   unfold_all. firstorder.
   - eapply H4, H; [> rewrite H0; apply H3 | assumption].
@@ -290,7 +295,7 @@ Ltac hahn_kat :=
     pre_dec true.
 
 (* NOTE: matching reordered for speed up a bit *)
-Ltac aggregate_hoare_hypotheses' :=
+Ltac aggregate_hoare_hypotheses_fixed :=
   repeat
     match goal with
       | H: _ ≡ _ |- _ =>
@@ -321,7 +326,7 @@ Ltac aggregate_hoare_hypotheses' :=
      And matching allows saving error message. *)
 Ltac hahn_hkat :=
   lift_to_kat_all;
-  intros; aggregate_hoare_hypotheses'; rewrite ?leq_iff_cup;
+  intros; aggregate_hoare_hypotheses_fixed; rewrite ?leq_iff_cup;
   (apply (catch_kat_weq tt tt) || fail "could not find a KAT structure");
   match goal with
     | H: _ ≦ 0 |- _    =>

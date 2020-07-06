@@ -16,9 +16,6 @@ Definition max_elt A (r: relation A) (a : A) :=
 Definition wmax_elt A (r: relation A) (a : A) :=
   forall b (REL: r a b), a = b.
 
-Local Lemma sym A: forall (x y: A), x = y <-> y = x.
-Proof. firstorder. Qed.
-
 Lemma max_elt_iff_kat (A: Type) (a: A) r:
   max_elt r a <-> ⦗eq a⦘ ;; r ⊆ ∅₂.
 Proof.
